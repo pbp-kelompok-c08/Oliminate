@@ -1,0 +1,162 @@
+
+:root {
+  /* Pacil Blue */
+  --pacil-blue-darker-2: #113352;
+  --pacil-blue-darker-1: #22629E;
+  --pacil-blue-base: #3293EC;
+  --pacil-blue-lighter-1: #73B9F9;
+  --pacil-blue-lighter-2: #AED4F7;
+  --pacil-blue-lighter-3: #E5F1FB;
+
+  /* Pacil Red */
+  --pacil-red-darker-2: #521517;
+  --pacil-red-darker-1: #9E292D;
+  --pacil-red-base: #EA3C43;
+  --pacil-red-lighter-1: #F47479;
+  --pacil-red-lighter-2: #FFAAAD;
+  --pacil-red-lighter-3: #FFE3E4;
+
+  /* Neutral */
+  --neutral-1000: #000000;
+  --neutral-900: #1A1A1A;
+  --neutral-700: #3D3D3D;
+  --neutral-500: #7D7D7D;
+  --neutral-300: #BDBDBD;
+  --neutral-100: #E0E0E0;
+  --neutral-50: #F5F5F5;
+
+  /* Font Weights */
+  --font-semibold: 600;
+  --font-medium: 500;
+  --font-regular: 400;
+
+  /* Desktop Typography */
+  --heading-1: 60px;
+  --heading-2: 50px;
+  --heading-3: 40px;
+  --heading-4: 30px;
+  --heading-5: 24px;
+  --headline: 20px;
+  --body-large: 18px;
+  --body: 16px;
+  --footnote: 14px;
+  --caption: 13px;
+  --small: 12px;
+}
+
+/* Mobile Typography*/
+@media (max-width: 768px) {
+  :root {
+    --heading-1: 40px;
+    --heading-2: 30px;
+    --heading-3: 28px;
+    --heading-4: 24px;
+    --heading-5: 20px;
+    --headline: 18px;
+    --body-large: 16px;
+    --body: 14px;
+    --footnote: 13px;
+    --caption: 12px;
+    --small: 10px;
+  }
+}
+
+ /* Typography */
+.h1 { font-size: var(--heading-1); font-weight: var(--font-semibold); color: var(--neutral-1000); }
+.h2 { font-size: var(--heading-2); font-weight: var(--font-semibold); color: var(--neutral-1000); }
+.h3 { font-size: var(--heading-3); font-weight: var(--font-semibold); color: var(--neutral-900); }
+.h4 { font-size: var(--heading-4); font-weight: var(--font-semibold); color: var(--neutral-900); }
+.h5 { font-size: var(--heading-5); font-weight: var(--font-semibold); color: var(--neutral-900); }
+
+.headline { font-size: var(--headline); font-weight: var(--font-medium); color: var(--neutral-900); }
+.body-large { font-size: var(--body-large); font-weight: var(--font-regular); color: var(--neutral-900); }
+.body { font-size: var(--body); font-weight: var(--font-regular); color: var(--neutral-900); }
+.footnote { font-size: var(--footnote); font-weight: var(--font-regular); color: var(--neutral-700); }
+.caption { font-size: var(--caption); font-weight: var(--font-regular); color: var(--neutral-700); }
+.small { font-size: var(--small); font-weight: var(--font-regular); color: var(--neutral-500); }
+
+/* Buttons */
+
+.btn {
+  font-size: var(--body-large);
+  font-weight: var(--font-medium);
+  border-radius: 10px;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Primary Button */
+.btn-primary {
+  background-color: var(--pacil-blue-base);
+  color: var(--neutral-50);
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--pacil-blue-darker-1);
+}
+
+/* Outline Button */
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--pacil-blue-base);
+  color: var(--pacil-blue-base);
+}
+
+.btn-outline:hover {
+  background-color: var(--pacil-blue-lighter-3);
+}
+
+/* Danger Button (Button yang bisa ngehapus) */
+.btn-danger {
+  background-color: var(--pacil-red-base);
+  color: var(--neutral-50);
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: var(--pacil-red-darker-1);
+}
+
+/* Disabled Button */
+.btn:disabled {
+  background-color: var(--neutral-300);
+  color: var(--neutral-700);
+  cursor: not-allowed;
+  border: none;
+}
+
+/* Global defaults */
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background-color: var(--neutral-50);
+  color: var(--neutral-900);
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: var(--pacil-blue-base);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.card {
+  background: white;
+  border: 1px solid var(--neutral-100);
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
