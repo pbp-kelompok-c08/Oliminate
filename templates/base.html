@@ -7,7 +7,19 @@
     <title>{% block title %}Oliminate{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
   </head>
-  <body>
+
+  <body
+    style="
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background-color: var(--neutral-50);
+      color: var(--neutral-900);
+      margin: 0;
+    "
+  >
+    <!-- NAVBAR -->
     <nav
       style="
         background-color: var(--pacil-blue-darker-2);
@@ -41,13 +53,9 @@
           <a href="/main/" style="color: var(--neutral-50)">Home</a>
           <a href="/scheduling/" style="color: var(--neutral-50)">Scheduling</a>
           <a href="/ticketing/" style="color: var(--neutral-50)">Ticketing</a>
-          <a href="/merchandise/" style="color: var(--neutral-50)"
-            >Merchandise</a
-          >
+          <a href="/merchandise/" style="color: var(--neutral-50)">Merchandise</a>
           <a href="/review/" style="color: var(--neutral-50)">Review</a>
-          <a href="/leaderboard/" style="color: var(--neutral-50)"
-            >Leaderboard</a
-          >
+          <a href="/leaderboard/" style="color: var(--neutral-50)">Leaderboard</a>
         </div>
 
         <div style="display: flex; gap: 12px">
@@ -57,9 +65,12 @@
       </div>
     </nav>
 
+    <!-- CONTENT -->
+    <main style="flex: 1; padding: 40px 0">
+      {% block content %}{% endblock %}
+    </main>
 
-    <main style="padding: 40px 0">{% block content %}{% endblock %}</main>
-
+    <!-- FOOTER -->
     <footer
       style="
         background-color: var(--pacil-blue-darker-2);
@@ -67,6 +78,7 @@
         text-align: center;
         padding: 16px 0;
         font-size: var(--footnote);
+        margin-top: auto;
       "
     >
       © 2025 Oliminate
