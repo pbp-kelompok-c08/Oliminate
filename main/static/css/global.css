@@ -92,11 +92,11 @@
 .btn-primary {
   background-color: var(--pacil-blue-base);
   color: var(--neutral-50);
-  border: none;
+  border: 2px solid var(--pacil-blue-base);
 }
-
 .btn-primary:hover {
   background-color: var(--pacil-blue-darker-1);
+  border: 2px solid var(--pacil-blue-darker-1);
 }
 
 /* Outline Button */
@@ -105,20 +105,21 @@
   border: 2px solid var(--pacil-blue-base);
   color: var(--pacil-blue-base);
 }
-
 .btn-outline:hover {
   background-color: var(--pacil-blue-lighter-3);
+  border: 2px solid var(--pacil-blue-base); /* ← border tetap ada */
+  color: var(--pacil-blue-darker-2);
 }
 
 /* Danger Button (Button yang bisa ngehapus) */
 .btn-danger {
   background-color: var(--pacil-red-base);
   color: var(--neutral-50);
-  border: none;
+  border: 2px solid var(--pacil-red-base);
 }
-
 .btn-danger:hover {
   background-color: var(--pacil-red-darker-1);
+  border: 2px solid var(--pacil-red-darker-1);
 }
 
 /* Disabled Button */
@@ -126,8 +127,9 @@
   background-color: var(--neutral-300);
   color: var(--neutral-700);
   cursor: not-allowed;
-  border: none;
+  border: 2px solid var(--neutral-300);
 }
+
 
 /* Global defaults */
 body {
