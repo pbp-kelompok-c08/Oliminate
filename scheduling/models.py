@@ -10,11 +10,11 @@ class Schedule(models.Model):
         ('reviewable', 'Reviewable'),
     ]
 
-    # Gunakan User bawaan dulu sebagai organizer
+
     organizer = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,     # ← ubah dari CASCADE → SET_NULL
-        null=True, blank=True,         # ← biar bisa kosong
+        on_delete=models.SET_NULL,     #  ubah dari CASCADE jadi SET_NULL
+        null=True, blank=True,         #  biar bisa kosong
         related_name="schedules"
     )
 

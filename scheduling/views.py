@@ -5,12 +5,12 @@ from .forms import ScheduleForm
 from django.shortcuts import redirect
 
 
-# 1️⃣ Daftar semua jadwal
+# Daftar semua jadwal
 def schedule_list(request):
-    schedules = Schedule.objects.all().order_by('date', 'time')
+    schedules = Schedule.objects.exclude(status='reviewable').order_by('date', 'time')
     return render(request, 'scheduling/schedule_list.html', {'schedules': schedules})
 
-# 2️⃣ Detail satu pertandingan
+# Detail satu pertandingan
 def schedule_detail(request, id):
     schedule = get_object_or_404(Schedule, pk=id)
     return render(request, 'scheduling/schedule_detail.html', {'schedule': schedule})
@@ -29,17 +29,6 @@ def schedule_feed(request):
     ]
     return JsonResponse(data, safe=False)
 
-# def schedule_create(request):
-#     if request.method == 'POST':
-#         form = ScheduleForm(request.POST)
-#         if form.is_valid():
-#             schedule = form.save(commit=False)
-#             schedule.organizer = request.user  # nanti ganti sesuai user login
-#             schedule.save()
-#             return redirect('scheduling:schedule_list')
-#     else:
-#         form = ScheduleForm()
-#     return render(request, 'scheduling/schedule_form.html', {'form': form, 'title': 'Tambah Jadwal'})
 
 def schedule_create(request):
     if request.method == "POST":
@@ -77,6 +66,10 @@ def schedule_delete(request, id):
 
 def make_reviewable(request, id):
     schedule = get_object_or_404(Schedule, id=id)
-    schedule.status = 'reviewable'
-    schedule.save()
-    return redirect('scheduling:schedule_detail', id=id)
+    if schedule.status != 'reviewable':
+        schedule.status = 'reviewable'
+        schedule.save()
+        messages.success(request, f"{schedule.category} sudah siap direview!")
+    else:
+        messages.info(request, f"{schedule.category} sudah direview sebelumnya.")
+    return redirect('reviews:review_list')
