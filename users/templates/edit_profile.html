@@ -14,32 +14,33 @@
       </div>
 
       <div style="display:flex; gap:8px; flex-direction:column; align-items:center; width:100%;">
-        <button type="button" id="editPfpBtn" class="btn" style="border:1px solid var(--neutral-100); width:100%;">Edit PFP</button>
+        <button type="button" id="editPfpBtn" class="btn" style="border:1px solid var(--neutral-100); width:100%;">Edit Profile Picture</button>
         <input id="fileInput" name="avatar" type="file" accept="image/*" style="display:none;">
-        <p class="small" style="text-align:center; margin:0;">Maks 2MB • JPG / PNG</p>
+        <p class="small" style="text-align:center; margin:0;">Max 2MB • JPG / PNG</p>
       </div>
     </div>
 
     <!-- RIGHT: Form -->
-    <form id="profileForm" method="post" enctype="multipart/form-data" style="flex:1;">
+    <form id="profileForm" method="POST" enctype="multipart/form-data" style="flex:1;">
       {% csrf_token %}
+      {{ form.as_p }}
       <h3 class="h3" style="margin-top:0;">Edit Profile</h3>
 
       <div style="margin-bottom:14px;">
         <label for="name" class="caption">Nama</label>
-        <input id="name" name="name" type="text" class="body" placeholder="Nama lengkap" value="{{ user.get_full_name|default:'' }}" style="width:100%; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
+        <input id="name" name="name" type="text" class="body" placeholder="Full Name" value="{{ user.get_full_name|default:'' }}" style="width:100%; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
       </div>
 
       <div style="margin-bottom:14px;">
         <label for="email" class="caption">Email</label>
-        <input id="email" name="email" type="email" class="body" placeholder="contoh@email.com" value="{{ user.email|default:'' }}" style="width:100%; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
+        <input id="email" name="email" type="email" class="body" placeholder="example@email.com" value="{{ user.email|default:'' }}" style="width:100%; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
       </div>
 
       <!-- NEW: Fakultas -->
       <div style="margin-bottom:14px;">
-        <label for="fakultas" class="caption">Fakultas</label>
+        <label for="fakultas" class="caption">Faculty</label>
         <select id="fakultas" name="fakultas" class="body" style="width:100%; height:44px; padding:8px 12px; border-radius:10px; border:1px solid var(--neutral-100); background:white;">
-          <option value="">Pilih Fakultas...</option>
+          <option value="">Choose Origin Faculty...</option>
 
           <option value="Kedokteran" {% if user.profile.fakultas == "Kedokteran" %}selected{% endif %}>Kedokteran</option>
           <option value="Kedokteran Gigi" {% if user.profile.fakultas == "Kedokteran Gigi" %}selected{% endif %}>Kedokteran Gigi</option>
@@ -58,21 +59,19 @@
           <option value="Ilmu Administrasi" {% if user.profile.fakultas == "Ilmu Administrasi" %}selected{% endif %}>Ilmu Administrasi</option>
           <option value="Ilmu Lingkungan" {% if user.profile.fakultas == "Ilmu Lingkungan" %}selected{% endif %}>Ilmu Lingkungan</option>
         </select>
-        <p class="small" style="margin:6px 0 0;">Pilih fakultasmu. (Opsional — kosongkan bila tidak relevan)</p>
       </div>
 
       <div style="margin-bottom:18px;">
         <label for="password" class="caption">Password</label>
         <div style="display:flex; gap:8px; align-items:center;">
-          <input id="password" name="password" type="password" class="body" placeholder="Kosongkan jika tidak ingin mengganti" style="flex:1; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
+          <input id="password" name="password" type="password" class="body" placeholder="Leave it blank if not changed" style="flex:1; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
           <button id="togglePwd" type="button" class="btn" style="min-width:44px; padding:8px; border-radius:8px; border:1px solid var(--neutral-100);">👁️</button>
         </div>
-        <p class="small" style="margin:6px 0 0;">Biarkan kosong bila tidak ingin mengubah password.</p>
       </div>
 
       <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:8px;">
-        <button id="cancelBtn" type="button" class="btn btn-outline">Cancel</button>
-        <button id="saveBtn" type="submit" class="btn btn-primary">Save</button>
+        <button id="cancelBtn" type="button" class="bg-red-600 hover:bg-[#6b1007]-700 text-white font-medium py-2 px-4 rounded">Cancel</button>
+        <button id="saveBtn" type="submit" class="bg-blue-600 hover:bg-[#13165c]-700 text-white font-medium py-2 px-4 rounded">Save</button>
       </div>
     </form>
   </div>
