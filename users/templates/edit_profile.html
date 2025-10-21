@@ -4,83 +4,90 @@
 {% block title %}Edit Profile — Oliminate{% endblock %}
 
 {% block content %}
-<div class="container" style="padding: 36px 0;">
-  <div class="card" style="display:flex; gap:28px; align-items:flex-start; border-radius:16px; padding:28px;">
-    <!-- LEFT: Avatar -->
-    <div style="width:220px; display:flex; flex-direction:column; align-items:center; gap:12px;">
-      <div id="avatarWrap" style="width:160px; height:160px; border-radius:999px; overflow:hidden; background:var(--pacil-blue-lighter-3); display:flex; align-items:center; justify-content:center;">
-        <img id="avatarImg" alt="Foto profil" style="width:100%; height:100%; object-fit:cover; display:block;"
-             src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><rect width='100%' height='100%' fill='%23E5F1FB'/><circle cx='80' cy='60' r='34' fill='%23AED4F7' /><rect x='32' y='100' rx='8' width='96' height='26' fill='%23AED4F7' /></svg>">
+<div class="max-w-4xl mx-auto py-9 px-4">
+  <form id="profileForm" method="POST" enctype="multipart/form-data" class="bg-white shadow-lg rounded-2xl p-7 flex flex-col md:flex-row gap-7 items-start">
+    {% csrf_token %}
+    
+    <div class="w-full md:w-56 flex-shrink-0 flex flex-col items-center gap-4">
+      <div class="w-40 h-40 rounded-full overflow-hidden bg-[#E5F1FB] flex items-center justify-center">
+        {% if user_obj.profile_picture %}
+          <img id="avatarImg" src="{{ user_obj.profile_picture.url }}" alt="Foto profil" class="w-full h-full object-cover">
+        {% else %}
+          <img id="avatarImg" alt="Foto profil" class="w-full h-full object-cover" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><rect width='100%' height='100%' fill='%23E5F1FB'/><circle cx='80' cy='60' r='34' fill='%23AED4F7' /><rect x='32' y='100' rx='8' width='96' height='26' fill='%23AED4F7' /></svg>">
+        {% endif %}
       </div>
-
-      <div style="display:flex; gap:8px; flex-direction:column; align-items:center; width:100%;">
-        <button type="button" id="editPfpBtn" class="btn" style="border:1px solid var(--neutral-100); width:100%;">Edit Profile Picture</button>
-        <input id="fileInput" name="avatar" type="file" accept="image/*" style="display:none;">
-        <p class="small" style="text-align:center; margin:0;">Max 2MB • JPG / PNG</p>
-      </div>
+      <p>Edit Profile Picture</p>
+      <input id="fileInput" name="profile_picture" type="file" accept="image/*" class="hidden" placeholder="Edit Profile Picture">
     </div>
 
-    <!-- RIGHT: Form -->
-    <form id="profileForm" method="POST" enctype="multipart/form-data" style="flex:1;">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <h3 class="h3" style="margin-top:0;">Edit Profile</h3>
-
-      <div style="margin-bottom:14px;">
-        <label for="name" class="caption">Nama</label>
-        <input id="name" name="name" type="text" class="body" placeholder="Full Name" value="{{ user_obj.name|default:'' }}"style="width:100%; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
+    <div class="w-full flex-1 space-y-4">
+      
+      <div>
+        <label for="id_username" class="block text-base font-medium text-gray-800 mb-1">Username</label>
+        <input id="id_username" name="username" type="text" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="Username" value="{{ user_obj.username|default:'' }}">
       </div>
 
-      <div style="margin-bottom:14px;">
-        <label for="email" class="caption">Email</label>
-        <input id="email" name="email" type="email" class="body" placeholder="example@email.com" value="{{ user_obj.email|default:'' }}" style="width:100%; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
+      <div>
+        <label for="id_first_name" class="block text-base font-medium text-gray-800 mb-1">First Name</label>
+        <input id="id_first_name" name="first_name" type="text" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="First Name" value="{{ user_obj.first_name|default:'' }}">
+      </div>
+      
+      <div>
+        <label for="id_last_name" class="block text-base font-medium text-gray-800 mb-1">Last Name</label>
+        <input id="id_last_name" name="last_name" type="text" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="Last Name" value="{{ user_obj.last_name|default:'' }}">
       </div>
 
-      <!-- NEW: Fakultas -->
-      <div style="margin-bottom:14px;">
-        <label for="fakultas" class="caption">Faculty</label>
-        <select id="fakultas" name="fakultas" class="body" style="width:100%; height:44px; padding:8px 12px; border-radius:10px; border:1px solid var(--neutral-100); background:white;">
+      <div>
+        <label for="id_email" class="block text-base font-medium text-gray-800 mb-1">Email</label>
+        <input id="id_email" name="email" type="email" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="example@email.com" value="{{ user_obj.email|default:'' }}">
+      </div>
+
+      <div>
+        <label for="id_role" class="block text-base font-medium text-gray-800 mb-1">Role</label>
+        <input id="id_role" name="role" type="text" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" value="{{ user_obj.get_role_display }}" readonly>
+      </div>
+
+      <div>
+        <label for="id_fakultas" class="block text-base font-medium text-gray-800 mb-1">Faculty</label>
+        <select id="id_fakultas" name="fakultas" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec] bg-white appearance-none">
           <option value="">Choose Origin Faculty...</option>
-
-          <option value="Kedokteran" {% if user_obj.profile == "Kedokteran" %}selected{% endif %}>Kedokteran</option>
-          <option value="Kedokteran Gigi" {% if user_obj.profile == "Kedokteran Gigi" %}selected{% endif %}>Kedokteran Gigi</option>
-          <option value="Matematika dan Ilmu Pengetahuan Alam" {% if user_obj.profile == "Matematika dan Ilmu Pengetahuan Alam" %}selected{% endif %}>Matematika dan Ilmu Pengetahuan Alam</option>
-          <option value="Teknik" {% if user_obj.profile == "Teknik" %}selected{% endif %}>Teknik</option>
-          <option value="Hukum" {% if user_obj.profile == "Hukum" %}selected{% endif %}>Hukum</option>
-          <option value="Ekonomi dan Bisnis" {% if user_obj.profile == "Ekonomi dan Bisnis" %}selected{% endif %}>Ekonomi dan Bisnis</option>
-          <option value="Ilmu Pengetahuan Budaya" {% if user_obj.profile == "Ilmu Pengetahuan Budaya" %}selected{% endif %}>Ilmu Pengetahuan Budaya</option>
-          <option value="Psikologi" {% if user_obj.profile == "Psikologi" %}selected{% endif %}>Psikologi</option>
-          <option value="Ilmu Sosial dan Ilmu Politik" {% if user_obj.profile == "Ilmu Sosial dan Ilmu Politik" %}selected{% endif %}>Ilmu Sosial dan Ilmu Politik</option>
-          <option value="Kesehatan Masyarakat" {% if user_obj.profile == "Kesehatan Masyarakat" %}selected{% endif %}>Kesehatan Masyarakat</option>
-          <option value="Ilmu Komputer" {% if user_obj.profile == "Ilmu Komputer" %}selected{% endif %}>Ilmu Komputer</option>
-          <option value="Ilmu Keperawatan" {% if user_obj.profile == "Ilmu Keperawatan" %}selected{% endif %}>Ilmu Keperawatan</option>
-          <option value="Pendidikan Vokasi" {% if user_obj.profile == "Pendidikan Vokasi" %}selected{% endif %}>Pendidikan Vokasi</option>
-          <option value="Farmasi" {% if user_obj.profile == "Farmasi" %}selected{% endif %}>Farmasi</option>
-          <option value="Ilmu Administrasi" {% if user_obj.profile == "Ilmu Administrasi" %}selected{% endif %}>Ilmu Administrasi</option>
-          <option value="Ilmu Lingkungan" {% if user_obj.profile == "Ilmu Lingkungan" %}selected{% endif %}>Ilmu Lingkungan</option>
+          <option value="Kedokteran" {% if user_obj.fakultas == "Kedokteran" %}selected{% endif %}>Kedokteran</option>
+          <option value="Kedokteran Gigi" {% if user_obj.fakultas == "Kedokteran Gigi" %}selected{% endif %}>Kedokteran Gigi</option>
+          <option value="Matematika dan Ilmu Pengetahuan Alam" {% if user_obj.fakultas == "Matematika dan Ilmu Pengetahuan Alam" %}selected{% endif %}>Matematika dan Ilmu Pengetahuan Alam</option>
+          <option value="Teknik" {% if user_obj.fakultas == "Teknik" %}selected{% endif %}>Teknik</option>
+          <option value="Hukum" {% if user_obj.fakultas == "Hukum" %}selected{% endif %}>Hukum</option>
+          <option value="Ekonomi dan Bisnis" {% if user_obj.fakultas == "Ekonomi dan Bisnis" %}selected{% endif %}>Ekonomi dan Bisnis</option>
+          <option value="Ilmu Pengetahuan Budaya" {% if user_obj.fakultas == "Ilmu Pengetahuan Budaya" %}selected{% endif %}>Ilmu Pengetahuan Budaya</option>
+          <option value="Psikologi" {% if user_obj.fakultas == "Psikologi" %}selected{% endif %}>Psikologi</option>
+          <option value="Ilmu Sosial dan Ilmu Politik" {% if user_obj.fakultas == "Ilmu Sosial dan Ilmu Politik" %}selected{% endif %}>Ilmu Sosial dan Ilmu Politik</option>
+          <option value="Kesehatan Masyarakat" {% if user_obj.fakultas == "Kesehatan Masyarakat" %}selected{% endif %}>Kesehatan Masyarakat</option>
+          <option value="Ilmu Komputer" {% if user_obj.fakultas == "Ilmu Komputer" %}selected{% endif %}>Ilmu Komputer</option>
+          <option value="Ilmu Keperawatan" {% if user_obj.fakultas == "Ilmu Keperawatan" %}selected{% endif %}>Ilmu Keperawatan</option>
+          <option value="Pendidikan Vokasi" {% if user_obj.fakultas == "Pendidikan Vokasi" %}selected{% endif %}>Pendidikan Vokasi</option>
+          <option value="Farmasi" {% if user_obj.fakultas == "Farmasi" %}selected{% endif %}>Farmasi</option>
+          <option value="Ilmu Administrasi" {% if user_obj.fakultas == "Ilmu Administrasi" %}selected{% endif %}>Ilmu Administrasi</option>
+          <option value="Ilmu Lingkungan" {% if user_obj.fakultas == "Ilmu Lingkungan" %}selected{% endif %}>Ilmu Lingkungan</option>
         </select>
       </div>
 
-      <div style="margin-bottom:18px;">
-        <label for="password" class="caption">Password</label>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <input id="password" name="password" type="password" class="body" placeholder="Leave it blank if not changed" style="flex:1; height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100);">
-          <button id="togglePwd" type="button" class="btn" style="min-width:44px; padding:8px; border-radius:8px; border:1px solid var(--neutral-100);">👁️</button>
+      <div>
+        <label for="id_password" class="block text-base font-medium text-gray-800 mb-1">Password</label>
+        <div class="flex gap-2 items-center">
+          <input id="id_password" name="password" type="password" class="flex-1 h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="Leave blank if not changed">
+          <button id="togglePwd" type="button" class="h-11 w-11 flex items-center justify-center rounded-lg border border-gray-300 text-lg">👁️</button>
         </div>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:8px;">
-        <button id="cancelBtn" type="button" class="bg-red-600 hover:bg-[#6b1007]-700 text-white font-medium py-2 px-4 rounded">Cancel</button>
-        <button id="saveBtn" type="submit" class="bg-blue-600 hover:bg-[#13165c]-700 text-white font-medium py-2 px-4 rounded">Save</button>
+      <div class="flex justify-end gap-3 pt-4">
+        <button id="cancelBtn" type="button" class="py-2 px-5 rounded-lg bg-[#EA3C43] text-white text-base font-medium hover:bg-white hover:text-[#EA3C43] border border-[#EA3C43] transition-colors">Cancel</button>
+        <button id="saveBtn" type="submit" class="py-2 px-5 rounded-lg bg-[#3293ec] text-white text-base font-medium hover:bg-white hover:text-[#3293ec] border border-[#3293ec] transition-colors">Save</button>
       </div>
-    </form>
-  </div>
+    </div>
+  </form>
 </div>
 
-<!-- Toast (simple) -->
-<div id="toast" style="position:fixed; right:18px; bottom:18px; background:var(--neutral-900); color:var(--neutral-50); padding:10px 14px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.18); opacity:0; transform:translateY(12px); transition:all .22s ease;">Saved</div>
+<div id="toast" class="fixed right-5 bottom-5 bg-gray-900 text-white py-2.5 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-3 transition-all duration-200 ease-out">Saved</div>
 
-<!-- JS: preview avatar, toggle password, cancel restore, basic validation -->
 <script>
   (function(){
     const editBtn = document.getElementById('editPfpBtn');
@@ -90,13 +97,21 @@
     const cancelBtn = document.getElementById('cancelBtn');
     const togglePwd = document.getElementById('togglePwd');
     const toast = document.getElementById('toast');
-    const fakultasEl = document.getElementById('fakultas');
+    
+    const usernameEl = document.getElementById('id_username');
+    const firstNameEl = document.getElementById('id_first_name');
+    const lastNameEl = document.getElementById('id_last_name');
+    const emailEl = document.getElementById('id_email');
+    const fakultasEl = document.getElementById('id_fakultas');
+    const passwordEl = document.getElementById('id_password');
 
-    // snapshot original values to restore on cancel
+    // snapshot original values
     const original = {
       avatar: avatarImg.src,
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
+      username: usernameEl.value,
+      first_name: firstNameEl.value,
+      last_name: lastNameEl.value,
+      email: emailEl.value,
       fakultas: fakultasEl ? fakultasEl.value : '',
       password: ''
     };
@@ -106,43 +121,29 @@
     fileInput.addEventListener('change', (e) => {
       const f = e.target.files && e.target.files[0];
       if (!f) return;
-      if (f.size > 2_000_000) {
-        alert('File terlalu besar (maks 2MB). Pilih file lain.');
-        fileInput.value = '';
-        return;
-      }
+      if (f.size > 2_000_000) { alert('File terlalu besar (maks 2MB). Pilih file lain.'); fileInput.value = ''; return; }
       const r = new FileReader();
       r.onload = () => avatarImg.src = r.result;
       r.readAsDataURL(f);
     });
 
     togglePwd.addEventListener('click', () => {
-      const pwd = document.getElementById('password');
-      pwd.type = (pwd.type === 'password') ? 'text' : 'password';
+      passwordEl.type = (passwordEl.type === 'password') ? 'text' : 'password';
     });
 
     profileForm.addEventListener('submit', function(ev){
-      // basic client validation
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const pwd = document.getElementById('password').value;
-      if (!name) { alert('Nama tidak boleh kosong'); ev.preventDefault(); return; }
+      const firstName = firstNameEl.value.trim();
+      const email = emailEl.value.trim();
+      if (!firstName) { alert('First Name tidak boleh kosong'); ev.preventDefault(); return; }
       if (!email || !/^\S+@\S+\.\S+$/.test(email)) { alert('Masukkan email yang valid'); ev.preventDefault(); return; }
-      if (pwd && pwd.length < 6) { alert('Password minimal 6 karakter'); ev.preventDefault(); return; }
-
-      // optionally you can check fakultas here, e.g. require it:
-      // const fakultas = fakultasEl ? fakultasEl.value : '';
-      // if(!fakultas){ alert('Pilih fakultas'); ev.preventDefault(); return; }
-
-      // allow submit to server — you can remove the simulated parts if posting to server
-      showToast('Mengirim perubahan...');
-      // note: if you want to submit via AJAX/fetch, prevent default and send FormData here.
     });
 
     cancelBtn.addEventListener('click', function(){
-      document.getElementById('name').value = original.name;
-      document.getElementById('email').value = original.email;
-      document.getElementById('password').value = original.password;
+      usernameEl.value = original.username;
+      firstNameEl.value = original.first_name;
+      lastNameEl.value = original.last_name;
+      emailEl.value = original.email;
+      passwordEl.value = original.password;
       avatarImg.src = original.avatar;
       fileInput.value = '';
       if (fakultasEl) fakultasEl.value = original.fakultas;

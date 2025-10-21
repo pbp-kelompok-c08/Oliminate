@@ -4,52 +4,77 @@
 {% block title %}Profile — Oliminate{% endblock %}
 
 {% block content %}
-<div class="container" style="padding:36px 0;">
-  <div class="card" style="display:flex; gap:28px; align-items:flex-start; border-radius:16px; padding:28px;">
-    <!-- LEFT: Avatar (preview only, no edit button) -->
-    <div style="width:220px; display:flex; flex-direction:column; align-items:center; gap:12px;">
-      <div id="avatarWrap" style="width:160px; height:160px; border-radius:999px; overflow:hidden; background:var(--pacil-blue-lighter-3); display:flex; align-items:center; justify-content:center;">
-        {% if user_obj.foto %}
-          <img id="avatarImg" src="{{ user_obj.foto.url }}" alt="Foto profil" style="width:100%; height:100%; object-fit:cover; display:block;">
+<div class="max-w-4xl mx-auto py-9 px-4">
+  <div class="bg-white shadow-lg rounded-2xl p-7 flex flex-col md:flex-row gap-7 items-start">
+    
+    <div class="w-full md:w-56 flex-shrink-0 flex flex-col items-center gap-3 text-center">
+      <div class="w-40 h-40 rounded-full overflow-hidden bg-[#E5F1FB] flex items-center justify-center">
+        {% if user_obj.profile_picture %}
+          <img id="avatarImg" src="{{ user_obj.profile_picture.url }}" alt="Foto profil" class="w-full h-full object-cover">
         {% else %}
-          <img id="avatarImg" alt="Foto profil" style="width:100%; height:100%; object-fit:cover; display:block;"
+          <img id="avatarImg" alt="Foto profil" class="w-full h-full object-cover"
                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><rect width='100%' height='100%' fill='%23E5F1FB'/><circle cx='80' cy='60' r='34' fill='%23AED4F7' /><rect x='32' y='100' rx='8' width='96' height='26' fill='%23AED4F7' /></svg>">
         {% endif %}
       </div>
-
-      <p class="small" style="text-align:center; margin:0;">{{ user_obj.fakultas|default:"-" }}</p>
+      <h2 class="text-2xl font-semibold text-gray-900 mt-2">{{ user_obj.first_name }} {{ user_obj.last_name }}</h2>
+      <p class="text-lg text-gray-600 -mt-2">{{ user_obj.get_role_display }}</p>
     </div>
 
-    <!-- RIGHT: Preview-only form-like layout -->
-    <div style="flex:1;">
-      <h3 class="h3" style="margin-top:0;">Profile</h3>
-
-      <div style="margin-bottom:14px;">
-        <label class="caption">Name</label>
-        <div class="body" style="height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100); display:flex; align-items:center;">{{ user_obj.name }}</div>
+    <div class="w-full flex-1 space-y-4">
+      
+      <div>
+        <label class="block text-base font-medium text-gray-800 mb-1">Username</label>
+        <div class="w-full h-11 px-3 py-2 text-base bg-gray-100 border border-gray-300 rounded-lg flex items-center text-gray-800">
+          {{ user_obj.username }}
+        </div>
       </div>
 
-      <div style="margin-bottom:14px;">
-        <label class="caption">Email</label>
-        <div class="body" style="height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100); display:flex; align-items:center;">{{ user_obj.email }}</div>
+      <div>
+        <label class="block text-base font-medium text-gray-800 mb-1">First Name</label>
+        <div class="w-full h-11 px-3 py-2 text-base bg-gray-100 border border-gray-300 rounded-lg flex items-center text-gray-800">
+          {{ user_obj.first_name }}
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-base font-medium text-gray-800 mb-1">Last Name</label>
+        <div class="w-full h-11 px-3 py-2 text-base bg-gray-100 border border-gray-300 rounded-lg flex items-center text-gray-800">
+          {{ user_obj.last_name }}
+        </div>
       </div>
 
-      <div style="margin-bottom:14px;">
-        <label class="caption">Faculty</label>
-        <div class="body" style="height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100); display:flex; align-items:center;">{{ user_obj.fakultas|default:"-" }}</div>
+      <div>
+        <label class="block text-base font-medium text-gray-800 mb-1">Email</label>
+        <div class="w-full h-11 px-3 py-2 text-base bg-gray-100 border border-gray-300 rounded-lg flex items-center text-gray-800">
+          {{ user_obj.email }}
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-base font-medium text-gray-800 mb-1">Role</label>
+        <div class="w-full h-11 px-3 py-2 text-base bg-gray-100 border border-gray-300 rounded-lg flex items-center text-gray-800">
+          {{ user_obj.get_role_display }}
+        </div>
       </div>
 
-      <!-- password should not be shown; optionally show a placeholder -->
-      <div style="margin-bottom:18px;">
-        <label class="caption">Password</label>
-        <div class="body" style="height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--neutral-100); display:flex; align-items:center;">••••••••</div>
+      <div>
+        <label class="block text-base font-medium text-gray-800 mb-1">Faculty</label>
+        <div class="w-full h-11 px-3 py-2 text-base bg-gray-100 border border-gray-300 rounded-lg flex items-center text-gray-800">
+          {{ user_obj.fakultas|default:"-" }}
+        </div>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:8px;">
-        <!-- button navigasi ke halaman edit -->
-            <button id="editProfileBtn" class="btn btn-primary bg-blue-600 hover:bg-[#13165c]-700 text-white font-medium py-2 px-4 rounded">
-                Edit Profile
-            </button>
+      <div>
+        <label class="block text-base font-medium text-gray-800 mb-1">Password</label>
+        <div class="w-full h-11 px-3 py-2 text-base bg-gray-100 border border-gray-300 rounded-lg flex items-center text-gray-500">
+          ••••••••
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-4">
+        <button id="editProfileBtn" class="py-2 px-5 rounded-lg bg-[#3293ec] text-white text-base font-medium hover:bg-white hover:text-[#3293ec] border border-[#3293ec] transition-colors">
+            Edit Profile
+        </button>
       </div>
     </div>
   </div>
@@ -57,6 +82,7 @@
 
 <script>
   document.getElementById('editProfileBtn').addEventListener('click', function() {
+    // Pastikan 'users:edit_profile' adalah nama URL Anda yang benar di urls.py
     window.location.href = "{% url 'users:edit_profile' %}";
   });
 </script>

@@ -1,34 +1,40 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
 from .models import User
+from .forms import UserForm
 
-'''
-# Menampilkan profil user yang sedang login
+def register_user(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('users:main_profile')
+    else:
+        form = UserForm()
+        
+    return render(request, 'register.html', {'form': form})
+
+@login_required
 def main_profile(request):
-    user = User.objects.first()
-    return render(request, 'main_profile.html', {'user_obj': user})
+    user = request.user 
+    
+    context = {
+        'user_obj': user,
+    }
+    return render(request, 'main_profile.html', context)
 
-# Mengedit profil user yang sedang login
+@login_required
 def edit_profile(request):
     user = request.user
 
     if request.method == 'POST':
-        user.name = request.POST.get('name')
-        user.email = request.POST.get('email')
-        user.fakultas = request.POST.get('fakultas')
-        if request.FILES.get('foto'):
-            user.foto = request.FILES['foto']
-        user.save()
-        return redirect('users:main_profile')
+        form = UserForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('users:main_profile')
+    else:
+        form = UserForm(instance=user)
 
-    return render(request, 'edit_profile.html', {'user_obj': user})
-'''
-
-def main_profile(request):
-    print("Main Profile OK!")
-    user = User.objects.first()
-    return render(request, 'main_profile.html', {'user_obj': user})
-
-def edit_profile(request):
-    print("Edit Profile OK!")
-    user = User.objects.first()
-    return render(request, 'edit_profile.html', {'user_obj': user})
+    return render(request, 'edit_profile.html', {'form': form, 'user_obj': user})
