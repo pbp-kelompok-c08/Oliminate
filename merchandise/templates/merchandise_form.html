@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top:48px; max-width:800px;">
+    <div class="card">
+        <h1 class="h3" style="margin-bottom:24px;">{{ title }}</h1>
+
+        <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="flex flex-col gap-2">
+                <label for="{{ field.id_for_label }}" style="font-weight:var(--font-medium); color:var(--neutral-900)">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                <p class="description" style="color:var(--neutral-500);">
+                    {{ field.help_text }}
+                </p>
+                {% endif %}
+                {% if field.errors %}
+                <p class="footnote" style="color:var(--pacil-red-base); margin-top:-4px;">
+                    {{ field.errors|striptags }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="flex justify-end gap-2 mt-6">
+                <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-outline">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
