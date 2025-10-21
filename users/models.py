@@ -21,6 +21,7 @@ class User(models.Model):
     password = models.CharField(max_length=255) 
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     profile_picture = models.ImageField(upload_to='fotoUser', null=True, blank=True)
+    fakultas = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.username

@@ -13,7 +13,8 @@ class UserForm(forms.ModelForm):
             'email',
             'password',      
             'phone_number',
-            'profile_picture'
+            'profile_picture',
+            'fakultas',
         ]
 
     def save(self, commit=True):
