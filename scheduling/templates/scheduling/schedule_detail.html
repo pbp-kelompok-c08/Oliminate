@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}{{ schedule.team1 }} vs {{ schedule.team2 }}{% endblock %}
+
+{% block content %}
+<div class="container mt-8">
+  <div class="card" style="padding: 0; overflow: hidden;">
+    {% if schedule.image_url %}
+      <img
+        src="{{ schedule.image_url }}"
+        alt="{{ schedule.category }}"
+        style="
+          width: 100%;
+          height: 300px; 
+          object-fit: cover; 
+          border-bottom: 1px solid var(--neutral-100);
+        "
+      />
+    {% endif %}
+
+    <div style="padding: 24px;">
+      <h1 class="h3" style="margin-bottom: 8px;">
+        {{ schedule.team1 }} vs {{ schedule.team2 }}
+      </h1>
+      <p class="headline" style="margin-bottom: 4px;">
+        {{ schedule.category }} — {{ schedule.location }}
+      </p>
+      <p class="footnote" style="margin-bottom: 16px; color: var(--neutral-700);">
+        {{ schedule.date|date:"l, d M Y" }} | Waktu : {{ schedule.time|time:"H:i" }}
+      </p>
+
+      {% if schedule.caption %}
+        <p class="body-large" style="margin-bottom: 16px;">
+          {{ schedule.caption }}
+        </p>
+      {% endif %}
+
+      {% if schedule.organizer %}
+        <p class="footnote" style="color: var(--neutral-700);">
+          Diselenggarakan oleh: {{ schedule.organizer.username }}
+        </p>
+      {% endif %}
+
+      <div class="flex gap-2 mt-6">
+        <a href="{% url 'scheduling:schedule_list' %}" class="btn btn-outline">Kembali</a>
+
+        {% if user.is_authenticated and user == schedule.organizer %}
+          <a href="{% url 'scheduling:schedule_update' schedule.id %}" class="btn btn-primary">Edit</a>
+          <a href="{% url 'scheduling:schedule_delete' schedule.id %}" class="btn btn-danger">Delete</a>
+          <a href="{% url 'scheduling:make_reviewable' schedule.id %}" class="btn btn-outline">Reviewable</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

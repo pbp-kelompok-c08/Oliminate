@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Jadwal Pertandingan{% endblock %}
+
+{% block content %}
+<div class="container mt-2">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="h3">Jadwal Pertandingan</h1>
+    <a href="{% url 'scheduling:schedule_create' %}" class="btn btn-primary">+ Buat Jadwal</a>
+  </div>
+
+  {% if schedules %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="margin-top: 1rem;">
+      {% for schedule in schedules %}
+      <div class="card schedule-card flex flex-col"
+           style="margin:0; display:flex; flex-direction:column; overflow:hidden; border-radius:12px; background:white;">
+        {% if schedule.image_url %}
+          <img src="{{ schedule.image_url }}" alt="{{ schedule.category }}"
+               style="width:100%; height:200px; object-fit:cover; border-radius:12px 12px 0 0;">
+        {% else %}
+          <div style="background-color:var(--neutral-100); height:200px; display:flex; align-items:center; justify-content:center;">
+            <span class="footnote">No Image</span>
+          </div>
+        {% endif %}
+
+        <div style="padding:16px; flex:1;">
+          <h2 class="h5">{{ schedule.team1 }} vs {{ schedule.team2 }}</h2>
+          <p class="footnote">{{ schedule.category }} — {{ schedule.location }}</p>
+          <p class="footnote" style="margin-top:8px;">{{ schedule.caption|truncatechars:80 }}</p>
+          <p class="headline" style="color:var(--pacil-blue-base); margin-top:8px;">
+            {{ schedule.date }} | {{ schedule.time }}
+          </p>
+        </div>
+
+        <div style="padding:0 16px 16px 16px;">
+          <a href="{% url 'scheduling:schedule_detail' schedule.id %}" class="btn btn-outline w-full">Detail</a>
+          {% if user.is_authenticated and user == schedule.organizer %}
+            <div class="flex gap-2 mt-2">
+              <a href="{% url 'scheduling:schedule_update' schedule.id %}" class="btn btn-primary flex-1">Edit</a>
+              <a href="{% url 'scheduling:schedule_delete' schedule.id %}" class="btn btn-danger flex-1">Delete</a>
+              <a href="{% url 'scheduling:make_reviewable' schedule.id %}" class="btn btn-outline flex-1">Reviewable</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card"><p class="body">Belum ada jadwal pertandingan yang tersedia.</p></div>
+  {% endif %}
+</div>
+
+<style>
+.container > .grid {
+  display: grid ;
+  gap: 1rem ; 
+}
+
+.card {
+  margin: 0 ;
+  display: block ;
+}
+
+.schedule-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  transition: all 0.25s ease;
+}
+</style>
+{% endblock %}
