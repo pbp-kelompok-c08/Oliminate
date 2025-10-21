@@ -4,162 +4,130 @@
 {% block title %}Edit Profile — Oliminate{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-9 px-4">
-  <form id="profileForm" method="POST" enctype="multipart/form-data" class="bg-white shadow-lg rounded-2xl p-7 flex flex-col md:flex-row gap-7 items-start">
+<div class="w-full max-w-4xl mx-auto py-10 px-4">
+  <form id="profileForm" method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-lg p-7">
     {% csrf_token %}
     
-    <div class="w-full md:w-56 flex-shrink-0 flex flex-col items-center gap-4">
-      <div class="w-40 h-40 rounded-full overflow-hidden bg-[#E5F1FB] flex items-center justify-center">
-        {% if user_obj.profile_picture %}
-          <img id="avatarImg" src="{{ user_obj.profile_picture.url }}" alt="Foto profil" class="w-full h-full object-cover">
-        {% else %}
-          <img id="avatarImg" alt="Foto profil" class="w-full h-full object-cover" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><rect width='100%' height='100%' fill='%23E5F1FB'/><circle cx='80' cy='60' r='34' fill='%23AED4F7' /><rect x='32' y='100' rx='8' width='96' height='26' fill='%23AED4F7' /></svg>">
-        {% endif %}
-      </div>
-      <p>Edit Profile Picture</p>
-      <input id="fileInput" name="profile_picture" type="file" accept="image/*" class="hidden" placeholder="Edit Profile Picture">
+    <div class="flex justify-between items-start gap-5">
+      <h3 class="text-2xl font-semibold text-gray-900">Edit Profile</h3>
+      <a href="{% url 'users:main_profile' %}" class="py-2 px-5 rounded-lg bg-gray-100 text-gray-800 text-base font-medium hover:bg-gray-200 transition-colors border border-gray-200">
+        Cancel
+      </a>
     </div>
 
-    <div class="w-full flex-1 space-y-4">
+    <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-7">
       
-      <div>
-        <label for="id_username" class="block text-base font-medium text-gray-800 mb-1">Username</label>
-        <input id="id_username" name="username" type="text" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="Username" value="{{ user_obj.username|default:'' }}">
+      <div class="md:col-span-1 flex flex-col items-center text-center gap-4">
+        {% if user_obj.profile_picture %}
+          <img id="avatarPreview" src="{{ user_obj.profile_picture.url }}" alt="Foto profil" class="w-48 h-48 rounded-full object-cover border-4 border-white shadow-md">
+        {% else %}
+          <div id="avatarPreview" class="w-48 h-48 rounded-full bg-gradient-to-br from-[#73B9F9] to-[#E5F1FB] flex items-center justify-center border-4 border-white shadow-md">
+            <span id="avatarInitials" class="text-5xl font-bold text-white">{{ user_obj.first_name|first|upper }}{{ user_obj.last_name|first|upper }}</span>
+          </div>
+        {% endif %}
+        
+        <label for="fileInput" class="cursor-pointer w-full max-w-xs py-2 px-4 rounded-lg border-2 border-dashed border-[#3293ec]/50 text-[#3293ec] bg-white hover:bg-[#3293ec]/10 transition-colors text-base font-medium">
+          Edit Profile Picture
+        </label>
+        <input id="fileInput" name="profile_picture" type="file" accept="image/*" class="hidden">
+        <p class="text-xs text-gray-500">Max 2MB • JPG / PNG</p>
       </div>
 
-      <div>
-        <label for="id_first_name" class="block text-base font-medium text-gray-800 mb-1">First Name</label>
-        <input id="id_first_name" name="first_name" type="text" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="First Name" value="{{ user_obj.first_name|default:'' }}">
-      </div>
-      
-      <div>
-        <label for="id_last_name" class="block text-base font-medium text-gray-800 mb-1">Last Name</label>
-        <input id="id_last_name" name="last_name" type="text" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="Last Name" value="{{ user_obj.last_name|default:'' }}">
-      </div>
-
-      <div>
-        <label for="id_email" class="block text-base font-medium text-gray-800 mb-1">Email</label>
-        <input id="id_email" name="email" type="email" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="example@email.com" value="{{ user_obj.email|default:'' }}">
-      </div>
-
-      <div>
-        <label for="id_role" class="block text-base font-medium text-gray-800 mb-1">Role</label>
-        <input id="id_role" name="role" type="text" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" value="{{ user_obj.get_role_display }}" readonly>
-      </div>
-
-      <div>
-        <label for="id_fakultas" class="block text-base font-medium text-gray-800 mb-1">Faculty</label>
-        <select id="id_fakultas" name="fakultas" class="w-full h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec] bg-white appearance-none">
-          <option value="">Choose Origin Faculty...</option>
-          <option value="Kedokteran" {% if user_obj.fakultas == "Kedokteran" %}selected{% endif %}>Kedokteran</option>
-          <option value="Kedokteran Gigi" {% if user_obj.fakultas == "Kedokteran Gigi" %}selected{% endif %}>Kedokteran Gigi</option>
-          <option value="Matematika dan Ilmu Pengetahuan Alam" {% if user_obj.fakultas == "Matematika dan Ilmu Pengetahuan Alam" %}selected{% endif %}>Matematika dan Ilmu Pengetahuan Alam</option>
-          <option value="Teknik" {% if user_obj.fakultas == "Teknik" %}selected{% endif %}>Teknik</option>
-          <option value="Hukum" {% if user_obj.fakultas == "Hukum" %}selected{% endif %}>Hukum</option>
-          <option value="Ekonomi dan Bisnis" {% if user_obj.fakultas == "Ekonomi dan Bisnis" %}selected{% endif %}>Ekonomi dan Bisnis</option>
-          <option value="Ilmu Pengetahuan Budaya" {% if user_obj.fakultas == "Ilmu Pengetahuan Budaya" %}selected{% endif %}>Ilmu Pengetahuan Budaya</option>
-          <option value="Psikologi" {% if user_obj.fakultas == "Psikologi" %}selected{% endif %}>Psikologi</option>
-          <option value="Ilmu Sosial dan Ilmu Politik" {% if user_obj.fakultas == "Ilmu Sosial dan Ilmu Politik" %}selected{% endif %}>Ilmu Sosial dan Ilmu Politik</option>
-          <option value="Kesehatan Masyarakat" {% if user_obj.fakultas == "Kesehatan Masyarakat" %}selected{% endif %}>Kesehatan Masyarakat</option>
-          <option value="Ilmu Komputer" {% if user_obj.fakultas == "Ilmu Komputer" %}selected{% endif %}>Ilmu Komputer</option>
-          <option value="Ilmu Keperawatan" {% if user_obj.fakultas == "Ilmu Keperawatan" %}selected{% endif %}>Ilmu Keperawatan</option>
-          <option value="Pendidikan Vokasi" {% if user_obj.fakultas == "Pendidikan Vokasi" %}selected{% endif %}>Pendidikan Vokasi</option>
-          <option value="Farmasi" {% if user_obj.fakultas == "Farmasi" %}selected{% endif %}>Farmasi</option>
-          <option value="Ilmu Administrasi" {% if user_obj.fakultas == "Ilmu Administrasi" %}selected{% endif %}>Ilmu Administrasi</option>
-          <option value="Ilmu Lingkungan" {% if user_obj.fakultas == "Ilmu Lingkungan" %}selected{% endif %}>Ilmu Lingkungan</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="id_password" class="block text-base font-medium text-gray-800 mb-1">Password</label>
-        <div class="flex gap-2 items-center">
-          <input id="id_password" name="password" type="password" class="flex-1 h-11 px-3 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]" placeholder="Leave blank if not changed">
-          <button id="togglePwd" type="button" class="h-11 w-11 flex items-center justify-center rounded-lg border border-gray-300 text-lg">👁️</button>
+      <div class="md:col-span-2 space-y-4">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center">
+          <label for="id_username" class="w-32 font-semibold text-gray-700">Username</label>
+          <input type="text" id="id_username" name="username" value="{{ user_obj.username }}" placeholder="Username" class="flex-1 p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]">
         </div>
-      </div>
 
-      <div class="flex justify-end gap-3 pt-4">
-        <button id="cancelBtn" type="button" class="py-2 px-5 rounded-lg bg-[#EA3C43] text-white text-base font-medium hover:bg-white hover:text-[#EA3C43] border border-[#EA3C43] transition-colors">Cancel</button>
-        <button id="saveBtn" type="submit" class="py-2 px-5 rounded-lg bg-[#3293ec] text-white text-base font-medium hover:bg-white hover:text-[#3293ec] border border-[#3293ec] transition-colors">Save</button>
+        <div class="flex flex-col sm:flex-row sm:items-center">
+          <label for="id_first_name" class="w-32 font-semibold text-gray-700">First Name</label>
+          <input type="text" id="id_first_name" name="first_name" value="{{ user_obj.first_name }}" placeholder="First Name" class="flex-1 p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]">
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center">
+          <label for="id_last_name" class="w-32 font-semibold text-gray-700">Last Name</label>
+          <input type="text" id="id_last_name" name="last_name" value="{{ user_obj.last_name }}" placeholder="Last Name" class="flex-1 p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]">
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center">
+          <label for="id_email" class="w-32 font-semibold text-gray-700">Email</label>
+          <input type="email" id="id_email" name="email" value="{{ user_obj.email }}" placeholder="example@email.com" class="flex-1 p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]">
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center">
+          <label for="id_role" class="w-32 font-semibold text-gray-700">Role</label>
+          <input type="text" id="id_role" name="role" value="{{ user_obj.get_role_display }}" readonly class="flex-1 p-3 bg-gray-200 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed">
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center">
+          <label for="id_fakultas" class="w-32 font-semibold text-gray-700">Faculty</label>
+          <select id="id_fakultas" name="fakultas" class="flex-1 p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec] appearance-none">
+            <option value="">Choose Origin Faculty...</option>
+            <option value="Kedokteran" {% if user_obj.fakultas == "Kedokteran" %}selected{% endif %}>Kedokteran</option>
+            <option value="Kedokteran Gigi" {% if user_obj.fakultas == "Kedokteran Gigi" %}selected{% endif %}>Kedokteran Gigi</option>
+            <option value="Matematika dan Ilmu Pengetahuan Alam" {% if user_obj.fakultas == "Matematika dan Ilmu Pengetahuan Alam" %}selected{% endif %}>Matematika dan Ilmu Pengetahuan Alam</option>
+            <option value="Teknik" {% if user_obj.fakultas == "Teknik" %}selected{% endif %}>Teknik</option>
+            <option value="Hukum" {% if user_obj.fakultas == "Hukum" %}selected{% endif %}>Hukum</option>
+            <option value="Ekonomi dan Bisnis" {% if user_obj.fakultas == "Ekonomi dan Bisnis" %}selected{% endif %}>Ekonomi dan Bisnis</option>
+            <option value="Ilmu Pengetahuan Budaya" {% if user_obj.fakultas == "Ilmu Pengetahuan Budaya" %}selected{% endif %}>Ilmu Pengetahuan Budaya</option>
+            <option value="Psikologi" {% if user_obj.fakultas == "Psikologi" %}selected{% endif %}>Psikologi</option>
+            <option value="Ilmu Sosial dan Ilmu Politik" {% if user_obj.fakultas == "Ilmu Sosial dan Ilmu Politik" %}selected{% endif %}>Ilmu Sosial dan Ilmu Politik</option>
+            <option value="Kesehatan Masyarakat" {% if user_obj.fakultas == "Kesehatan Masyarakat" %}selected{% endif %}>Kesehatan Masyarakat</option>
+            <option value="Ilmu Komputer" {% if user_obj.fakultas == "Ilmu Komputer" %}selected{% endif %}>Ilmu Komputer</option>
+            <option value="Ilmu Keperawatan" {% if user_obj.fakultas == "Ilmu Keperawatan" %}selected{% endif %}>Ilmu Keperawatan</option>
+            <option value="Pendidikan Vokasi" {% if user_obj.fakultas == "Pendidikan Vokasi" %}selected{% endif %}>Pendidikan Vokasi</option>
+            <option value="Farmasi" {% if user_obj.fakultas == "Farmasi" %}selected{% endif %}>Farmasi</option>
+            <option value="Ilmu Administrasi" {% if user_obj.fakultas == "Ilmu Administrasi" %}selected{% endif %}>Ilmu Administrasi</option>
+            <option value="Ilmu Lingkungan" {% if user_obj.fakultas == "Ilmu Lingkungan" %}selected{% endif %}>Ilmu Lingkungan</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center">
+          <label for="id_password" class="w-32 font-semibold text-gray-700">Password</label>
+          <input type="password" id="id_password" name="password" placeholder="Leave blank if not changed" class="flex-1 p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3293ec]">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4">
+          <a href="{% url 'users:main_profile' %}" class="py-2.5 px-6 rounded-lg bg-gray-200 text-gray-800 text-base font-medium hover:bg-gray-300 transition-colors">
+            Cancel
+          </a>
+          <button type="submit" class="py-2.5 px-6 rounded-lg bg-[#3293ec] text-white text-base font-medium hover:bg-white hover:text-[#3293ec] border border-transparent hover:border-[#3293ec] transition-colors shadow-lg shadow-[#3293ec]/30">
+            Save
+          </button>
+        </div>
       </div>
     </div>
   </form>
 </div>
 
-<div id="toast" class="fixed right-5 bottom-5 bg-gray-900 text-white py-2.5 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-3 transition-all duration-200 ease-out">Saved</div>
-
 <script>
-  (function(){
-    const editBtn = document.getElementById('editPfpBtn');
+  (function() {
     const fileInput = document.getElementById('fileInput');
-    const avatarImg = document.getElementById('avatarImg');
-    const profileForm = document.getElementById('profileForm');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const togglePwd = document.getElementById('togglePwd');
-    const toast = document.getElementById('toast');
-    
-    const usernameEl = document.getElementById('id_username');
-    const firstNameEl = document.getElementById('id_first_name');
-    const lastNameEl = document.getElementById('id_last_name');
-    const emailEl = document.getElementById('id_email');
-    const fakultasEl = document.getElementById('id_fakultas');
-    const passwordEl = document.getElementById('id_password');
-
-    // snapshot original values
-    const original = {
-      avatar: avatarImg.src,
-      username: usernameEl.value,
-      first_name: firstNameEl.value,
-      last_name: lastNameEl.value,
-      email: emailEl.value,
-      fakultas: fakultasEl ? fakultasEl.value : '',
-      password: ''
-    };
-
-    editBtn.addEventListener('click', () => fileInput.click());
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarInitials = document.getElementById('avatarInitials');
 
     fileInput.addEventListener('change', (e) => {
-      const f = e.target.files && e.target.files[0];
-      if (!f) return;
-      if (f.size > 2_000_000) { alert('File terlalu besar (maks 2MB). Pilih file lain.'); fileInput.value = ''; return; }
-      const r = new FileReader();
-      r.onload = () => avatarImg.src = r.result;
-      r.readAsDataURL(f);
-    });
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
 
-    togglePwd.addEventListener('click', () => {
-      passwordEl.type = (passwordEl.type === 'password') ? 'text' : 'password';
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Cek apakah avatarPreview adalah img atau div
+        if (avatarPreview.tagName === 'IMG') {
+          avatarPreview.src = reader.result;
+        } else {
+          // Jika ini adalah div (placeholder), ubah jadi img
+          const newImg = document.createElement('img');
+          newImg.id = 'avatarPreview';
+          newImg.src = reader.result;
+          newImg.alt = 'Foto profil';
+          newImg.className = 'w-48 h-48 rounded-full object-cover border-4 border-white shadow-md';
+          avatarPreview.parentNode.replaceChild(newImg, avatarPreview);
+        }
+      };
+      reader.readAsDataURL(file);
     });
-
-    profileForm.addEventListener('submit', function(ev){
-      const firstName = firstNameEl.value.trim();
-      const email = emailEl.value.trim();
-      if (!firstName) { alert('First Name tidak boleh kosong'); ev.preventDefault(); return; }
-      if (!email || !/^\S+@\S+\.\S+$/.test(email)) { alert('Masukkan email yang valid'); ev.preventDefault(); return; }
-    });
-
-    cancelBtn.addEventListener('click', function(){
-      usernameEl.value = original.username;
-      firstNameEl.value = original.first_name;
-      lastNameEl.value = original.last_name;
-      emailEl.value = original.email;
-      passwordEl.value = original.password;
-      avatarImg.src = original.avatar;
-      fileInput.value = '';
-      if (fakultasEl) fakultasEl.value = original.fakultas;
-      showToast('Perubahan dibatalkan');
-    });
-
-    function showToast(message='') {
-      toast.textContent = message;
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateY(0)';
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(()=> {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(12px)';
-      }, 2200);
-    }
   })();
 </script>
 {% endblock %}
