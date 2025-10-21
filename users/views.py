@@ -24,9 +24,11 @@ def edit_profile(request):
 '''
 
 def main_profile(request):
+    print("Main Profile OK!")
     user = User.objects.first()
     return render(request, 'main_profile.html', {'user_obj': user})
 
 def edit_profile(request):
+    print("Edit Profile OK!")
     user = User.objects.first()
     return render(request, 'edit_profile.html', {'user_obj': user})
