@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from datetime import datetime
-from django.contrib.auth.models import User  # ✅ pakai user bawaan Django
+from django.contrib.auth.models import User  #  pakai user bawaan Django
 
 class Schedule(models.Model):
     STATUS_CHOICES = [
@@ -10,15 +10,15 @@ class Schedule(models.Model):
         ('reviewable', 'Reviewable'),
     ]
 
-    # Gunakan User bawaan dulu sebagai organizer
+
     organizer = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,     # ← ubah dari CASCADE → SET_NULL
-        null=True, blank=True,         # ← biar bisa kosong
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,     #  ubah dari CASCADE jadi SET_NULL
+        null=True, blank=True,         #  biar bisa kosong
         related_name="schedules"
     )
 
-    category = models.CharField(max_length=50)           # Ex: "Futsal", "Badminton"
+    category = models.CharField(max_length=50)           
     team1 = models.CharField(max_length=100)
     team2 = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
