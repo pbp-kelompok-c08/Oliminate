@@ -79,7 +79,7 @@
         
         {% if ticket.payment_status == 'paid' and not ticket.is_used %}
           <a href="{% url 'ticket_scan' ticket.id %}" class="btn btn-outline w-full md:w-auto" style="text-decoration: none;">
-            Simulasi Scan Tiket
+            Scan Tiket
           </a>
         {% endif %}
 

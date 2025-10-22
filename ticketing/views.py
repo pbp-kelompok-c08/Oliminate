@@ -1,21 +1,31 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-# 1. Import model & form baru
 from .models import Ticket, EventPrice
 from .forms import TicketPurchaseForm, EventPriceForm
-# 2. Ganti ini ke get_user_model() jika app 'users' sudah jadi
-from django.contrib.auth.models import User 
-# 3. Import yang kita perlukan
+from users.models import User
 from scheduling.models import Schedule
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages # Untuk pesan error/sukses
+# HAPUS 'login_required' bawaan Django
+# from django.contrib.auth.decorators import login_required 
+from django.contrib import messages
 
 # ==================================
 # VIEWS YANG SUDAH ADA (BIARKAN SAJA)
 # ==================================
+
+# Kita akan ubah ticket_list sedikit
 def ticket_list(request):
-    # (Logika kamu yang lama di sini)
-    tickets = Ticket.objects.all().order_by('-purchase_date')
+    # --- LOGIKA AMBIL USER DARI SESSION ---
+    try:
+        user_id = request.session['user_id']
+        buyer = User.objects.get(id=user_id)
+        # Filter tiket HANYA untuk user yang login
+        tickets = Ticket.objects.filter(buyer=buyer).order_by('-purchase_date')
+    except (KeyError, User.DoesNotExist):
+        # Jika tidak login, tampilkan daftar kosong atau paksa login
+        messages.error(request, "Silakan login untuk melihat riwayat tiket.")
+        return redirect('users:login') # Redirect ke login temanmu
+    # --- SELESAI ---
+
     return render(request, 'ticket_list.html', {'tickets': tickets})
 
 def confirm_payment(request, ticket_id):
@@ -47,82 +57,70 @@ def scan_ticket(request, ticket_id):
         message = "Tiket berhasil divalidasi! Selamat menonton!"
     return render(request, 'ticket_scan.html', {'ticket': ticket, 'message': message})
 
-
 # ==================================
 # === VIEW BARU UNTUK PANITIA ===
 # ==================================
-# @login_required 
-# (Bisa kamu tambahkan @user_passes_test untuk cek apa dia panitia)
 def set_event_price(request):
-    """
-    View untuk panitia mengatur atau meng-update harga
-    untuk sebuah event/schedule.
-    """
+    # (Logika kamu yang lama di sini, sudah benar)
     if request.method == 'POST':
         form = EventPriceForm(request.POST)
         if form.is_valid():
             schedule = form.cleaned_data['schedule']
             price = form.cleaned_data['price']
-            
-            # Canggih: Otomatis update jika sudah ada, atau buat baru jika belum
             EventPrice.objects.update_or_create(
                 schedule=schedule,
-                defaults={'price': price} # Data yang di-set/di-update
+                defaults={'price': price}
             )
-            
             messages.success(request, f"Harga untuk {schedule} berhasil diatur/diperbarui!")
-            return redirect('set_event_price') # Kembali ke halaman yang sama
+            return redirect('set_event_price')
     else:
         form = EventPriceForm()
-
-    # Ambil semua harga yang sudah diatur untuk ditampilkan di list
     prices = EventPrice.objects.all().order_by('schedule__date')
-    
-    return render(request, 'set_price_form.html', { # (Template ini akan kita buat nanti)
+    return render(request, 'set_price_form.html', {
         'form': form,
         'prices': prices
     })
 
 
 # ==================================
-# === VIEW LAMA (DIUBAH) UNTUK USER ===
+# === VIEW USER (INI YANG DIUBAH) ===
 # ==================================
-#@login_required # User harus login untuk beli
 def buy_ticket(request):
     """
     View untuk user membeli tiket.
-    Harga diambil otomatis dari EventPrice.
     """
+    # --- LOGIKA AMBIL USER DARI SESSION ---
+    try:
+        user_id = request.session['user_id']
+        buyer = User.objects.get(id=user_id) 
+    except (KeyError, User.DoesNotExist):
+        # Jika tidak ada di session, paksa login
+        messages.error(request, "Anda harus login untuk membeli tiket.")
+        return redirect('users:login') # Redirect ke login temanmu
+    # --- SELESAI ---
+    
     if request.method == 'POST':
         form = TicketPurchaseForm(request.POST)
         if form.is_valid():
             ticket = form.save(commit=False)
             
-            # (Pastikan ganti 'User' dengan 'get_user_model()' nanti)
-            ticket.buyer = request.user 
-            
-            # === INI LOGIKA BARUNYA ===
-            try:
-                # 1. Cari harga di model EventPrice
-                event_price_obj = EventPrice.objects.get(schedule=ticket.schedule)
-                
-                # 2. Copy harga ke tiket
-                ticket.price = event_price_obj.price
-                
-            except EventPrice.DoesNotExist:
-                # 3. Jika panitia lupa set harga
-                messages.error(request, "Maaf, harga untuk event ini belum diatur oleh panitia. Silakan hubungi organizer.")
-                # Tampilkan form-nya lagi dengan pesan error
-                return render(request, 'ticket_form.html', {'form': form})
+            # === INI PERBAIKANNYA ===
+            # Gunakan 'buyer' yang kita ambil dari session
+            ticket.buyer = buyer
             # ==========================
+            
+            try:
+                event_price_obj = EventPrice.objects.get(schedule=ticket.schedule)
+                ticket.price = event_price_obj.price
+            except EventPrice.DoesNotExist:
+                messages.error(request, "Maaf, harga untuk event ini belum diatur oleh panitia.")
+                return render(request, 'ticket_form.html', {'form': form})
 
             ticket.payment_status = 'unpaid'
             ticket.save()
             return redirect('ticket_payment', ticket_id=ticket.id)
     else:
-        # Saat user buka halaman (GET request)
         form = TicketPurchaseForm()
-        # Filter dropdown agar hanya schedule 'upcoming' yang bisa dibeli
         form.fields['schedule'].queryset = Schedule.objects.filter(status='upcoming')
 
     return render(request, 'ticket_form.html', {'form': form})

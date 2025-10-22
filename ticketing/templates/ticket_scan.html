@@ -8,14 +8,14 @@
   <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
     
     {% if "berhasil" in message %}
-      <div class"p-6 md:p-8 text-center bg-green-50 border-b-4 border-green-200">
+      <div class="p-6 md:p-8 text-center bg-green-50 border-b-4 border-green-200">
         <h1 class="h3" style="color: var(--neutral-900);">Validasi Sukses</h1>
         <p class="body" style="color: var(--neutral-700); margin-top: 8px;">
           {{ message }}
         </p>
       </div>
     {% else %}
-      <div class"p-6 md:p-8 text-center bg-red-50 border-b-4 border-red-200">
+      <div class="p-6 md:p-8 text-center bg-red-50 border-b-4 border-red-200">
         <h1 class="h3" style="color: var(--neutral-900);">Validasi Gagal</h1>
         <p class="body" style="color: var(--pacil-red-base); font-weight: var(--font-semibold); margin-top: 8px;">
           {{ message }}

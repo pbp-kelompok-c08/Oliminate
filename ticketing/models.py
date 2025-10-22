@@ -2,7 +2,8 @@ from django.db import models
 from scheduling.models import Schedule
 # Ganti ini ke custom user model jika sudah siap, 
 # untuk sekarang kita pakai user bawaan
-from django.contrib.auth.models import User 
+from users.models import User
+#from django.contrib.auth.models import User 
 
 # ==================================
 # === 1. TAMBAHKAN MODEL BARU INI ===
