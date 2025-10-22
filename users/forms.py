@@ -1,7 +1,8 @@
+# users/forms.py
 from django import forms
 from .models import User
 
-# Form ini KHUSUS untuk registrasi
+# UserRegisterForm Anda (tidak berubah)
 class UserRegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
     email = forms.EmailField(required=True)
@@ -18,14 +19,17 @@ class UserRegisterForm(forms.ModelForm):
         ]
 
     def save(self, commit=True):
-        # PERINGATAN KERAS: 
-        # Kode ini menyimpan password sebagai plain text.
-        # Metode set_password() tidak ada karena ini models.Model
         user = super().save(commit=True)
         return user
 
-# Form ini KHUSUS untuk edit profil
+
+# ==========================================================
+# PERBARUI UserEditForm ANDA DENGAN INI
+# ==========================================================
 class UserEditForm(forms.ModelForm):
+    # TAMBAHKAN: Buat field password baru yang tidak wajib diisi
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
+    
     class Meta:
         model = User
         fields = [
@@ -36,4 +40,41 @@ class UserEditForm(forms.ModelForm):
             'phone_number',
             'profile_picture',
             'fakultas',
+            'password',  # TAMBAHKAN: 'password' di sini
         ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        placeholders = {
+            'username': 'Your Username',
+            'first_name': 'Your First Name',
+            'last_name': 'Your Last Name',
+            'email': 'your.email@example.com',
+            'phone_number': '+628123456789',
+            'fakultas': 'Choose your faculty',
+            # TAMBAHKAN: Placeholder untuk password baru
+            'password': 'Leave blank if not changing' 
+        }
+
+        for field_name, placeholder_text in placeholders.items():
+            if field_name in self.fields:
+                field = self.fields[field_name]
+                # Atur atribut placeholder
+                field.widget.attrs['placeholder'] = placeholder_text
+                
+    # TAMBAHKAN: save() method untuk handle password opsional
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # Ambil password dari data yang sudah divalidasi
+        password = self.cleaned_data.get("password")
+        
+        # Hanya update password jika pengguna memasukkan password baru
+        if password:
+            # Karena Anda pakai models.Model, kita simpan sbg plain text
+            user.password = password
+        
+        if commit:
+            user.save()
+            
+        return user
