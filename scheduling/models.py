@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from datetime import datetime
-from django.contrib.auth.models import User  # ✅ pakai user bawaan Django
+from django.contrib.auth.models import User  #  pakai user bawaan Django
 
 class Schedule(models.Model):
     STATUS_CHOICES = [
