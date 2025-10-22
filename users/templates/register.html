@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Register — Oliminate{% endblock %}
+
+{% block styles %}
+<style>
+  :root{
+    --blue-base: #3293ec; /* pacil-blue-base */
+    --card-bg: #ffffff;
+    --muted: #6b7280;
+    --radius: 12px;
+  }
+
+  .register-container {
+    width: 100%;
+    max-width: 420px;
+    margin: 40px auto; /* Memberi jarak atas/bawah dan center horizontal */
+  }
+
+  .card{background:var(--card-bg); border-radius:var(--radius); padding:28px; box-shadow: 0 10px 30px rgba(16,24,40,0.12);}
+  .card h1{margin:0 0 18px 0; text-align:center; font-size:22px}
+
+  label{display:block; font-weight:700; margin-bottom:8px}
+  input[type="text"], input[type="password"], input[type="email"], input[type="tel"]{width:100%; padding:12px 14px; border-radius:10px; border:1px solid #e6edf6; font-size:15px; outline:none}
+  input:focus{box-shadow:0 8px 20px rgba(50,147,236,0.12); border-color:var(--blue-base)}
+
+  .form-row{margin-bottom:14px}
+  .btn{display:block; width:100%; padding:12px 14px; border-radius:10px; border:0; font-weight:700; background:var(--blue-base); color:white; font-size:15px; cursor:pointer; box-shadow:0 8px 20px rgba(50,147,236,0.18);}
+
+  .foot{margin-top:18px; text-align:center; color:var(--muted); font-size:14px}
+  .foot a{color:var(--blue-base); text-decoration:underline; font-weight:700}
+
+  .errorlist { list-style-type: none; padding: 0; color: #D8000C; font-size: 13px; margin-top: 5px; margin-left: 2px; }
+  .errorlist li { margin-bottom: 5px; }
+</style>
+{% endblock styles %}
+
+
+{% block content %}
+<main class="register-container">
+  <section class="card" aria-labelledby="registerTitle">
+    <h1 id="registerTitle">Register</h1>
+    
+    <form id="registerForm" method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="form-row">
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+
+      <div class="form-row">
+        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+        {{ form.first_name }}
+        {{ form.first_name.errors }}
+      </div>
+
+      <div class="form-row">
+        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+        {{ form.last_name }}
+        {{ form.last_name.errors }}
+      </div>
+
+      <div class="form-row">
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+        {{ form.email.errors }}
+      </div>
+
+      <div class="form-row">
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+        {{ form.password.errors }}
+      </div>
+
+      <div class="form-row">
+        <label for="{{ form.phone_number.id_for_label }}">Phone number</label>
+        {{ form.phone_number }}
+        {{ form.phone_number.errors }}
+      </div>
+
+      <div class="form-row">
+        <button class="btn" type="submit">Submit</button>
+      </div>
+    </form>
+
+    <div class="foot">Already have account? <a id="toLogin" href="{% url 'login' %}">Login here</a></div>
+  </section>
+</main>
+{% endblock content %}

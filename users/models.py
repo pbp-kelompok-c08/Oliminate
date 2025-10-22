@@ -18,7 +18,10 @@ class User(models.Model):
     )
     
     email = models.EmailField(max_length=255, unique=True)
+    
+    # PERINGATAN: Ini akan menyimpan password sebagai plain text
     password = models.CharField(max_length=255) 
+    
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     profile_picture = models.ImageField(upload_to='fotoUser', null=True, blank=True)
     fakultas = models.CharField(max_length=100, null=True, blank=True)

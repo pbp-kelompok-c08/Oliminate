@@ -1,8 +1,10 @@
 from django import forms
 from .models import User
 
-class UserForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+# Form ini KHUSUS untuk registrasi
+class UserRegisterForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    email = forms.EmailField(required=True)
 
     class Meta:
         model = User
@@ -13,18 +15,25 @@ class UserForm(forms.ModelForm):
             'email',
             'password',      
             'phone_number',
-            'profile_picture',
-            'fakultas',
         ]
 
     def save(self, commit=True):
-        user = super().save(commit=False)
-        password = self.cleaned_data.get("password")
-        
-        if password:
-            user.set_password(password)
-        
-        if commit:
-            user.save()
-            
+        # PERINGATAN KERAS: 
+        # Kode ini menyimpan password sebagai plain text.
+        # Metode set_password() tidak ada karena ini models.Model
+        user = super().save(commit=True)
         return user
+
+# Form ini KHUSUS untuk edit profil
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'phone_number',
+            'profile_picture',
+            'fakultas',
+        ]

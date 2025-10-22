@@ -1,0 +1,31 @@
+{% block content %}
+<main class="login-container">
+  <section class="card" aria-labelledby="loginTitle">
+    <h1 id="loginTitle">Login</h1>
+
+    <form id="loginForm" method="post">
+      {% csrf_token %}
+      
+      {% if error %}
+        <p style="color: #D8000C; text-align: center;">{{ error }}</p>
+      {% endif %}
+      <div class="form-row">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" required>
+      </div>
+
+      <div class="form-row">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="form-row" style="margin-top: 20px;">
+        <button class="btn" type="submit">Login</button>
+      </div>
+    </form>
+
+    <div class="link-row">
+      <p class="foot">No account yet? <a id="toRegister" href="{% url 'users:register_user' %}">Register here</a></p>
+    </div>
+  </section>
+</main>
+{% endblock content %}
