@@ -2,34 +2,55 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from .models import Ticket, EventPrice
 from .forms import TicketPurchaseForm, EventPriceForm
-from users.models import User
+from users.models import User 
 from scheduling.models import Schedule
-# HAPUS 'login_required' bawaan Django
-# from django.contrib.auth.decorators import login_required 
 from django.contrib import messages
 
 # ==================================
-# VIEWS YANG SUDAH ADA (BIARKAN SAJA)
+# === VIEW TICKET_LIST (DIPERBAIKI) ===
 # ==================================
-
-# Kita akan ubah ticket_list sedikit
 def ticket_list(request):
-    # --- LOGIKA AMBIL USER DARI SESSION ---
+    """
+    Menampilkan daftar tiket milik user yang login.
+    Sekarang dengan tambahan filter berdasarkan status.
+    """
+    
+    # 1. Ambil parameter 'status' dari URL. 
+    #    Default-nya None (artinya 'semua')
+    filter_status = request.GET.get('status', None)
+
     try:
         user_id = request.session['user_id']
         buyer = User.objects.get(id=user_id)
-        # Filter tiket HANYA untuk user yang login
-        tickets = Ticket.objects.filter(buyer=buyer).order_by('-purchase_date')
+        
+        # 2. Siapkan query dasar (semua tiket milik user ini)
+        base_query = Ticket.objects.filter(buyer=buyer)
+
+        # 3. Terapkan filter JIKA ada
+        if filter_status == 'paid':
+            tickets_query = base_query.filter(payment_status='paid')
+        elif filter_status == 'unpaid':
+            tickets_query = base_query.filter(payment_status='unpaid')
+        else:
+            # Jika filter_status=None atau 'semua', ambil semua
+            tickets_query = base_query
+        
+        # 4. Terapkan ordering di akhir
+        tickets = tickets_query.order_by('-purchase_date')
+
     except (KeyError, User.DoesNotExist):
-        # Jika tidak login, tampilkan daftar kosong atau paksa login
-        messages.error(request, "Silakan login untuk melihat riwayat tiket.")
-        return redirect('users:login') # Redirect ke login temanmu
-    # --- SELESAI ---
+        tickets = Ticket.objects.none() 
+        if not filter_status: # Hanya tampilkan pesan jika user belum filter
+            messages.info(request, "Silakan login untuk melihat riwayat tiket Anda.")
 
-    return render(request, 'ticket_list.html', {'tickets': tickets})
+    # 5. Kirim 'tickets' DAN 'active_filter' ke template
+    return render(request, 'ticket_list.html', {
+        'tickets': tickets,
+        'active_filter': filter_status # Ini untuk highlight tombol
+    })
 
+# ... (sisa view-mu: confirm_payment, ticket_detail, dll... biarkan saja) ...
 def confirm_payment(request, ticket_id):
-    # (Logika kamu yang lama di sini)
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
         ticket.payment_status = 'paid'
@@ -38,12 +59,10 @@ def confirm_payment(request, ticket_id):
     return render(request, 'ticket_payment.html', {'ticket': ticket})
 
 def ticket_detail(request, ticket_id):
-    # (Logika kamu yang lama di sini)
     ticket = get_object_or_404(Ticket, id=ticket_id)
     return render(request, 'ticket_detail.html', {'ticket': ticket})
 
 def scan_ticket(request, ticket_id):
-    # (Logika kamu yang lama di sini)
     ticket = get_object_or_404(Ticket, id=ticket_id)
     message = ""
     if ticket.payment_status != 'paid':
@@ -57,11 +76,17 @@ def scan_ticket(request, ticket_id):
         message = "Tiket berhasil divalidasi! Selamat menonton!"
     return render(request, 'ticket_scan.html', {'ticket': ticket, 'message': message})
 
-# ==================================
-# === VIEW BARU UNTUK PANITIA ===
-# ==================================
 def set_event_price(request):
-    # (Logika kamu yang lama di sini, sudah benar)
+    try:
+        user_id = request.session['user_id']
+        user = User.objects.get(id=user_id)
+        if user.role != 'organizer':
+            messages.error(request, "Anda tidak punya hak akses ke halaman ini.")
+            return redirect('users:main_profile')
+    except (KeyError, User.DoesNotExist):
+        messages.error(request, "Anda harus login sebagai panitia untuk mengakses halaman ini.")
+        return redirect('users:login')
+
     if request.method == 'POST':
         form = EventPriceForm(request.POST)
         if form.is_valid():
@@ -69,53 +94,41 @@ def set_event_price(request):
             price = form.cleaned_data['price']
             EventPrice.objects.update_or_create(
                 schedule=schedule,
-                defaults={'price': price}
+                defaults={'price': price} 
             )
             messages.success(request, f"Harga untuk {schedule} berhasil diatur/diperbarui!")
-            return redirect('set_event_price')
+            return redirect('set_event_price') 
     else:
         form = EventPriceForm()
+
     prices = EventPrice.objects.all().order_by('schedule__date')
     return render(request, 'set_price_form.html', {
         'form': form,
         'prices': prices
     })
 
-
-# ==================================
-# === VIEW USER (INI YANG DIUBAH) ===
-# ==================================
 def buy_ticket(request):
-    """
-    View untuk user membeli tiket.
-    """
-    # --- LOGIKA AMBIL USER DARI SESSION ---
     try:
         user_id = request.session['user_id']
-        buyer = User.objects.get(id=user_id) 
+        buyer = User.objects.get(id=user_id)
+        if buyer.role != 'user':
+            messages.error(request, "Hanya user yang dapat membeli tiket. Akun panitia tidak bisa.")
+            return redirect('users:main_profile')
     except (KeyError, User.DoesNotExist):
-        # Jika tidak ada di session, paksa login
         messages.error(request, "Anda harus login untuk membeli tiket.")
-        return redirect('users:login') # Redirect ke login temanmu
-    # --- SELESAI ---
-    
+        return redirect('users:login')
+
     if request.method == 'POST':
         form = TicketPurchaseForm(request.POST)
         if form.is_valid():
             ticket = form.save(commit=False)
-            
-            # === INI PERBAIKANNYA ===
-            # Gunakan 'buyer' yang kita ambil dari session
-            ticket.buyer = buyer
-            # ==========================
-            
+            ticket.buyer = buyer 
             try:
                 event_price_obj = EventPrice.objects.get(schedule=ticket.schedule)
                 ticket.price = event_price_obj.price
             except EventPrice.DoesNotExist:
                 messages.error(request, "Maaf, harga untuk event ini belum diatur oleh panitia.")
                 return render(request, 'ticket_form.html', {'form': form})
-
             ticket.payment_status = 'unpaid'
             ticket.save()
             return redirect('ticket_payment', ticket_id=ticket.id)
