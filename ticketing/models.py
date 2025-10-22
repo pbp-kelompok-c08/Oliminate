@@ -1,6 +1,7 @@
 from django.db import models
 from scheduling.models import Schedule
-# from users.models import User
+from django.contrib.auth.models import User 
+#from users.models import User
 
 # Create your models here.
 class Ticket(models.Model):
@@ -17,7 +18,7 @@ class Ticket(models.Model):
 
     id = models.AutoField(primary_key=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name='tickets')
-    # buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets')
+    buyer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     purchase_date = models.DateTimeField(auto_now_add=True)
     qr_code = models.CharField(max_length=255, blank=True, null=True)

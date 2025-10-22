@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Konfirmasi Pembayaran{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-8 px-4">
+
+  <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+    
+    <div class="p-6 md:p-8 border-b border-gray-100">
+      <h1 class="h3">Konfirmasi Pembayaran</h1>
+      <p class="body" style="color: var(--neutral-700); margin-top: 8px;">
+        Selesaikan pembelian tiket Anda dengan mengonfirmasi detail di bawah ini.
+      </p>
+    </div>
+
+    <div class="p-6 md:p-8">
+      
+      <div class="p-4 rounded-lg bg-blue-50 border border-blue-200 mb-6">
+        <p class="body" style="color: var(--pacil-blue-darker-1);">
+          Ini adalah halaman simulasi pembayaran. Klik tombol "Konfirmasi Bayar" di bawah untuk menandai tiket ini sebagai 'Sudah Dibayar'.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex justify-between">
+          <span class="body" style="color: var(--neutral-700);">Event</span>
+          <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">{{ ticket.schedule }}</span>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="body" style="color: var(--neutral-700);">Metode Pembayaran</span>
+          <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
+            {{ ticket.get_payment_method_display }}
+          </span>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="body" style="color: var(--neutral-700);">Status Saat Ini</span>
+          <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
+            {{ ticket.get_payment_status_display }}
+          </span>
+        </div>
+        
+        <hr class="pt-2">
+
+        <div class="flex justify-between">
+          <span class="headline" style="color: var(--neutral-700);">Total Harga</span>
+          <span class="headline" style="color: var(--pacil-blue-base); font-weight: var(--font-semibold);">
+            Rp {{ ticket.price|floatformat:0 }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 px-6 py-4 md:px-8 md:py-6">
+      <form method="POST" class="flex flex-col md:flex-row gap-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary w-full md:w-auto">
+          Konfirmasi Bayar
+        </button>
+        <a href="{% url 'ticket_detail' ticket.id %}" class="btn btn-outline w-full md:w-auto text-center" style="text-decoration: none;">
+          Kembali ke Detail
+        </a>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
