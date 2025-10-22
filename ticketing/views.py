@@ -5,10 +5,37 @@ from .forms import TicketPurchaseForm, EventPriceForm
 from users.models import User 
 from scheduling.models import Schedule
 from django.contrib import messages
+from django.http import JsonResponse
 
-# ==================================
-# === VIEW TICKET_LIST (DIPERBAIKI) ===
-# ==================================
+def get_user_from_session(request):
+    try:
+        user_id = request.session['user_id']
+        user = User.objects.get(id=user_id)
+        return user
+    except (KeyError, User.DoesNotExist):
+        return None
+    
+def get_price(request, schedule_id):
+    """
+    View ini dipanggil oleh AJAX.
+    Tugasnya mencari harga dan mengembalikannya sebagai JSON.
+    """
+    try:
+        # 1. Cari harga di model EventPrice berdasarkan ID schedule
+        event_price = EventPrice.objects.get(schedule__id=schedule_id)
+        # 2. Siapkan data untuk dikirim kembali
+        data = {
+            'price': event_price.price
+        }
+    except EventPrice.DoesNotExist:
+        # 3. Jika panitia lupa set harga, kirim harga 0
+        data = {
+            'price': 0  # Atau bisa juga kirim pesan error
+        }
+    
+    # 4. Kembalikan data sebagai JSON
+    return JsonResponse(data)
+
 def ticket_list(request):
     """
     Menampilkan daftar tiket milik user yang login.

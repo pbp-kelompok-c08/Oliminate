@@ -8,4 +8,5 @@ urlpatterns = [
     path('<int:ticket_id>/payment/', views.confirm_payment, name='ticket_payment'),
     path('<int:ticket_id>/scan/', views.scan_ticket, name='ticket_scan'),
     path('set-price/', views.set_event_price, name='set_event_price'),
+    path('get-price/<int:schedule_id>/', views.get_price, name='get_price'),
 ]
