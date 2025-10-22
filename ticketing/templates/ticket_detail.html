@@ -64,11 +64,19 @@
           <dd class="body" style="color: var(--neutral-900);">{{ ticket.used_at }}</dd>
         </div>
         {% endif %}
-
       </dl>
     </div>
 
     <div class="bg-gray-50 px-6 py-4 md:px-8 md:py-6">
+
+      {% if ticket.payment_status == 'paid' %}
+      <!-- 🟢 Tambahan baru: QR code muncul otomatis -->
+      <div class="text-center mb-6">
+        <img id="qrImage" alt="QR Code Tiket" style="width:200px; height:200px; display:none; margin:auto;" />
+        <p class="footnote mt-2" style="color: var(--neutral-700);">Tunjukkan QR ini saat check-in</p>
+      </div>
+      {% endif %}
+
       <div class="flex flex-col md:flex-row gap-4">
         
         {% if ticket.payment_status != 'paid' %}
@@ -91,6 +99,25 @@
     </div>
 
   </div>
-  
 </div>
+
+{% if ticket.payment_status == 'paid' %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  fetch(`/ticketing/generate_qr/{{ ticket.id }}/`)
+    .then(response => response.json())
+    .then(data => {
+      const img = document.getElementById("qrImage");
+      if (data.qr_code) {
+        img.src = "data:image/png;base64," + data.qr_code;
+        img.style.display = "block";
+      } else {
+        console.error("QR code kosong:", data);
+      }
+    })
+    .catch(err => console.error("Gagal fetch:", err));
+});
+</script>
+{% endif %}
+
 {% endblock %}

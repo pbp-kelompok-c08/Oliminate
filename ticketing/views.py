@@ -6,6 +6,8 @@ from users.models import User
 from scheduling.models import Schedule
 from django.contrib import messages
 from django.http import JsonResponse
+import qrcode, base64
+from io import BytesIO
 
 def get_user_from_session(request):
     try:
@@ -16,25 +18,12 @@ def get_user_from_session(request):
         return None
     
 def get_price(request, schedule_id):
-    """
-    View ini dipanggil oleh AJAX.
-    Tugasnya mencari harga dan mengembalikannya sebagai JSON.
-    """
     try:
-        # 1. Cari harga di model EventPrice berdasarkan ID schedule
         event_price = EventPrice.objects.get(schedule__id=schedule_id)
-        # 2. Siapkan data untuk dikirim kembali
-        data = {
-            'price': event_price.price
-        }
+        price = float(event_price.price)
     except EventPrice.DoesNotExist:
-        # 3. Jika panitia lupa set harga, kirim harga 0
-        data = {
-            'price': 0  # Atau bisa juga kirim pesan error
-        }
-    
-    # 4. Kembalikan data sebagai JSON
-    return JsonResponse(data)
+        price = 0.0
+    return JsonResponse({'price': price})
 
 def ticket_list(request):
     """
@@ -76,7 +65,17 @@ def ticket_list(request):
         'active_filter': filter_status # Ini untuk highlight tombol
     })
 
-# ... (sisa view-mu: confirm_payment, ticket_detail, dll... biarkan saja) ...
+def generate_qr(request, ticket_id):
+    ticket = Ticket.objects.get(id=ticket_id)
+    data = f"TIKET-{ticket.id}-{ticket.buyer.username}"
+    
+    qr = qrcode.make(data)
+    buffer = BytesIO()
+    qr.save(buffer, format='PNG')
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+    
+    return JsonResponse({'qr_code': img_str})
+
 def confirm_payment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
