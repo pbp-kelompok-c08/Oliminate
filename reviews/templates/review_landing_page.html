@@ -1,133 +1,87 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block meta %}
 <title>Review Events</title>
 <link rel="stylesheet" href="{% static 'css/global.css' %}">
-<style>
-    /* PAKAI VARIABLE YANG ADA DI global.css */
-    .review-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 16px;
-    }
-
-    .review-grid {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-        gap: 24px !important;
-        padding: 24px 0 !important;
-    }
-
-    .review-card {
-        background: white !important;
-        border: 2px solid var(--pacil-blue-base) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-        overflow: hidden !important;
-        display: flex !important;
-        flex-direction: column !important;
-        min-height: 400px !important;
-    }
-
-    .review-card-image {
-        height: 180px !important;
-        background: linear-gradient(45deg, var(--pacil-blue-base), var(--pacil-blue-lighter-1)) !important;
-        border-bottom: 2px solid var(--pacil-blue-base) !important;
-    }
-
-    .review-card-content {
-        padding: 20px !important;
-        flex-grow: 1 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-    }
-
-    .review-card-content h5 {
-        font-size: var(--heading-5) !important;
-        font-weight: var(--font-semibold) !important;
-        color: var(--neutral-900) !important;
-        margin: 0 !important;
-    }
-
-    .rating-container {
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-    }
-
-    .rating-stars {
-        font-size: 24px !important;
-        letter-spacing: 2px !important;
-    }
-
-    .star-filled {
-        color: #f59e0b !important;
-    }
-
-    .star-empty {
-        color: var(--neutral-300) !important;
-    }
-
-    .review-btn {
-        display: block !important;
-        padding: 12px !important;
-        background: var(--pacil-blue-base) !important;
-        color: white !important;
-        text-decoration: none !important;
-        border-radius: 8px !important;
-        text-align: center !important;
-        font-weight: var(--font-medium) !important;
-        margin-top: auto !important;
-        border: none !important;
-    }
-</style>
 {% endblock meta %}
 
 {% block content %}
-<div class="container">
-    <h2 style="margin-top: 24px; font-size: 24px; font-weight: bold;">Review Events</h2>
-    <p style="margin-bottom: 16px; color: #666;">
-        Share your experience about the events you've attended.
-    </p>
+<div class="container mt-2">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="h3">Review Events</h1>
+  </div>
 
-    <div class="event-grid">
-        {% if event_list %}
-            {% for event in event_list %}
-            <div class="event-card">
-                <div class="event-card-image"></div>
-                
-                <div class="event-card-content">
-                    <h5>{{ event.team1 }} vs {{ event.team2 }}</h5>
-
-                    <div class="rating-container">
-                        <div class="rating-stars">
-                            {% for i in "12345" %}
-                                {% if forloop.counter <= event.avg_rating %}
-                                    <span class="star-filled">★</span>
-                                {% else %}
-                                    <span class="star-empty">☆</span>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <span style="font-size: 14px;">
-                            <b>{{ event.avg_rating }}</b> ({{ event.review_count }})
-                        </span>
-                    </div>
-
-                    <p style="font-size: 14px; color: #666;">
-                        {{ event.date|date:"d M Y" }}<br>
-                        {{ event.category }}
-                    </p>
-
-                    <a href="#" class="btn">See Reviews</a>
-                </div>
-            </div>
-            {% endfor %}
+  {% if event_list %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="margin-top: 1rem;">
+      {% for event in event_list %}
+      <div class="card schedule-card flex flex-col"
+           style="margin:0; display:flex; flex-direction:column; overflow:hidden; border-radius:12px; background:white;">
+        {% if event.image_url %}
+          <img src="{{ event.image_url }}" alt="{{ event.category }}"
+               style="width:100%; height:200px; object-fit:cover; border-radius:12px 12px 0 0;">
         {% else %}
-            <p>There are no reviewable events at this time.</p>
+          <div style="background-color:var(--neutral-100); height:200px; display:flex; align-items:center; justify-content:center;">
+            <span class="footnote">No Image</span>
+          </div>
         {% endif %}
+
+        <div style="padding:16px; flex:1;">
+          <h2 class="h5">{{ event.team1 }} vs {{ event.team2 }}</h2>
+          <!-- RATING SECTION -->
+          <div style="display:flex; align-items:center; gap:8px; margin:12px 0;">
+            <div style="font-size:18px; letter-spacing:1px;">
+              {% with rounded_rating=event.avg_rating|default:0|floatformat:0 %}
+              {% for i in "12345" %}
+                {% if forloop.counter <= rounded_rating|add:0 %}
+                  <span style="color:#f59e0b;">★</span>
+                {% else %}
+                  <span style="color:var(--neutral-300);">☆</span>
+                {% endif %}
+              {% endfor %}
+              {% endwith %}
+            </div>
+            <span class="footnote" style="font-weight:var(--font-medium);">
+              <b>{{ event.avg_rating|default:0|floatformat:1 }}</b> ({{ event.review_count|default:0 }} reviews)
+            </span>
+          </div>
+          <p class="footnote">{{ event.category }} — {{ event.location }}</p>
+          
+
+          <p class="footnote" style="margin-top:8px;">{{ event.caption|truncatechars:80|default:"No description" }}</p>
+          <p class="headline" style="color:var(--pacil-blue-base); margin-top:8px;">
+            {{ event.start_time|date:"d M Y" }} | {{ event.start_time|date:"H:i" }}
+          </p>
+        </div>
+
+        <div style="padding:0 16px 16px 16px;">
+          <a href="{% url 'review_detail' event.id %}" class="btn btn-outline w-full">See Reviews</a>
+        </div>
+      </div>
+      {% endfor %}
     </div>
+  {% else %}
+    <div class="card">
+      <p class="body">There are no reviewable events at this time.</p>
+    </div>
+  {% endif %}
 </div>
+
+<style>
+.container > .grid {
+  display: grid ;
+  gap: 1rem ; 
+}
+
+.card {
+  margin: 0 ;
+  display: block ;
+}
+
+.schedule-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  transition: all 0.25s ease;
+}
+</style>
 {% endblock content %}

@@ -39,7 +39,7 @@ def review_detail_page(request, schedule_id):
     #         buyer=request.user, 
     #         schedule=schedule
     #     ).exists()
-    can_review = request.user.is_authenticated
+    can_review = True
 
     # Handle submit review (kalau eligible aja)
     if request.method == 'POST' and can_review:
@@ -61,63 +61,89 @@ def review_detail_page(request, schedule_id):
         'average_rating': average_rating,
         'can_review': can_review,
     }
-    return render(request, 'reviews/review_detail_page.html', context)
+    return render(request, 'review_detail.html', context)
 
+# def add_review(request, schedule_id):
+#     if request.method == 'POST':
+#         if not request.user.is_authenticated:
+#             return JsonResponse({'status': 'error', 'message': 'You must be logged in.'})
+
+#         schedule = get_object_or_404(Schedule, pk=schedule_id)
+#         form = ReviewForm(request.POST)
+
+#         if form.is_valid():
+#             review = form.save(commit=False)
+#             review.schedule = schedule
+#             review.reviewer = request.user
+#             review.save()
+
+#             return JsonResponse({
+#                 'status': 'success',
+#                 'review': {
+#                     'username': review.reviewer.username,
+#                     'rating': review.rating,
+#                     'comment': review.comment,
+#                     'created_at': localtime(review.created_at).strftime('%b %d, %Y'),
+#                 }
+#             })
+
+#     return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
+
+# @login_required # Pastikan user harus login
 def add_review(request, schedule_id):
+    # Ambil schedule yang mau direview
+    schedule = get_object_or_404(Schedule, id=schedule_id)
+    
+    can_review = True
+    # can_review = Ticket.objects.filter(
+    #         buyer=request.user, 
+    #         schedule=schedule
+    #     ).exists()
+    if not can_review:
+        return redirect('review_detail', schedule_id=schedule_id) 
+
     if request.method == 'POST':
-        if not request.user.is_authenticated:
-            return JsonResponse({'status': 'error', 'message': 'You must be logged in.'})
-
-        schedule = get_object_or_404(Schedule, pk=schedule_id)
+        # Proses data yang dikirim dari form
         form = ReviewForm(request.POST)
-
         if form.is_valid():
+            # Kalau data valid, simpan ke database
             review = form.save(commit=False)
-            review.schedule = schedule
-            review.reviewer = request.user
+            review.schedule = schedule      # Kaitkan dengan schedule ini
+            review.reviewer = request.user  # Kaitkan dengan user yang login
             review.save()
-
-            return JsonResponse({
-                'status': 'success',
-                'review': {
-                    'username': review.reviewer.username,
-                    'rating': review.rating,
-                    'comment': review.comment,
-                    'created_at': localtime(review.created_at).strftime('%b %d, %Y'),
-                }
-            })
-
-    return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
-
-def review_page_view(request): # Bikin view baru buat ngetes
-    form = ReviewForm()
-    
-    # Bikin data dummy (kalo error)
-    form_errors = False
-    
-    # Kalo beneran mau ngetes error-nya, uncomment ini
-    # if request.method == 'POST':
-    #     form = ReviewForm(request.POST)
-    #     if not form.is_valid():
-    #         form_errors = True
-            
+            # Redirect kembali ke halaman detail setelah berhasil
+            return redirect('review_detail', schedule_id=schedule.id)
+        # Jika form TIDAK valid, biarkan saja. 
+        # Kode di bawah akan merender ulang halaman form DENGAN pesan error
+    else:
+        # Request GET: Tampilkan form kosong
+        form = ReviewForm()
+        
+    # Siapkan data untuk dikirim ke template
     context = {
-        'review_form': form,
-        'form_errors': form_errors
+        'schedule': schedule, # Perlu dikirim biar tombol 'Cancel' bisa balik
+        'review_form': form   # Form (kosong atau berisi error)
     }
-    # Render template HTML yang kamu buat
-    return render(request, 'review_landing_page.html', context)
+    # Render template halaman form
+    return render(request, 'review_form.html', context)
 
 @login_required
-def like_review_view(request, review_id):
+def submit_review(request, schedule_id):
+    schedule = get_object_or_404(Schedule, id=schedule_id)
+    
     if request.method == 'POST':
-        review = get_object_or_404(Review, id=review_id)
-        user = request.user
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
         
-        if user in review.likes.all():
-            review.likes.remove(user)
-        else:
-            review.likes.add(user)
-        new_like_count = review.likes.count()
-        return JsonResponse({'new_count': new_like_count})
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+        # Create review
+        review = Review.objects.create(
+            schedule=schedule,
+            reviewer=request.user,
+            rating=int(rating),
+            comment=comment
+        )
+        
+        # Redirect to review detail page
+        return redirect('review_detail', schedule_id=schedule.id)
+    
+    return redirect('add_review', schedule_id=schedule.id)

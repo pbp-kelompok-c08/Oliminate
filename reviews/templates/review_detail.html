@@ -1,27 +1,59 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Reviews for {{ schedule.team1 }} vs {{ schedule.team2 }}{% endblock %} 
 {% block content %}
 <div class="max-w-5xl mx-auto py-10 px-6">
 
-  {% if user.is_authenticated %}
-  <div class="flex justify-end mb-6">
-    <button 
-      {% if can_review %}
-        onclick="document.getElementById('reviewModal').classList.remove('hidden')"
-      {% else %}
-        onclick="showToastWarning()" 
-      {% endif %}
-      class="btn btn-primary">
-      + Add Review
-    </button>
-  </div>
-  {% endif %}
+  <div class="mb-6 border-b border-gray-200 pb-4">
+    <h1 class="text-3xl font-bold text-gray-900">
+      {{ schedule.category }}: {{ schedule.team1 }} vs {{ schedule.team2 }}
+    </h1>
+    <p class="text-gray-600">{{ schedule.location }} • {{ schedule.date|date:"d M Y" }} • {{ schedule.time|time:"H:i" }}</p> 
+    </div>
 
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-10">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-around gap-6">
+
+      <div class="flex flex-col items-center">
+        <p class="text-sm text-gray-600 mb-1">Total Reviews</p>
+        <h2 class="text-4xl font-bold text-gray-900">
+          {{ total_reviews }}
+        </h2>
+      </div>
+
+      <div class="flex flex-col items-center">
+        <p class="text-sm text-gray-600 mb-1">Average Rating</p>
+        <div class="flex items-center gap-2">
+          <h2 class="text-4xl font-bold text-gray-900">
+            {{ average_rating|floatformat:1 }}
+          </h2>
+          <div class="flex items-center">
+            {% for i in "12345" %}
+              {% widthratio i 1 average_rating as star_level %} {% if star_level >= 1 %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/></svg>
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/></svg>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  {% if can_review %} 
+  <div class="flex justify-end mb-6">
+    <a href="{% url 'add_review' schedule.id %}" class="btn btn-primary">
+      + Add Review
+    </a>
+  </div>
+  {% endif %} 
+
+  <h2 class="text-2xl font-semibold text-gray-800 mb-4">User Reviews</h2>
   <div class="space-y-5">
     {% for review in reviews %}
-    <div class="border border-gray-200 rounded-xl p-5 bg-white shadow-sm">
-            <div class="flex items-center gap-3 mb-3">
+    <div class="bg-white rounded-xl shadow-lg p-5"> <div class="flex items-center gap-3 mb-3">
         {% if review.reviewer.profile.avatar %}
           <img src="{{ review.reviewer.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover" alt="{{ review.reviewer.username }}">
         {% else %}
@@ -36,10 +68,10 @@
           <div class="flex items-center gap-2 mt-1">
             <div class="flex">
               {% for i in "12345" %}
-                {% if forloop.counter <= review.rating %}
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c...z"/></svg>
+                {% if i|add:"0" <= review.rating %}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/></svg>
                 {% else %}
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c...z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/></svg>
                 {% endif %}
               {% endfor %}
             </div>
@@ -47,7 +79,9 @@
           </div>
         </div>
       </div>
+      
       <p class="text-gray-700 leading-relaxed">{{ review.comment }}</p>
+      
       <div class="flex justify-between items-center mt-4">
         <div class="flex gap-3">
           {% if user == review.reviewer %}
@@ -55,69 +89,18 @@
             <a href="#" class="text-sm font-medium text-red-500 hover:text-red-700">Delete</a>
           {% endif %}
         </div>
+        </div>
+    </div> {% empty %}
+      <div style="text-align: center; padding: 4rem 2rem;">
+          <h2 class="h4" style="color: var(--neutral-900);">
+              No reviews yet.
+          </h2>
+          <p class="h5" style="color: var(--neutral-500); margin: 0; font-weight: var(--font-regular);">
+              Be the first to review!
+          </p>
       </div>
-    </div>
-    {% empty %}
-    <p class="text-gray-600">No reviews yet. Be the first to review!</p>
     {% endfor %}
-  </div>
-</div>
+  </div> </div> {% endblock %}
 
-<div 
-  id="reviewModal" 
-  class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 
-         {% if not form_errors %}hidden{% endif %}"> <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-    <h2 class="text-xl font-bold mb-4 text-gray-800">Add Your Review</h2>
-    
-    <form method="POST"> {% csrf_token %}
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Rating (1-5)</label>
-        {{ review_form.rating }}
-        {% if review_form.rating.errors %}
-          <p class="text-xs text-red-600 mt-1">{{ review_form.rating.errors|striptags }}</p>
-        {% endif %}
-      </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Comment</label>
-        {{ review_form.comment }}
-        {% if review_form.comment.errors %}
-          <p class="text-xs text-red-600 mt-1">{{ review_form.comment.errors|striptags }}</p>
-        {% endif %}
-      </div>
-      <div class="flex justify-end gap-2 mt-6">
-        <button type="button" class="btn btn-outline" id="cancel-modal-btn"> Cancel
-        </button>
-        <button type="submit" class="btn btn-primary"> Save
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div id="toast-warning" class="hidden">
-  You can't add review.
-</div>
-{% endblock %}
 {% block scripts %}
-<script>
-// --- (1) Fungsi Toast ---
-function showToastWarning() {
-    const toast = document.getElementById('toast-warning');
-    if (!toast) return;
-    toast.classList.remove('hidden');
-    setTimeout(() => toast.classList.add('hidden'), 3000);
-}
-
-// --- (2) Fungsi buat nutup modal ---
-document.addEventListener("DOMContentLoaded", function() {
-    const modal = document.getElementById('reviewModal');
-    const cancelBtn = document.getElementById('cancel-modal-btn');
-
-    if (modal && cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
-    }
-});
-</script>
 {% endblock scripts %}
