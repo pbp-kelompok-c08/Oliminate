@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Oliminate{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+    
+    {% block styles %}{% endblock styles %}
   </head>
 
   <body
@@ -19,7 +21,6 @@
       margin: 0;
     "
   >
-    <!-- NAVBAR -->
     <nav
       style="
         background-color: var(--pacil-blue-darker-2);
@@ -58,18 +59,23 @@
         </div>
 
         <div style="display: flex; gap: 12px">
-          <a href="/login/" class="btn btn-outline">Login</a>
-          <a href="/register/" class="btn btn-primary">Register</a>
+          {% if request.session.user_id %}
+            <a href="{% url 'users:main_profile' %}" class="btn btn-outline">Profile</a>
+            <a href="{% url 'users:logout' %}" class="btn btn-primary">Logout</a>
+          {% else %}
+            <a href="{% url 'users:login' %}" class="btn btn-outline">Login</a>
+            <a href="{% url 'users:register_user' %}" class="btn btn-primary">Register</a>
+          {% endif %}
         </div>
       </div>
     </nav>
 
-    <!-- CONTENT -->
     <main style="flex: 1; padding: 40px 0">
-      {% block content %}{% endblock %}
+      <div class="container">
+        {% block content %}{% endblock %}
+      </div>
     </main>
 
-    <!-- FOOTER -->
     <footer
       style="
         background-color: var(--pacil-blue-darker-2);

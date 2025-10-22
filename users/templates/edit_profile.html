@@ -1,10 +1,9 @@
+{% extends "base.html" %}
 {% load static %}
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Edit Profile — Oliminate</title>
+
+{% block title %}Edit Profile — Oliminate{% endblock %}
+
+{% block styles %}
 <style>
   :root{
     --blue-base: #3293ec;
@@ -12,21 +11,21 @@
     --muted: #6b7280;
     --radius: 12px;
   }
-  *{box-sizing:border-box}
-  body{min-height:100vh; margin:0; font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(to bottom, #AED4F7 0%, #ffffff 85%); display:flex; align-items:center; justify-content:center; padding:40px; color:#113352}
-
+  
+  /* HAPUS 'body' style. Cukup atur card-nya saja */
   .profile-card{
     display: flex;
     width: 100%;
-    /* PERUBAHAN 1: Card dibuat lebih lebar */
-    max-width: 900px;
+    max-width: 900px; /* Lebar card Anda */
     background:var(--card-bg); 
     border-radius:var(--radius); 
     padding: 32px; 
     box-shadow: 0 10px 30px rgba(16,24,40,0.12);
+    /* TAMBAHKAN INI agar card ke tengah di dalam 'main' */
+    margin: 40px auto;
   }
 
-  /* Kolom Kiri: Foto */
+  /* ... sisa style CSS Anda (profile-sidebar, profile-pic, dll.) ... */
   .profile-sidebar{
     flex: 0 0 200px;
     text-align: center;
@@ -43,15 +42,8 @@
     background: #eee;
   }
   
-  /* Kolom Kanan: Form */
-  .profile-main{
-    flex: 1;
-    padding-left: 32px;
-  }
-  .profile-main h1{
-    margin:0 0 24px 0; 
-    font-size:24px;
-  }
+  .profile-main{ flex: 1; padding-left: 32px; }
+  .profile-main h1{ margin:0 0 24px 0; font-size:24px; }
   
   .form-row{margin-bottom:14px}
   label{display:block; font-weight:700; margin-bottom:8px; font-size: 14px;}
@@ -59,132 +51,118 @@
   input[type="file"] { display: none; }
   
   input[type="text"], input[type="password"], input[type="email"], input[type="tel"], select{
-    width:100%; 
-    padding:12px 14px; 
-    border-radius:10px; 
-    border:1px solid #e6edf6; 
-    font-size:15px; 
-    outline:none;
-    font-family: inherit;
-    color: inherit;
+    width:80%; padding:12px 14px; border-radius:10px; border:1px solid #e6edf6; 
+    font-size:15px; outline:none; font-family: inherit; color: inherit;
   }
+
+  select {
+    width: 85%;
+  }
+  
   input:focus, select:focus{box-shadow:0 8px 20px rgba(50,147,236,0.12); border-color:var(--blue-base)}
   
-  .button-row{
-    display: flex;
-    gap: 12px;
-    margin-top: 24px;
-  }
+  .button-row{ display: flex; gap: 12px; margin-top: 24px; }
   .btn, .btn-secondary{
-    display:inline-block; 
-    flex: 1;
-    text-align: center;
-    text-decoration: none;
-    padding:12px 14px; 
-    border-radius:10px; 
-    border:0; 
-    font-weight:700; 
-    font-size:15px; 
-    cursor:pointer; 
+    display:inline-block; flex: 1; text-align: center; text-decoration: none;
+    padding:12px 14px; border-radius:10px; border:0; font-weight:700; 
+    font-size:15px; cursor:pointer; 
   }
   .btn{
-    background:var(--blue-base); 
-    color:white; 
+    background:var(--blue-base); color:white; 
     box-shadow:0 8px 20px rgba(50,147,236,0.18);
   }
   .btn-secondary{
-    background:transparent; 
-    color:var(--blue-base); 
+    background:transparent; color:var(--blue-base); 
     border:2px solid rgba(50,147,236,0.12);
   }
 </style>
-</head>
-<body>
-  
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    
-    <main class="profile-card">
-      <aside class="profile-sidebar">
-        {% if user_obj.profile_picture %}
-          <img src="{{ user_obj.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
-        {% else %}
-          <div class="profile-pic" style="display: flex; align-items: center; justify-content: center; font-size: 50px; color: #ccc;">&#9786;</div>
-        {% endif %}
-        
-        <label for="{{ form.profile_picture.id_for_label }}" class="btn-secondary">
-          Edit Picture
-        </label>
-        {{ form.profile_picture }}
-        <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Max 2MB. JPG/PNG</p>
-      </aside>
-      
-      <section class="profile-main">
-        <h1>Edit Profile</h1>
-        
-        {{ form.non_field_errors }}
-        
-        <div class="form-row">
-          <label for="{{ form.username.id_for_label }}">Username</label>
-          {{ form.username }}
-          {{ form.username.errors }}
-        </div>
-        
-        <div class="form-row">
-          <label for="{{ form.first_name.id_for_label }}">First Name</label>
-          {{ form.first_name }}
-          {{ form.first_name.errors }}
-        </div>
-        
-        <div class="form-row">
-          <label for="{{ form.last_name.id_for_label }}">Last Name</label>
-          {{ form.last_name }}
-          {{ form.last_name.errors }}
-        </div>
-        
-        <div class="form-row">
-          <label for="{{ form.email.id_for_label }}">Email</label>
-          {{ form.email }}
-          {{ form.email.errors }}
-        </div>
-        
-        <div class="form-row">
-          <label for="id_fakultas">Faculty</label>
-          <select id="id_fakultas" name="fakultas">
-            <option value="">Choose Origin Faculty...</option>
-            <option value="Kedokteran" {% if user_obj.fakultas == "Kedokteran" %}selected{% endif %}>Kedokteran</option>
-            <option value="Kedokteran Gigi" {% if user_obj.fakultas == "Kedokteran Gigi" %}selected{% endif %}>Kedokteran Gigi</option>
-            <option value="Matematika dan Ilmu Pengetahuan Alam" {% if user_obj.fakultas == "Matematika dan Ilmu Pengetahuan Alam" %}selected{% endif %}>Matematika dan Ilmu Pengetahuan Alam</option>
-            <option value="Teknik" {% if user_obj.fakultas == "Teknik" %}selected{% endif %}>Teknik</option>
-            <option value="Hukum" {% if user_obj.fakultas == "Hukum" %}selected{% endif %}>Hukum</option>
-            <option value="Ekonomi dan Bisnis" {% if user_obj.fakultas == "Ekonomi dan Bisnis" %}selected{% endif %}>Ekonomi dan Bisnis</option>
-            <option value="Ilmu Pengetahuan Budaya" {% if user_obj.fakultas == "Ilmu Pengetahuan Budaya" %}selected{% endif %}>Ilmu Pengetahuan Budaya</option>
-            <option value="Psikologi" {% if user_obj.fakultas == "Psikologi" %}selected{% endif %}>Psikologi</option>
-            <option value="Ilmu Sosial dan Ilmu Politik" {% if user_obj.fakultas == "Ilmu Sosial dan Ilmu Politik" %}selected{% endif %}>Ilmu Sosial dan Ilmu Politik</option>
-            <option value="Kesehatan Masyarakat" {% if user_obj.fakultas == "Kesehatan Masyarakat" %}selected{% endif %}>Kesehatan Masyarakat</option>
-            <option value="Ilmu Komputer" {% if user_obj.fakultas == "Ilmu Komputer" %}selected{% endif %}>Ilmu Komputer</option>
-            <option value="Ilmu Keperawatan" {% if user_obj.fakultas == "Ilmu Keperawatan" %}selected{% endif %}>Ilmu Keperawatan</option>
-            <option value="Pendidikan Vokasi" {% if user_obj.fakultas == "Pendidikan Vokasi" %}selected{% endif %}>Pendidikan Vokasi</option>
-            <option value="Farmasi" {% if user_obj.fakultas == "Farmasi" %}selected{% endif %}>Farmasi</option>
-            <option value="Ilmu Administrasi" {% if user_obj.fakultas == "Ilmu Administrasi" %}selected{% endif %}>Ilmu Administrasi</option>
-            <option value="Ilmu Lingkungan" {% if user_obj.fakultas == "Ilmu Lingkungan" %}selected{% endif %}>Ilmu Lingkungan</option>
-          </select>
-          {{ form.fakultas.errors }} </div>
-        
-        <div class="form-row">
-          <label for="{{ form.password.id_for_label }}">New Password</label>
-          {{ form.password }}
-          {{ form.password.errors }}
-        </div>
+{% endblock styles %}
 
-        <div class="button-row">
-          <a href="{% url 'users:main_profile' %}" class="btn-secondary">Cancel</a>
-          <button type="submit" class="btn">Save</button>
-        </div>
-        
-      </section>
-    </main>
-  </form>
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
   
-</body>
-</html>
+  <main class="profile-card">
+    <aside class="profile-sidebar">
+      {% if user_obj.profile_picture %}
+        <img src="{{ user_obj.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
+      {% else %}
+        <div class="profile-pic" style="display: flex; align-items: center; justify-content: center; font-size: 50px; color: #ccc;">&#9786;</div>
+      {% endif %}
+
+      <label for="{{ form.profile_picture.id_for_label }}" class="btn-secondary">
+        Edit Picture
+      </label>
+
+      <input type="file" name="{{ form.profile_picture.name }}" id="{{ form.profile_picture.id_for_label }}" accept="image/png, image/jpeg">
+      <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Max 2MB. JPG/PNG</p>
+    </aside>
+    
+    <section class="profile-main">
+      <h1>Edit Profile</h1>
+      
+      {{ form.non_field_errors }}
+      
+      <div class="form-row">
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+      
+      <div class="form-row">
+        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+        {{ form.first_name }}
+        {{ form.first_name.errors }}
+      </div>
+      
+      <div class="form-row">
+        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+        {{ form.last_name }}
+        {{ form.last_name.errors }}
+      </div>
+      
+      <div class="form-row">
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+        {{ form.email.errors }}
+      </div>
+      
+      <div class="form-row">
+        <label for="id_fakultas">Faculty</label>
+        <select id="id_fakultas" name="fakultas">
+          <option value="">Choose Origin Faculty...</option>
+          <option value="Kedokteran" {% if user_obj.fakultas == "Kedokteran" %}selected{% endif %}>Kedokteran</option>
+          <option value="Kedokteran Gigi" {% if user_obj.fakultas == "Kedokteran Gigi" %}selected{% endif %}>Kedokteran Gigi</option>
+          <option value="Matematika dan Ilmu Pengetahuan Alam" {% if user_obj.fakultas == "Matematika dan Ilmu Pengetahuan Alam" %}selected{% endif %}>Matematika dan Ilmu Pengetahuan Alam</option>
+          <option value="Teknik" {% if user_obj.fakultas == "Teknik" %}selected{% endif %}>Teknik</option>
+          <option value="Hukum" {% if user_obj.fakultas == "Hukum" %}selected{% endif %}>Hukum</option>
+          <option value="Ekonomi dan Bisnis" {% if user_obj.fakultas == "Ekonomi dan Bisnis" %}selected{% endif %}>Ekonomi dan Bisnis</option>
+          <option value="Ilmu Pengetahuan Budaya" {% if user_obj.fakultas == "Ilmu Pengetahuan Budaya" %}selected{% endif %}>Ilmu Pengetahuan Budaya</option>
+          <option value="Psikologi" {% if user_obj.fakultas == "Psikologi" %}selected{% endif %}>Psikologi</option>
+          <option value="Ilmu Sosial dan Ilmu Politik" {% if user_obj.fakultas == "Ilmu Sosial dan Ilmu Politik" %}selected{% endif %}>Ilmu Sosial dan Ilmu Politik</option>
+          <option value="Kesehatan Masyarakat" {% if user_obj.fakultas == "Kesehatan Masyarakat" %}selected{% endif %}>Kesehatan Masyarakat</option>
+          <option value="Ilmu Komputer" {% if user_obj.fakultas == "Ilmu Komputer" %}selected{% endif %}>Ilmu Komputer</option>
+          <option value="Ilmu Keperawatan" {% if user_obj.fakultas == "Ilmu Keperawatan" %}selected{% endif %}>Ilmu Keperawatan</option>
+          <option value="Pendidikan Vokasi" {% if user_obj.fakultas == "Pendidikan Vokasi" %}selected{% endif %}>Pendidikan Vokasi</option>
+          <option value="Farmasi" {% if user_obj.fakultas == "Farmasi" %}selected{% endif %}>Farmasi</option>
+          <option value="Ilmu Administrasi" {% if user_obj.fakultas == "Ilmu Administrasi" %}selected{% endif %}>Ilmu Administrasi</option>
+          <option value="Ilmu Lingkungan" {% if user_obj.fakultas == "Ilmu Lingkungan" %}selected{% endif %}>Ilmu Lingkungan</option>
+        </select>
+        {{ form.fakultas.errors }}
+      </div>
+      
+      <div class="form-row">
+        <label for="{{ form.password.id_for_label }}">New Password</label>
+        {{ form.password }}
+        {{ form.password.errors }}
+      </div>
+
+      <div class="button-row">
+        <a href="{% url 'users:main_profile' %}" class="btn-secondary">Cancel</a>
+        <button type="submit" class="btn">Save</button>
+      </div>
+      
+    </section>
+  </main>
+</form>
+{% endblock content %}

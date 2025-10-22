@@ -1,10 +1,9 @@
+{% extends "base.html" %}
 {% load static %}
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>User Profile — Oliminate</title>
+
+{% block title %}User Profile — Oliminate{% endblock %}
+
+{% block styles %}
 <style>
   :root{
     --blue-base: #3293ec;
@@ -12,23 +11,20 @@
     --muted: #6b7280;
     --radius: 12px;
   }
-  *{box-sizing:border-box}
-  body{min-height:100vh; margin:0; font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(to bottom, #AED4F7 0%, #ffffff 85%); display:flex; align-items:center; justify-content:center; padding:40px; color:#113352}
-
-  /* Ini adalah card putih utama */
+  
   .profile-card{
-    display: flex; /* Membuat layout 2 kolom */
+    display: flex;
     width: 100%;
-    max-width: 800px; /* Lebih lebar dari card login */
+    max-width: 800px;
     background:var(--card-bg); 
     border-radius:var(--radius); 
     padding: 32px; 
     box-shadow: 0 10px 30px rgba(16,24,40,0.12);
+    margin: 40px auto; 
   }
 
-  /* Kolom Kiri: Foto & Nama */
   .profile-sidebar{
-    flex: 0 0 200px; /* Lebar 200px, jangan membesar/mengecil */
+    flex: 0 0 200px;
     text-align: center;
     padding-right: 32px;
     border-right: 1px solid #e6edf6;
@@ -40,119 +36,130 @@
     object-fit: cover;
     border: 3px solid #f0f0f0;
     margin-bottom: 16px;
-    background: #eee; /* Warna jika tidak ada foto */
+    background: #eee;
   }
-  .profile-sidebar h2{
-    margin: 8px 0;
-    font-size: 20px;
+  .profile-sidebar h2{ 
+    margin: 8px 0; 
+    font-size: 20px; 
     word-wrap: break-word;
+    /* PERBAIKAN 2a: Ukuran font judul nama */
+    font-size: 1.25rem; /* 20px */
   }
-  .profile-sidebar p{
-    margin: 0;
-    color: var(--muted);
-    font-size: 14px;
+  .profile-sidebar p{ 
+    margin: 0; 
+    color: var(--muted); 
+    font-size: 14px; 
+    /* PERBAIKAN 2b: Ukuran font role */
+    font-size: 0.875rem; /* 14px */
   }
   
-  /* Kolom Kanan: Data */
-  .profile-main{
-    flex: 1; /* Ambil sisa ruang */
-    padding-left: 32px;
-  }
-  .profile-main h1{
+  .profile-main{ flex: 1; padding-left: 32px; }
+  .profile-main h1{ 
     margin:0 0 24px 0; 
-    font-size:24px;
+    font-size:24px; 
+    /* PERBAIKAN 2c: Ukuran font judul utama */
+    font-size: 1.5rem; /* 24px */
   }
   
-  .data-row{
-    margin-bottom: 16px;
-  }
-  .data-row label{
+  .data-row{ margin-bottom: 16px; }
+  .data-row label{ 
     display:block; 
     font-weight:700; 
-    margin-bottom:6px;
-    font-size: 14px;
-    color: #555;
+    margin-bottom:6px; 
+    font-size: 14px; 
+    color: #555; 
+    /* PERBAIKAN 2d: Ukuran font label */
+    font-size: 0.875rem; /* 14px */
   }
-  /* Ini adalah kotak untuk menampilkan data */
   .data-display{
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 10px;
+    width: 90%; 
+    /* PERBAIKAN 2e: Kurangi padding vertikal */
+    padding: 12px 14px; /* Dulu 12px 14px */
+    border-radius: 10px; 
     border: 1px solid #e6edf6;
-    font-size: 15px;
-    background-color: #f9faff;
-    min-height: 43px; /* Samakan tinggi dengan input */
+    /* PERBAIKAN 2f: Ukuran font display data */
+    font-size: 0.9375rem; /* 15px */
+    background-color: #f9faff; 
+    /* PERBAIKAN 2g: Samakan min-height dengan padding baru */
+    min-height: 20px; /* Dulu 43px */
     word-wrap: break-word;
+    line-height: 1.5; /* Tambahkan ini agar teks tidak terlalu rapat */
   }
   
   .btn{
     display:inline-block; 
-    width:100%;
-    text-align: center;
+    width:30%; 
+    text-align: center; 
     text-decoration: none;
-    padding:12px 14px; 
+    /* PERBAIKAN 2h: Kurangi padding vertikal tombol */
+    padding:10px 14px; /* Dulu 12px 14px */
     border-radius:10px; 
     border:0; 
     font-weight:700; 
     background:var(--blue-base); 
     color:white; 
-    font-size:15px; 
+    /* PERBAIKAN 2i: Ukuran font tombol */
+    font-size: 0.9375rem; /* 15px */
     cursor:pointer; 
-    box-shadow:0 8px 20px rgba(50,147,236,0.18);
-    margin-top: 24px;
+    box-shadow:0 8px 20px rgba(50,147,236,0.18); 
+    /* PERBAIKAN 1: Menambah margin bawah setelah tombol Edit Profile */
+    margin-top: 24px; /* Ini sudah ada, tidak perlu br lagi */
+    margin-bottom: 12px; /* Ini yang akan menciptakan "break" */
   }
 </style>
-</head>
-<body>
-  
-  <main class="profile-card">
-    <aside class="profile-sidebar">
-      {% if user_obj.profile_picture %}
-        <img src="{{ user_obj.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
-      {% else %}
-        <div class="profile-pic" style="display: flex; align-items: center; justify-content: center; font-size: 50px; color: #ccc;">&#9786;</div>
-      {% endif %}
-      
-      <h2>{{ user_obj.first_name }} {{ user_obj.last_name }}</h2>
-      <p>{{ user_obj.get_role_display }}</p>
-    </aside>
+{% endblock styles %}
+
+
+{% block content %}
+<main class="profile-card">
+  <aside class="profile-sidebar">
+    {% if user_obj.profile_picture %}
+      <img src="{{ user_obj.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
+    {% else %}
+      <div class="profile-pic" style="display: flex; align-items: center; justify-content: center; font-size: 50px; color: #ccc;">&#9786;</div>
+    {% endif %}
     
-    <section class="profile-main">
-      <h1>User Profile</h1>
-      
-      <div class="data-row">
-        <label>Username</label>
-        <div class="data-display">{{ user_obj.username }}</div>
-      </div>
-      
-      <div class="data-row">
-        <label>First Name</label>
-        <div class="data-display">{{ user_obj.first_name }}</div>
-      </div>
-      
-      <div class="data-row">
-        <label>Last Name</label>
-        <div class="data-display">{{ user_obj.last_name }}</div>
-      </div>
-      
-      <div class="data-row">
-        <label>Email</label>
-        <div class="data-display">{{ user_obj.email }}</div>
-      </div>
-      
-      <div class="data-row">
-        <label>Faculty</label>
-        <div class="data-display">{{ user_obj.fakultas|default:"-" }}</div>
-      </div>
-      
-      <div class="data-row">
-        <label>Password</label>
-        <div class="data-display">********</div>
-      </div>
-      
-      <a href="{% url 'users:edit_profile' %}" class="btn">Edit Profile</a>
-    </section>
-  </main>
+    <h2>{{ user_obj.first_name }} {{ user_obj.last_name }}</h2>
+    <p>{{ user_obj.get_role_display }}</p>
+  </aside>
   
-</body>
-</html>
+  <section class="profile-main">
+    <h1>User Profile</h1>
+    
+    <div class="data-row">
+      <label>Username</label>
+      <div class="data-display">{{ user_obj.username }}</div>
+    </div>
+    
+    <div class="data-row">
+      <label>First Name</label>
+      <div class="data-display">{{ user_obj.first_name }}</div>
+    </div>
+    
+    <div class="data-row">
+      <label>Last Name</label>
+      <div class="data-display">{{ user_obj.last_name }}</div>
+    </div>
+    
+    <div class="data-row">
+      <label>Email</label>
+      <div class="data-display">{{ user_obj.email }}</div>
+    </div>
+    
+    <div class="data-row">
+      <label>Faculty</label>
+      <div class="data-display">{{ user_obj.fakultas|default:"-" }}</div>
+    </div>
+    
+    <div class="data-row">
+      <label>Password</label>
+      <div class="data-display">********</div>
+    </div>
+    
+    <a href="{% url 'users:edit_profile' %}" class="btn">Edit Profile</a>
+    
+    {# Ini adalah tempat 'break' yang Anda inginkan, dibuat dengan margin CSS di atas #}
+    {# Jika Anda ingin sesuatu yang lain di bawahnya, letakkan di sini #}
+  </section>
+</main>
+{% endblock content %}
