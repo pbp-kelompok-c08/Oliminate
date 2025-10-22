@@ -12,20 +12,17 @@
     --radius: 12px;
   }
   
-  /* HAPUS 'body' style. Cukup atur card-nya saja */
   .profile-card{
     display: flex;
     width: 100%;
-    max-width: 900px; /* Lebar card Anda */
+    max-width: 900px; 
     background:var(--card-bg); 
     border-radius:var(--radius); 
     padding: 32px; 
     box-shadow: 0 10px 30px rgba(16,24,40,0.12);
-    /* TAMBAHKAN INI agar card ke tengah di dalam 'main' */
     margin: 40px auto;
   }
 
-  /* ... sisa style CSS Anda (profile-sidebar, profile-pic, dll.) ... */
   .profile-sidebar{
     flex: 0 0 200px;
     text-align: center;
@@ -137,7 +134,7 @@
           <option value="Teknik" {% if user_obj.fakultas == "Teknik" %}selected{% endif %}>Teknik</option>
           <option value="Hukum" {% if user_obj.fakultas == "Hukum" %}selected{% endif %}>Hukum</option>
           <option value="Ekonomi dan Bisnis" {% if user_obj.fakultas == "Ekonomi dan Bisnis" %}selected{% endif %}>Ekonomi dan Bisnis</option>
-          <option value="Ilmu Pengetahuan Budaya" {% if user_obj.fakultas == "Ilmu Pengetahuan Budaya" %}selected{% endif %}>Ilmu Pengetahuan Budaya</option>
+          <option value="Ilmu Pengetahuan Budaya" {% if user_obj.fakultas == "Ilmu Pengetahuan Budaya" %}selected{% endif %}>Ilmu Budaya</option>
           <option value="Psikologi" {% if user_obj.fakultas == "Psikologi" %}selected{% endif %}>Psikologi</option>
           <option value="Ilmu Sosial dan Ilmu Politik" {% if user_obj.fakultas == "Ilmu Sosial dan Ilmu Politik" %}selected{% endif %}>Ilmu Sosial dan Ilmu Politik</option>
           <option value="Kesehatan Masyarakat" {% if user_obj.fakultas == "Kesehatan Masyarakat" %}selected{% endif %}>Kesehatan Masyarakat</option>

@@ -13,7 +13,6 @@
     --radius: 12px;
   }
   *{box-sizing:border-box}
-  /* KEMBALIKAN STYLE BODY INI */
   body{min-height:100vh; margin:0; font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(to bottom, #AED4F7 0%, #ffffff 85%); display:flex; align-items:center; justify-content:center; padding:40px; color:#113352}
 
   .container{width:100%; max-width:420px}
@@ -21,8 +20,44 @@
   h1{margin:0 0 18px 0; text-align:center; font-size:22px}
 
   label{display:block; font-weight:700; margin-bottom:8px}
-  input[type="text"], input[type="password"], input[type="email"], input[type="tel"]{width:100%; padding:12px 14px; border-radius:10px; border:1px solid #e6edf6; font-size:15px; outline:none}
-  input:focus{box-shadow:0 8px 20px rgba(50,147,236,0.12); border-color:var(--blue-base)}
+
+  /* ========================================================
+    PERBAIKAN CSS DIMULAI DI SINI
+    ========================================================
+  */
+  
+  /* Aturan 1: Style dasar untuk SEMUA input DAN select */
+  input[type="text"], input[type="password"], input[type="email"], input[type="tel"], select {
+    width:100%; 
+    padding:12px 14px; 
+    border-radius:10px; 
+    border:1px solid #e6edf6; 
+    font-size:15px; 
+    outline:none;
+    font-family: inherit; 
+    color: inherit;
+    box-sizing: border-box;
+    /* HAPUS 'appearance' dan 'background-image' dari sini */
+  }
+
+  /* Aturan 2: Style "panah" HANYA untuk <select> */
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 1em;
+    cursor: pointer;
+  }
+
+  /* ========================================================
+    PERBAIKAN CSS SELESAI
+    ========================================================
+  */
+
+  input:focus, select:focus {box-shadow:0 8px 20px rgba(50,147,236,0.12); border-color:var(--blue-base)}
 
   .form-row{margin-bottom:14px}
   .btn{display:block; width:100%; padding:12px 14px; border-radius:10px; border:0; font-weight:700; background:var(--blue-base); color:white; font-size:15px; cursor:pointer; box-shadow:0 8px 20px rgba(50,147,236,0.18);}
@@ -39,7 +74,7 @@
     <section class="card" aria-labelledby="registerTitle">
       <h1 id="registerTitle">Register</h1>
       
-      <form id="registerForm" method="post">
+      <form id="registerForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.non_field_errors }}
 
@@ -78,13 +113,19 @@
           {{ form.phone_number }}
           {{ form.phone_number.errors }}
         </div>
+        
+        <div class="form-row">
+          <label for="{{ form.role.id_for_label }}">Register as</label>
+          {{ form.role }}
+          {{ form.role.errors }}
+        </div>
 
         <div class="form-row">
           <button class="btn" type="submit">Submit</button>
         </div>
       </form>
 
-      <div class="foot">Already have account? <a id="toLogin" href="{% url 'users:login' %}">Login here</a></div>
+      <div class="foot">Already have account? <a href="{% url 'login' %}">Login here</a></div>
     </section>
   </main>
 </body>
