@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Atur Harga Event{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-8 px-4">
+
+  <!-- ================================== -->
+  <!-- ===== 1. FORM ATUR HARGA ===== -->
+  <!-- ================================== -->
+  <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+    
+    <form method="POST" class="p-6 md:p-8">
+      {% csrf_token %}
+      <h1 class="h3 mb-6">Atur Harga Event</h1>
+
+      <!-- Pesan Sukses (jika ada) -->
+      {% if messages %}
+        <ul class="mb-4 space-y-2">
+          {% for message in messages %}
+            <li class="p-4 rounded-lg bg-green-100 text-green-700 body">
+              {{ message }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <!-- Field: Schedule (Dropdown) -->
+      <div class="mb-5">
+        <label for="{{ form.schedule.id_for_label }}" class="block body mb-2" style="font-weight: var(--font-semibold);">
+          Pilih Event/Jadwal
+        </label>
+        {{ form.schedule }}
+        {% if form.schedule.errors %}
+          <p class="footnote" style="color: var(--pacil-red-base); margin-top: 4px;">
+            {{ form.schedule.errors|striptags }}
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- Field: Price -->
+      <div class="mb-5">
+        <label for="{{ form.price.id_for_label }}" class="block body mb-2" style="font-weight: var(--font-semibold);">
+          Harga (Rp)
+        </label>
+        {{ form.price }}
+        {% if form.price.errors %}
+          <p class="footnote" style="color: var(--pacil-red-base); margin-top: 4px;">
+            {{ form.price.errors|striptags }}
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- Tombol Aksi -->
+      <div class="border-t border-gray-100 pt-6 mt-6">
+        <button type="submit" class="btn btn-primary w-full">
+          Simpan Harga
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ================================== -->
+  <!-- ===== 2. DAFTAR HARGA AKTIF ===== -->
+  <!-- ================================== -->
+  <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="p-6 md:p-8">
+      <h2 class="h4 mb-4">Daftar Harga Saat Ini</h2>
+      {% if prices %}
+        <ul class="divide-y divide-gray-200">
+          {% for p in prices %}
+            <li class="py-3 flex justify-between items-center">
+              <div>
+                <p class="body" style="font-weight:var(--font-semibold);">{{ p.schedule }}</p>
+                <p class="footnote" style="color:var(--neutral-700);">{{ p.schedule.date }}</p>
+              </div>
+              <span class="body" style="color:var(--pacil-blue-base); font-weight:var(--font-semibold);">
+                Rp {{ p.price|floatformat:0 }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="body" style="color:var(--neutral-700);">Belum ada harga yang diatur.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

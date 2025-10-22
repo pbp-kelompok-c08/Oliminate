@@ -5,13 +5,36 @@
 {% block content %}
 <div class="container mx-auto mt-8 px-4">
 
+  <!-- Card Wrapper untuk Form -->
   <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
     
     <form method="POST" class="p-6 md:p-8">
       {% csrf_token %}
-
       <h1 class="h3 mb-6">Form Pembelian Tiket</h1>
 
+      <!-- ================================== -->
+      <!-- ===== TAMBAHKAN BLOK INI ===== -->
+      <!-- ================================== -->
+      <!-- Blok ini untuk menampilkan pesan error, misal "Harga belum diatur" -->
+      {% if messages %}
+        <ul class="mb-4 space-y-2">
+          {% for message in messages %}
+            <li class="p-4 rounded-lg 
+                       {% if message.tags == 'error' %}
+                         bg-red-100 text-red-700
+                       {% else %}
+                         bg-blue-100 text-blue-700
+                       {% endif %}
+                       body">
+              {{ message }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <!-- ================================== -->
+
+
+      <!-- Field: Schedule (Dropdown) -->
       <div class="mb-5">
         <label for="{{ form.schedule.id_for_label }}" class="block body mb-2" style="font-weight: var(--font-semibold);">
           Pilih Event/Jadwal
@@ -23,19 +46,12 @@
           </p>
         {% endif %}
       </div>
+      
+      <!-- ================================== -->
+      <!-- ===== FIELD HARGA DIHAPUS DARI SINI ===== -->
+      <!-- ================================== -->
 
-      <div class="mb-5">
-        <label for="{{ form.price.id_for_label }}" class="block body mb-2" style="font-weight: var(--font-semibold);">
-          Harga
-        </label>
-        {{ form.price }}
-        {% if form.price.errors %}
-          <p class="footnote" style="color: var(--pacil-red-base); margin-top: 4px;">
-            {{ form.price.errors|striptags }}
-          </p>
-        {% endif %}
-      </div>
-
+      <!-- Field: Payment Method (Radio Buttons) -->
       <div class="mb-6">
         <label class="block body mb-3" style="font-weight: var(--font-semibold);">
           Metode Pembayaran
@@ -43,7 +59,8 @@
         <div class="space-y-3">
           {% for radio in form.payment_method %}
           <label for="{{ radio.id_for_label }}" class="flex items-center p-4 rounded-lg border border-gray-200 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400 cursor-pointer transition-all">
-            {{ radio.tag }} <span class="ml-3 block body" style="color: var(--neutral-900);">
+            {{ radio.tag }} <!-- Ini adalah <input type="radio"> -->
+            <span class="ml-3 block body" style="color: var(--neutral-900);">
               {{ radio.choice_label }}
             </span>
           </label>
@@ -56,6 +73,7 @@
         {% endif %}
       </div>
 
+      <!-- Tombol Aksi di Footer -->
       <div class="border-t border-gray-100 pt-6 mt-6">
         <div class="flex flex-col md:flex-row gap-4">
           <button type="submit" class="btn btn-primary w-full md:w-auto">
@@ -70,4 +88,10 @@
     </form>
   </div>
 </div>
+
+<!-- ================================== -->
+<!-- ===== BLOK SCRIPT DIHAPUS DARI SINI ===== -->
+<!-- ================================== -->
+
 {% endblock %}
+

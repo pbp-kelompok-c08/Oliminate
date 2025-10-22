@@ -1,9 +1,30 @@
 from django.db import models
 from scheduling.models import Schedule
+# Ganti ini ke custom user model jika sudah siap, 
+# untuk sekarang kita pakai user bawaan
 from django.contrib.auth.models import User 
-#from users.models import User
 
-# Create your models here.
+# ==================================
+# === 1. TAMBAHKAN MODEL BARU INI ===
+# ==================================
+class EventPrice(models.Model):
+    """
+    Model ini menghubungkan Schedule (dari app lain) dengan harga.
+    Panitia akan mengisi ini.
+    """
+    schedule = models.OneToOneField(
+        Schedule, 
+        on_delete=models.CASCADE, 
+        related_name="price_info"
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Harga untuk {self.schedule}: Rp {self.price}"
+
+# ==================================
+# === 2. MODEL TICKET KAMU (TETAP SAMA) ===
+# ==================================
 class Ticket(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ('ewallet', 'E-Wallet'),
@@ -19,7 +40,11 @@ class Ticket(models.Model):
     id = models.AutoField(primary_key=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name='tickets')
     buyer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
+    
+    # Field 'price' ini sudah benar. JANGAN DIHAPUS.
+    # Ini untuk 'struk' pembelian.
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    
     purchase_date = models.DateTimeField(auto_now_add=True)
     qr_code = models.CharField(max_length=255, blank=True, null=True)
     is_used = models.BooleanField(default=False)
@@ -35,7 +60,8 @@ class Ticket(models.Model):
     payment_status = models.CharField(
         max_length=20,
         choices=PAYMENT_STATUS_CHOICES,
-        default='pending'
+        # Saya ganti 'pending' jadi 'unpaid' agar sesuai pilihan
+        default='unpaid' 
     )
 
     def __str__(self):
