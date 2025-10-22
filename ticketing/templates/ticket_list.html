@@ -36,25 +36,20 @@
     <!-- Tombol 'Semua' -->
     <!-- 'not active_filter' berarti 'active_filter' adalah None (default) -->
     <a href="{% url 'ticket_list' %}" 
-       class="btn {% if not active_filter %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3"
-       style="text-decoration: none;">
-       Semua
+        class="btn filter-btn {% if not active_filter %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3">
+        Semua
     </a>
-    
-    <!-- Tombol 'Sudah Dibayar' -->
-    <!-- '?' di href akan menambahkan query parameter ke URL saat ini -->
+
     <a href="?status=paid" 
-       class="btn {% if active_filter == 'paid' %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3"
-       style="text-decoration: none;">
-       Sudah Dibayar
+        class="btn filter-btn {% if active_filter == 'paid' %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3">
+        Sudah Dibayar
     </a>
-    
-    <!-- Tombol 'Belum Dibayar' -->
+
     <a href="?status=unpaid" 
-       class="btn {% if active_filter == 'unpaid' %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3"
-       style="text-decoration: none;">
-       Belum Dibayar
+        class="btn filter-btn {% if active_filter == 'unpaid' %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3">
+        Belum Dibayar
     </a>
+
   </div>
 
   <!-- Cek jika ada tiket -->
@@ -86,7 +81,7 @@
         </thead>
 
         <!-- Table Body -->
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody id="ticket-table-body" class="bg-white divide-y divide-gray-200">
           {% for t in tickets %}
             <tr>
               <!-- Event & ID -->
@@ -162,4 +157,27 @@
   {% endif %}
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  
+  filterButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();  // hindari reload
+      const url = this.getAttribute('href');
+      const query = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+
+      fetch(`/ticketing/json/${query}`)
+        .then(response => response.json())
+        .then(data => {
+          document.querySelector('#ticket-table-body').innerHTML = data.html;
+        })
+        .catch(error => console.error('Error:', error));
+    });
+  });
+});
+
+</script>
+
 {% endblock %}

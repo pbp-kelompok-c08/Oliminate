@@ -10,4 +10,6 @@ urlpatterns = [
     path('set-price/', views.set_event_price, name='set_event_price'),
     path('get-price/<int:schedule_id>/', views.get_price, name='get_price'),
     path('generate_qr/<int:ticket_id>/', views.generate_qr, name='generate_qr'),
+    #path('tickets/json/', views.ticket_list_json, name='ticket_list_json'),
+    path('json/', views.ticket_list_json, name='ticket_list_json'),
 ]

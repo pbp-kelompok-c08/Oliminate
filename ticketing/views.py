@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 import qrcode, base64
 from io import BytesIO
+from django.template.loader import render_to_string
 
 def get_user_from_session(request):
     try:
@@ -164,3 +165,28 @@ def buy_ticket(request):
 
     return render(request, 'ticket_form.html', {'form': form})
 
+def ticket_list_json(request):
+    """
+    View AJAX GET untuk mengambil daftar tiket dalam bentuk HTML partial (tabel body).
+    """
+    filter_status = request.GET.get('status')
+
+    try:
+        user_id = request.session['user_id']
+        buyer = User.objects.get(id=user_id)
+        base_query = Ticket.objects.filter(buyer=buyer)
+
+        if filter_status == 'paid':
+            tickets_query = base_query.filter(payment_status='paid')
+        elif filter_status == 'unpaid':
+            tickets_query = base_query.filter(payment_status='unpaid')
+        else:
+            tickets_query = base_query
+
+        tickets = tickets_query.order_by('-purchase_date')
+    except (KeyError, User.DoesNotExist):
+        tickets = Ticket.objects.none()
+
+    # render partial HTML
+    html = render_to_string('partials/ticket_table_body.html', {'tickets': tickets})
+    return JsonResponse({'html': html})
