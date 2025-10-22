@@ -1,78 +1,165 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Profile — Oliminate{% endblock %}
+{% block title %}User Profile — Oliminate{% endblock %}
+
+{% block styles %}
+<style>
+  :root{
+    --blue-base: #3293ec;
+    --card-bg: #ffffff;
+    --muted: #6b7280;
+    --radius: 12px;
+  }
+  
+  .profile-card{
+    display: flex;
+    width: 100%;
+    max-width: 800px;
+    background:var(--card-bg); 
+    border-radius:var(--radius); 
+    padding: 32px; 
+    box-shadow: 0 10px 30px rgba(16,24,40,0.12);
+    margin: 40px auto; 
+  }
+
+  .profile-sidebar{
+    flex: 0 0 200px;
+    text-align: center;
+    padding-right: 32px;
+    border-right: 1px solid #e6edf6;
+  }
+  .profile-pic{
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f0f0f0;
+    margin-bottom: 16px;
+    background: #eee;
+  }
+  .profile-sidebar h2{ 
+    margin: 8px 0; 
+    font-size: 20px; 
+    word-wrap: break-word;
+    /* PERBAIKAN 2a: Ukuran font judul nama */
+    font-size: 1.25rem; /* 20px */
+  }
+  .profile-sidebar p{ 
+    margin: 0; 
+    color: var(--muted); 
+    font-size: 14px; 
+    /* PERBAIKAN 2b: Ukuran font role */
+    font-size: 0.875rem; /* 14px */
+  }
+  
+  .profile-main{ flex: 1; padding-left: 32px; }
+  .profile-main h1{ 
+    margin:0 0 24px 0; 
+    font-size:24px; 
+    /* PERBAIKAN 2c: Ukuran font judul utama */
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  .data-row{ margin-bottom: 16px; }
+  .data-row label{ 
+    display:block; 
+    font-weight:700; 
+    margin-bottom:6px; 
+    font-size: 14px; 
+    color: #555; 
+    /* PERBAIKAN 2d: Ukuran font label */
+    font-size: 0.875rem; /* 14px */
+  }
+  .data-display{
+    width: 90%; 
+    /* PERBAIKAN 2e: Kurangi padding vertikal */
+    padding: 12px 14px; /* Dulu 12px 14px */
+    border-radius: 10px; 
+    border: 1px solid #e6edf6;
+    /* PERBAIKAN 2f: Ukuran font display data */
+    font-size: 0.9375rem; /* 15px */
+    background-color: #f9faff; 
+    /* PERBAIKAN 2g: Samakan min-height dengan padding baru */
+    min-height: 20px; /* Dulu 43px */
+    word-wrap: break-word;
+    line-height: 1.5; /* Tambahkan ini agar teks tidak terlalu rapat */
+  }
+  
+  .btn{
+    display:inline-block; 
+    width:30%; 
+    text-align: center; 
+    text-decoration: none;
+    /* PERBAIKAN 2h: Kurangi padding vertikal tombol */
+    padding:10px 14px; /* Dulu 12px 14px */
+    border-radius:10px; 
+    border:0; 
+    font-weight:700; 
+    background:var(--blue-base); 
+    color:white; 
+    /* PERBAIKAN 2i: Ukuran font tombol */
+    font-size: 0.9375rem; /* 15px */
+    cursor:pointer; 
+    box-shadow:0 8px 20px rgba(50,147,236,0.18); 
+    /* PERBAIKAN 1: Menambah margin bawah setelah tombol Edit Profile */
+    margin-top: 24px; /* Ini sudah ada, tidak perlu br lagi */
+    margin-bottom: 12px; /* Ini yang akan menciptakan "break" */
+  }
+</style>
+{% endblock styles %}
+
 
 {% block content %}
-<div classclass="w-full max-w-4xl mx-auto py-10 px-4">
-  <div class="bg-white rounded-2xl shadow-lg p-7">
-    <div class="flex justify-between items-start gap-5">
-      <h3 class="text-2xl font-semibold text-gray-900">User Profile</h3>
+<main class="profile-card">
+  <aside class="profile-sidebar">
+    {% if user_obj.profile_picture %}
+      <img src="{{ user_obj.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
+    {% else %}
+      <div class="profile-pic" style="display: flex; align-items: center; justify-content: center; font-size: 50px; color: #ccc;">&#9786;</div>
+    {% endif %}
+    
+    <h2>{{ user_obj.first_name }} {{ user_obj.last_name }}</h2>
+    <p>{{ user_obj.get_role_display }}</p>
+  </aside>
+  
+  <section class="profile-main">
+    <h1>User Profile</h1>
+    
+    <div class="data-row">
+      <label>Username</label>
+      <div class="data-display">{{ user_obj.username }}</div>
     </div>
-
-    <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-7">
-      
-      <div class="md:col-span-1 flex flex-col items-center text-center gap-4">
-        {% if user_obj.profile_picture %}
-          <img src="{{ user_obj.profile_picture.url }}" alt="Foto profil" class="w-48 h-48 rounded-full object-cover border-4 border-white shadow-md">
-        {% else %}
-          <div class="w-48 h-48 rounded-full bg-gradient-to-br from-[#73B9F9] to-[#E5F1FB] flex items-center justify-center border-4 border-white shadow-md">
-            <span class="text-5xl font-bold text-white">{{ user_obj.first_name|first|upper }}{{ user_obj.last_name|first|upper }}</span>
-          </div>
-        {% endif %}
-        <div>
-          <h3 class="text-xl font-semibold text-gray-800">{{ user_obj.first_name }} {{ user_obj.last_name }}</h3>
-          <p class="text-base text-gray-500">{{ user_obj.get_role_display }} • {{ user_obj.fakultas|default:"-" }}</p>
-        </div>
-      </div>
-
-      <div class="md:col-span-2">
-        <div class="bg-gray-50/70 rounded-lg p-5 space-y-4">
-          
-          <div class="flex flex-col sm:flex-row sm:items-center">
-            <label class="w-32 font-semibold text-gray-700">Username</label>
-            <input type="text" value="{{ user_obj.username }}" readonly class="flex-1 p-3 bg-gray-200 border border-gray-300 rounded-lg text-gray-600">
-          </div>
-
-          <div class="flex flex-col sm:flex-row sm:items-center">
-            <label class="w-32 font-semibold text-gray-700">First Name</label>
-            <input type="text" value="{{ user_obj.first_name }}" readonly class="flex-1 p-3 bg-gray-200 border border-gray-300 rounded-lg text-gray-600">
-          </div>
-
-          <div class="flex flex-col sm:flex-row sm:items-center">
-            <label class="w-32 font-semibold text-gray-700">Last Name</label>
-            <input type="text" value="{{ user_obj.last_name }}" readonly class="flex-1 p-3 bg-gray-200 border border-gray-300 rounded-lg text-gray-600">
-          </div>
-
-          <div class="flex flex-col sm:flex-row sm:items-center">
-            <label class="w-32 font-semibold text-gray-700">Email</label>
-            <input type="email" value="{{ user_obj.email }}" readonly class="flex-1 p-3 bg-gray-200 border border-gray-300 rounded-lg text-gray-600">
-          </div>
-
-          <div class="flex flex-col sm:flex-row sm:items-center">
-            <label class="w-32 font-semibold text-gray-700">Role</label>
-            <input type="text" value="{{ user_obj.get_role_display }}" readonly class="flex-1 p-3 bg-gray-200 border border-gray-300 rounded-lg text-gray-600">
-          </div>
-
-          <div class="flex flex-col sm:flex-row sm:items-center">
-            <label class="w-32 font-semibold text-gray-700">Faculty</label>
-            <input type="text" value="{{ user_obj.fakultas|default:'-' }}" readonly class="flex-1 p-3 bg-gray-200 border border-gray-300 rounded-lg text-gray-600">
-          </div>
-
-          <div class="flex flex-col sm:flex-row sm:items-center">
-            <label class="w-32 font-semibold text-gray-700">Password</label>
-            <input type="password" value="••••••••" readonly class="flex-1 p-3 bg-gray-200 border border-gray-300 rounded-lg text-gray-600">
-          </div>
-
-          <div class="flex justify-end pt-4">
-            <a href="{% url 'users:edit_profile' %}" class="py-2.5 px-6 rounded-lg bg-[#3293ec] text-white text-base font-medium hover:bg-white hover:text-[#3293ec] border border-transparent hover:border-[#3293ec] transition-colors shadow-lg shadow-[#3293ec]/30">
-              Edit Profile
-            </a>
-          </div>
-
-        </div>
-      </div>
+    
+    <div class="data-row">
+      <label>First Name</label>
+      <div class="data-display">{{ user_obj.first_name }}</div>
     </div>
-  </div>
-</div>
-{% endblock %}
+    
+    <div class="data-row">
+      <label>Last Name</label>
+      <div class="data-display">{{ user_obj.last_name }}</div>
+    </div>
+    
+    <div class="data-row">
+      <label>Email</label>
+      <div class="data-display">{{ user_obj.email }}</div>
+    </div>
+    
+    <div class="data-row">
+      <label>Faculty</label>
+      <div class="data-display">{{ user_obj.fakultas|default:"-" }}</div>
+    </div>
+    
+    <div class="data-row">
+      <label>Password</label>
+      <div class="data-display">********</div>
+    </div>
+    
+    <a href="{% url 'users:edit_profile' %}" class="btn">Edit Profile</a>
+    
+    {# Ini adalah tempat 'break' yang Anda inginkan, dibuat dengan margin CSS di atas #}
+    {# Jika Anda ingin sesuatu yang lain di bawahnya, letakkan di sini #}
+  </section>
+</main>
+{% endblock content %}
