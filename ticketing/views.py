@@ -10,6 +10,7 @@ import qrcode, base64
 from io import BytesIO
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
 def get_user_from_session(request):
     try:
@@ -29,42 +30,39 @@ def get_price(request, schedule_id):
 
 def ticket_list(request):
     """
-    Menampilkan daftar tiket milik user yang login.
-    Sekarang dengan tambahan filter berdasarkan status.
-    """
-    
-    # 1. Ambil parameter 'status' dari URL. 
-    #    Default-nya None (artinya 'semua')
+    Menampilkan daftar tiket milik user yang login.
+    Sekarang dengan tambahan filter berdasarkan status.
+    """
+
     filter_status = request.GET.get('status', None)
 
-    try:
-        user_id = request.session['user_id']
-        buyer = User.objects.get(id=user_id)
-        
-        # 2. Siapkan query dasar (semua tiket milik user ini)
+    # GUNAKAN CARA INI:
+    if request.user.is_authenticated:
+        buyer = request.user # Langsung ambil user yang login
+
+        if request.user.role == 'organizer':
+            # Jika dia organizer, lempar ke halaman atur harga
+            return redirect('set_event_price')
+
         base_query = Ticket.objects.filter(buyer=buyer)
 
-        # 3. Terapkan filter JIKA ada
         if filter_status == 'paid':
             tickets_query = base_query.filter(payment_status='paid')
         elif filter_status == 'unpaid':
             tickets_query = base_query.filter(payment_status='unpaid')
         else:
-            # Jika filter_status=None atau 'semua', ambil semua
             tickets_query = base_query
-        
-        # 4. Terapkan ordering di akhir
+
         tickets = tickets_query.order_by('-purchase_date')
 
-    except (KeyError, User.DoesNotExist):
+    else: # Ini pengganti blok 'except'
         tickets = Ticket.objects.none() 
-        if not filter_status: # Hanya tampilkan pesan jika user belum filter
+        if not filter_status:
             messages.info(request, "Silakan login untuk melihat riwayat tiket Anda.")
 
-    # 5. Kirim 'tickets' DAN 'active_filter' ke template
     return render(request, 'ticket_list.html', {
         'tickets': tickets,
-        'active_filter': filter_status # Ini untuk highlight tombol
+        'active_filter': filter_status 
     })
 
 def generate_qr(request, ticket_id):
@@ -104,16 +102,13 @@ def scan_ticket(request, ticket_id):
         message = "Tiket berhasil divalidasi! Selamat menonton!"
     return render(request, 'ticket_scan.html', {'ticket': ticket, 'message': message})
 
+@login_required(login_url='users:login') # Otomatis cek login & redirect
 def set_event_price(request):
-    try:
-        user_id = request.session['user_id']
-        user = User.objects.get(id=user_id)
-        if user.role != 'organizer':
-            messages.error(request, "Anda tidak punya hak akses ke halaman ini.")
-            return redirect('users:main_profile')
-    except (KeyError, User.DoesNotExist):
-        messages.error(request, "Anda harus login sebagai panitia untuk mengakses halaman ini.")
-        return redirect('users:login')
+    
+    # Langsung cek role dari request.user
+    if request.user.role != 'organizer':
+        messages.error(request, "Anda tidak punya hak akses ke halaman ini.")
+        return redirect('users:main_profile') 
 
     if request.method == 'POST':
         form = EventPriceForm(request.POST)
@@ -135,22 +130,20 @@ def set_event_price(request):
         'prices': prices
     })
 
+@login_required(login_url='users:login') # Otomatis cek login
 def buy_ticket(request):
-    try:
-        user_id = request.session['user_id']
-        buyer = User.objects.get(id=user_id)
-        if buyer.role != 'user':
-            messages.error(request, "Hanya user yang dapat membeli tiket. Akun panitia tidak bisa.")
-            return redirect('users:main_profile')
-    except (KeyError, User.DoesNotExist):
-        messages.error(request, "Anda harus login untuk membeli tiket.")
-        return redirect('users:login')
+    
+    # Langsung ambil user dan cek role
+    buyer = request.user
+    if buyer.role != 'user':
+        messages.error(request, "Hanya user yang dapat membeli tiket. Akun panitia tidak bisa.")
+        return redirect('users:main_profile')
 
     if request.method == 'POST':
         form = TicketPurchaseForm(request.POST)
         if form.is_valid():
             ticket = form.save(commit=False)
-            ticket.buyer = buyer 
+            ticket.buyer = buyer # Langsung set buyer
             try:
                 event_price_obj = EventPrice.objects.get(schedule=ticket.schedule)
                 ticket.price = event_price_obj.price
@@ -172,9 +165,9 @@ def ticket_list_json(request):
     """
     filter_status = request.GET.get('status')
 
-    try:
-        user_id = request.session['user_id']
-        buyer = User.objects.get(id=user_id)
+    # Ganti pengecekan session dengan request.user
+    if request.user.is_authenticated and request.user.role == 'user':
+        buyer = request.user
         base_query = Ticket.objects.filter(buyer=buyer)
 
         if filter_status == 'paid':
@@ -185,7 +178,7 @@ def ticket_list_json(request):
             tickets_query = base_query
 
         tickets = tickets_query.order_by('-purchase_date')
-    except (KeyError, User.DoesNotExist):
+    else:
         tickets = Ticket.objects.none()
 
     # render partial HTML
