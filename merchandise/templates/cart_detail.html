@@ -22,7 +22,7 @@
             <article class="card" style="display:flex; gap:12px; padding:12px; align-items:flex-start;">
                 <div style="width:110px; flex:0 0 110px;">
                     {% if item.merchandise.image_url %}
-                    <img src="{{ item.merchandise.image_url }}" alt="{{ item.merchandise.name }}" loading="lazy" style="width:100%; height:80px; object-fit:cover; border-radius:8px;">
+                    <img src="{{ item.merchandise.image_url }}" alt="{{ item.merchandise.name }}" loading="lazy" style="width:100%; height:80px; object-fit:contain; border-radius:8px;">
                     {% else %}
                     <div style="width:100%; height:80px; background:var(--neutral-200); border-radius:8px; display:flex; align-items:center; justify-content:center;">
                         <span class="footnote">No Image</span>
@@ -38,15 +38,16 @@
                         Stock: {{ item.merchandise.stock}}
                     </p>
 
-                    <form method="post" action="{% url 'merchandise:cart_update_item' item.id %}" style="display:flex; gap:8px; align-items:center;">
+                    <form method="post" action="{% url 'merchandise:cart_update_item' item.id %}" style="display:inline-flex; gap:8px; align-items:center; margin:0;">
                         {% csrf_token %}
                         <label class="footnote" for="qty-{{ item.id }}" style="margin:0;">Jumlah</label>
                         <input id="qty-{{ item.id }}" type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.merchandise.stock|default:9999 }}" class="form-input" style="width:80px;">
                         <button type="submit" class="btn btn-outline">Edit</button>
-                        <form method="post" action="{% url 'merchandise:cart_remove_item' item.id %}" style="margin:0;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
+                    </form>
+
+                    <form method="post" action="{% url 'merchandise:cart_remove_item' item.id %}" style="display:inline-block; margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
 
                     {% if item.quantity > item.merchandise.stock %}
@@ -82,7 +83,7 @@
                 <button type="submit" class="btn btn-primary" style="width:100%;">Pembayaran</button>
             </form>
             {% endif %}
-            <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-outline" style="width:100%; margin-top:8px;">Lanjut belanja</a>
+            <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-primary" style="width:84%; margin-top:8px;">Lanjut belanja</a>
         </aside>
     </div>
     {% endif %}

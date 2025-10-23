@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{$ load static %}
 {% load humanize %}
 {% block title %}Pembayaran berhasil{% endblock %}
 
@@ -16,7 +17,7 @@
                 <p class="footnote" style="margin:4px 0 0 0;"><strong>Date:</strong> {{ cart.created_at }}</p>
             </div>
             <div style="text-align:right;">
-                <p class="h5" style="margin:0;">Rp {{ cart.total|intcomma }}</p>
+                <p class="h5" style="margin:0;">Rp {{ cart.total_price|intcomma }}</p>
             </div>
         </div>
 
@@ -38,7 +39,7 @@
                 {% if receipt_url %}
                 <a href="{{ receipt_url }}" class="btn btn-outline" target="_blank" rel="noopener">Download kwitansi</a>
                 {% endif %}
-                <a href="{% url 'merchandise:cart_detail' cart.id %}" class="btn btn-primary">Lihat pesanan</a>
+                <a href="{% url 'merchandise:cart_detail' %}" class="btn btn-primary">Lihat pesanan</a>
             </div>
         </div>
     </div>
