@@ -125,7 +125,7 @@ def cart_checkout(request):
 
     cart.status = 'checked_out'
     cart.save()
-    return redirect('merchandise:cart_detail')
+    return cart_pay(request, cart.id)
 
 @login_required
 @user_passes_test(is_regular_user)

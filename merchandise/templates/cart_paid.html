@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{$ load static %}
 {% load humanize %}
-{% block title %}Pembayaran berhasil{% endblock %}
+{% block title %}Pembayaran Berhasil{% endblock %}
 
 {% block content %}
 <div class="container" style="margin-top:40px; max-width:900px;">
     <div class="card" style="padding:24px; text-align:left;">
-        <h1 class="h3" style="margin-bottom:8px;">Thank you — payment received!</h1>
+        <h1 class="h3" style="margin-bottom:8px;">Terima Kasih - Pembayaran Berhasil!</h1>
         <p class="body" style="margin-bottom:12px;">
             Pesananmu telah diproses dengan baik.
         </p>
@@ -16,8 +17,13 @@
                 <p class="footnote" style="margin:4px 0 0 0;"><strong>Date:</strong> {{ cart.created_at }}</p>
             </div>
             <div style="text-align:right;">
-                <p class="h5" style="margin:0;">Rp {{ cart.total|intcomma }}</p>
+                <p class="h5" style="margin:0;">Rp {{ cart.total_price|intcomma }}</p>
             </div>
+        </div>
+
+        <div class="h6" style="margin-top:20px; margin-bottom:12px;">QR Code</div>
+        <div style="display: flex; margin-bottom: 20px;">
+            <img id='barcode' src="https://api.qrserver.com/v1/create-qr-code/?data={{ cart.id }}&amp;size=150x150" alt="QR Code for Order ID {{ cart.id }}" title="Order ID: {{ cart.id }}" width="150" height="150" style="border: 1px solid var(--neutral-300); padding: 8px; border-radius: 4px;"/>
         </div>
 
         <h2 class="h6" style="margin-top:8px; margin-bottom:8px;">Barang yang dipesan</h2>
@@ -32,14 +38,8 @@
             </ul>
         </div>
         
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
-            <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-outline">Lanjut belanja</a>
-            <div style="display:flex; gap:8px;">
-                {% if receipt_url %}
-                <a href="{{ receipt_url }}" class="btn btn-outline" target="_blank" rel="noopener">Download kwitansi</a>
-                {% endif %}
-                <a href="{% url 'merchandise:cart_detail' cart.id %}" class="btn btn-primary">Lihat pesanan</a>
-            </div>
+        <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:16px;">
+            <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-primary">Lanjut Belanja</a>
         </div>
     </div>
 </div>
