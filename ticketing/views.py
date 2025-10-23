@@ -9,6 +9,7 @@ from django.http import JsonResponse
 import qrcode, base64
 from io import BytesIO
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
 
 def get_user_from_session(request):
     try:
@@ -190,3 +191,15 @@ def ticket_list_json(request):
     # render partial HTML
     html = render_to_string('partials/ticket_table_body.html', {'tickets': tickets})
     return JsonResponse({'html': html})
+
+@require_POST
+def pay_ticket(request, ticket_id):
+    # optional: cek apakah request.headers.get('x-requested-with') == 'XMLHttpRequest'
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    # pastikan only owner dapat mengubah? (opsional)
+    try:
+        ticket.payment_status = 'paid'
+        ticket.save()
+        return JsonResponse({'success': True, 'ticket_id': ticket.id})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

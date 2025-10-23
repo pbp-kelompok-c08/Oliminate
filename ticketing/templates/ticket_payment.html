@@ -4,9 +4,7 @@
 
 {% block content %}
 <div class="container mx-auto mt-8 px-4">
-
   <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-    
     <div class="p-6 md:p-8 border-b border-gray-100">
       <h1 class="h3">Konfirmasi Pembayaran</h1>
       <p class="body" style="color: var(--neutral-700); margin-top: 8px;">
@@ -15,7 +13,6 @@
     </div>
 
     <div class="p-6 md:p-8">
-      
       <div class="p-4 rounded-lg bg-blue-50 border border-blue-200 mb-6">
         <p class="body" style="color: var(--pacil-blue-darker-1);">
           Klik tombol "Konfirmasi Bayar" di bawah untuk menandai tiket ini sebagai 'Sudah Dibayar'.
@@ -25,23 +22,25 @@
       <div class="space-y-4">
         <div class="flex justify-between">
           <span class="body" style="color: var(--neutral-700);">Event</span>
-          <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">{{ ticket.schedule }}</span>
+          <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
+            {{ ticket.schedule }}
+          </span>
         </div>
-        
+
         <div class="flex justify-between">
           <span class="body" style="color: var(--neutral-700);">Metode Pembayaran</span>
           <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
             {{ ticket.get_payment_method_display }}
           </span>
         </div>
-        
+
         <div class="flex justify-between">
           <span class="body" style="color: var(--neutral-700);">Status Saat Ini</span>
-          <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
+          <span id="payment-status" class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
             {{ ticket.get_payment_status_display }}
           </span>
         </div>
-        
+
         <hr class="pt-2">
 
         <div class="flex justify-between">
@@ -54,17 +53,99 @@
     </div>
 
     <div class="bg-gray-50 px-6 py-4 md:px-8 md:py-6">
-      <form method="POST" class="flex flex-col md:flex-row gap-4">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary w-full md:w-auto">
+      <div class="flex flex-col md:flex-row gap-4">
+        <button id="payButton" class="btn btn-primary w-full md:w-auto">
           Konfirmasi Bayar
         </button>
         <a href="{% url 'ticket_detail' ticket.id %}" class="btn btn-outline w-full md:w-auto text-center" style="text-decoration: none;">
           Kembali ke Detail
         </a>
-      </form>
+      </div>
+      <p id="message" class="text-center text-sm mt-3 text-gray-600"></p>
     </div>
-
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const payBtn = document.getElementById("payButton");
+  const msgEl = document.getElementById("message");
+  const statusEl = document.getElementById("payment-status");
+
+  if (!payBtn) return;
+
+  // Ambil cookie csrf (standard Django)
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  payBtn.addEventListener("click", function () {
+    // disable tombol sementara
+    payBtn.disabled = true;
+    msgEl.textContent = "Memproses...";
+    msgEl.style.color = "inherit";
+
+    // URL endpoint AJAX — pastikan kamu menambahkan view/url yang sesuai
+    const url = "{% url 'pay_ticket' ticket.id %}";
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrftoken,
+        "Accept": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: null
+    })
+    .then(async (response) => {
+      // Jika backend mereturn JSON
+      const contentType = response.headers.get("content-type") || "";
+      if (!response.ok) {
+        // coba parse body jika json
+        let errText = "Terjadi kesalahan jaringan.";
+        try {
+          if (contentType.includes("application/json")) {
+            const j = await response.json();
+            if (j && j.error) errText = j.error;
+          } else {
+            const txt = await response.text();
+            if (txt) errText = txt;
+          }
+        } catch (e) { /* ignore */ }
+        throw new Error(errText);
+      }
+      if (contentType.includes("application/json")) {
+        return response.json();
+      } else {
+        // fallback: balikan teks jika bukan json
+        return { success: true };
+      }
+    })
+    .then((data) => {
+      if (data && data.success) {
+        statusEl.innerText = "Sudah Dibayar";
+        msgEl.innerText = "✅ Pembayaran berhasil dikonfirmasi!";
+        msgEl.style.color = "green";
+
+        // Sembunyikan tombol setelah berhasil bayar
+        payBtn.style.display = "none";
+      } else {
+        msgEl.innerText = data?.error || "⚠️ Terjadi kesalahan.";
+        msgEl.style.color = "red";
+      }
+    })
+
+    .catch((err) => {
+      msgEl.innerText = err.message || "❌ Terjadi kesalahan jaringan.";
+      msgEl.style.color = "red";
+    })
+    .finally(() => {
+      payBtn.disabled = false;
+    });
+  });
+});
+</script>
 {% endblock %}

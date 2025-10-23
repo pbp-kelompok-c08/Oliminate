@@ -12,4 +12,5 @@ urlpatterns = [
     path('generate_qr/<int:ticket_id>/', views.generate_qr, name='generate_qr'),
     #path('tickets/json/', views.ticket_list_json, name='ticket_list_json'),
     path('json/', views.ticket_list_json, name='ticket_list_json'),
+    path('pay/<int:ticket_id>/', views.pay_ticket, name='pay_ticket'),  # <<-- endpoint AJAX yang baru
 ]
