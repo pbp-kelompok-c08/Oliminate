@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Hasil Scan Tiket{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-8 px-4">
+
+  <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+    
+    {% if "berhasil" in message %}
+      <div class="p-6 md:p-8 text-center bg-green-50 border-b-4 border-green-200">
+        <h1 class="h3" style="color: var(--neutral-900);">Validasi Sukses</h1>
+        <p class="body" style="color: var(--neutral-700); margin-top: 8px;">
+          {{ message }}
+        </p>
+      </div>
+    {% else %}
+      <div class="p-6 md:p-8 text-center bg-red-50 border-b-4 border-red-200">
+        <h1 class="h3" style="color: var(--neutral-900);">Validasi Gagal</h1>
+        <p class="body" style="color: var(--pacil-red-base); font-weight: var(--font-semibold); margin-top: 8px;">
+          {{ message }}
+        </p>
+      </div>
+    {% endif %}
+
+    
+    <div class="p-6 md:p-8">
+      <h2 class="h5 mb-6" style="font-weight: var(--font-semibold);">Detail Tiket yang Di-scan</h2>
+      
+      <dl class="space-y-4">
+        <div class="flex justify-between">
+          <dt class="body" style="color: var(--neutral-700);">Event</dt>
+          <dd class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold); text-align: right;">
+            {{ ticket.schedule }}
+          </dd>
+        </div>
+        
+        <div class="flex justify-between">
+          <dt class="body" style="color: var(--neutral-700);">Pemilik</dt>
+          <dd class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
+            {{ ticket.buyer.username|default:"N/A" }}
+          </dd>
+        </div>
+
+        <hr>
+
+        <div class="flex justify-between">
+          <dt class="body" style="color: var(--neutral-700);">Status Pembayaran</dt>
+          <dd>
+            {% if ticket.payment_status == 'paid' %}
+              <span class="text-xs font-semibold inline-block py-1 px-3 rounded-full text-green-700 bg-green-100">
+                Sudah Dibayar
+              </span>
+            {% else %}
+              <span class="text-xs font-semibold inline-block py-1 px-3 rounded-full text-yellow-700 bg-yellow-100">
+                {{ ticket.get_payment_status_display }}
+              </span>
+            {% endif %}
+          </dd>
+        </div>
+
+        <div class="flex justify-between">
+          <dt class="body" style="color: var(--neutral-700);">Status Penggunaan</dt>
+          <dd>
+            {% if ticket.is_used %}
+              <span class="text-xs font-semibold inline-block py-1 px-3 rounded-full text-blue-700 bg-blue-100">
+                Sudah Digunakan
+              </span>
+            {% else %}
+              <span class="text-xs font-semibold inline-block py-1 px-3 rounded-full text-gray-700 bg-gray-100">
+                Belum Digunakan
+              </span>
+            {% endif %}
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="bg-gray-50 px-6 py-4 md:px-8 md:py-6 text-center">
+      <a href="{% url 'ticket_list' %}" class="btn btn-primary w-full md:w-auto" style="text-decoration: none;">
+        Kembali ke Daftar Tiket
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
