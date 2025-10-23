@@ -67,10 +67,21 @@ def merchandise_update(request, id):
 @login_required
 @user_passes_test(is_organizer)
 def merchandise_delete(request, id):
-    merchandise = get_object_or_404(Merchandise, pk=id)
+    merchandise = get_object_or_404(Merchandise, pk=id, organizer=request.user)
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
     if request.method == 'POST':
+        merchandise_name = merchandise.name 
         merchandise.delete()
+        
+        if is_ajax:
+            return JsonResponse({
+                'success': True, 
+                'message': f"Merchandise '{merchandise_name}' berhasil dihapus."
+            })
+        
         return redirect('merchandise:merchandise_list')
+
     context = {'merchandise': merchandise}
     return render(request, "merchandise_confirm_delete.html", context)
 

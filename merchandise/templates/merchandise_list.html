@@ -10,9 +10,7 @@
         <a href="{% url 'merchandise:cart_detail' %}" class="btn btn-primary">Keranjang</a>
         {% endif %}
         {% if user.is_authenticated and user.role == 'organizer' %}
-        <button id="open-merchandise-modal" class="btn btn-primary" data-target="#merchandise-modal">
-            + Tambah Merchandise
-        </button>
+        <button id="add-merchandise-btn" class="btn btn-primary">+ Tambah Merchandise</button>
         {% endif %}
     </div>
 
@@ -51,7 +49,14 @@
                 {% if user.is_authenticated and user == merchandise.organizer %}
                 <div class="flex gap-2 mt-2">
                     <a href="{% url 'merchandise:merchandise_update' merchandise.id %}" class="btn btn-primary flex-1">Edit</a>
-                    <a href="{% url 'merchandise:merchandise_delete' merchandise.id %}" class="btn btn-danger flex-1">Delete</a>
+                    <button 
+                        class="btn btn-danger flex-1 delete-merchandise-btn" 
+                        data-delete-url="{% url 'merchandise:merchandise_delete' merchandise.id %}"
+                        data-merchandise-name="{{ merchandise.name }}"
+                        data-merchandise-id="{{ merchandise.id }}"
+                        type="button">
+                        Delete
+                    </button>
                 </div>
                 {% endif %}
             </div>
@@ -65,13 +70,24 @@
     {% endif %}
 </div>
 
-<div id="merchandise-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-    <div class="card" style="padding: 24px; max-width: 600px; width: 90%; position: relative;">
-        <h2 class="h4" style="margin-top:0;">Tambah Merchandise Baru</h2>
-        <div id="merchandise-form-container">
-            <p>Loading form...</p>
+<div id="ajax-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div class="card" style="width:90%; max-width:600px; padding:24px; max-height: 90vh; overflow-y: auto;">
+        <h2 class="h4" style="margin-bottom:16px;" id="modal-title">Tambah Merchandise</h2>
+        <div id="modal-form-content">
         </div>
-        <button id="close-merchandise-modal" style="position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+    </div>
+</div>
+
+<div id="delete-confirm-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div class="card" style="width:90%; max-width:400px; padding:24px;">
+        <h2 class="h4" style="margin-bottom:16px;">Konfirmasi Hapus</h2>
+        <p class="body" id="delete-merchandise-name" style="margin-bottom:24px;">
+            Apakah kamu yakin ingin menghapus merchandise <strong>[Product Name]</strong>?
+        </p>
+        <div class="flex justify-end gap-2">
+            <button id="delete-cancel-btn" class="btn btn-outline">Batal</button>
+            <button id="delete-confirm-btn" class="btn btn-danger" data-delete-url="">Ya, Hapus</button>
+        </div>
     </div>
 </div>
 
@@ -108,99 +124,189 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const modal = document.getElementById('merchandise-modal');
-        const openButton = document.getElementById('open-merchandise-modal');
-        const closeButton = document.getElementById('close-merchandise-modal');
-        const formContainer = document.getElementById('merchandise-form-container');
-        const createUrl = "{% url 'merchandise:merchandise_create' %}";
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        openButton.addEventListener('click', function() {
-            modal.style.display = 'flex';
-            
-            fetch(createUrl, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest' 
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
-            })
-            .then(response => response.text())
-            .then(html => {
-                formContainer.innerHTML = html;
-                setupFormSubmission(); 
-            })
-            .catch(error => console.error('Error loading form:', error));
-        });
-
-        closeButton.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-
-        function setupFormSubmission() {
-            const form = formContainer.querySelector('form');
-            if (form) {
-                const modalCancelButton = form.querySelector('#modal-cancel-button');
-                if (modalCancelButton) {
-                    modalCancelButton.addEventListener('click', function(e) {
-                        e.preventDefault(); 
-                        modal.style.display = 'none'; 
-                    });
-                }
-
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const formData = new FormData(form);
-                    
-                    const submitButton = form.querySelector('button[type="submit"]');
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Submitting...';
-
-                    fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest', 
-                            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                        }
-                    })
-                    .then(response => {
-                        if (response.ok && response.headers.get('content-type').includes('application/json')) {
-                            return response.json();
-                        }
-                        return response.text().then(text => { throw new Error(text); }); // Throw error or return HTML for form with errors
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            formContainer.innerHTML = `
-                                <div style="text-align:center; padding: 40px 20px;">
-                                    <h3 class="h4" style="color: var(--pacil-blue-base); margin-bottom: 12px;">✅ Berhasil!</h3>
-                                    <p class="body">Merchandise berhasil ditambahkan!</p>
-                                    <button id="success-ok-button" class="btn btn-primary" style="margin-top: 20px;">OK</button>
-                                </div>
-                            `;
-                            
-                            document.getElementById('success-ok-button').addEventListener('click', function() {
-                                modal.style.display = 'none';
-                                window.location.reload(); 
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        if (error.message.includes('<form')) {
-                            formContainer.innerHTML = error.message; 
-                            setupFormSubmission(); 
-                        } else {
-                            console.error('AJAX Submission Error:', error);
-                            alert('An unexpected error occurred.');
-                            submitButton.textContent = 'Submit';
-                            submitButton.disabled = false;
-                        }
-                    });
-                });
             }
         }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    const modal = document.getElementById('ajax-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const createBtn = document.getElementById('add-merchandise-btn');
+    const formContainer = document.getElementById('modal-form-content');
+    const createUrl = "{% url 'merchandise:merchandise_create' %}"; // URL for creating product
+
+    function showSuccessPopup(message) {
+        modalTitle.textContent = 'Sukses';
+        formContainer.innerHTML = `
+            <div style="text-align:center; padding: 40px 20px;">
+                <h3 class="h4" style="color: var(--pacil-blue-base); margin-bottom: 12px;">✅ ${message}</h3>
+                <p class="body">Halaman akan dimuat ulang sebentar lagi...</p>
+            </div>
+        `;
+        modal.style.display = 'flex';
+        
+        setTimeout(() => {
+            modal.style.display = 'none';
+            window.location.reload(); 
+        }, 1500);
+    }
+
+    createBtn.addEventListener('click', function() {
+        modal.style.display = 'flex';
+        formContainer.innerHTML = '<p class="body" style="text-align:center;">Loading form...</p>';
+        
+        fetch(createUrl, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            formContainer.innerHTML = html;
+            setupFormSubmission();
+        })
+        .catch(error => {
+            console.error('Error loading form:', error);
+            formContainer.innerHTML = '<p class="body" style="color:red;">Error loading form. Please try again.</p>';
+        });
+    });
+
+    function setupFormSubmission() {
+        const form = formContainer.querySelector('form');
+        if (form) {
+            const modalCancelButton = form.querySelector('#modal-cancel-button');
+            if (modalCancelButton) {
+                modalCancelButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    modal.style.display = 'none';
+                });
+            }
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Submitting...';
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (response.ok && response.headers.get('content-type').includes('application/json')) {
+                        return response.json();
+                    }
+                    if (response.ok) return response.text();
+                    
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    if (typeof data === 'string') {
+                        formContainer.innerHTML = data;
+                        setupFormSubmission(); 
+                    } else if (data.success) {
+                        showSuccessPopup('Merchandise berhasil ditambahkan!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Submission error:', error);
+                    alert('An unexpected error occurred during submission.');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Submit';
+                });
+            });
+        }
+    }
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+    const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+    const deleteMerchandiseName = document.getElementById('delete-merchandise-name');
+    
+    document.querySelectorAll('.delete-merchandise-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const deleteUrl = this.getAttribute('data-delete-url');
+            const name = this.getAttribute('data-merchandise-name');
+            const id = this.getAttribute('data-merchandise-id');
+
+            deleteMerchandiseName.innerHTML = `Apakah kamu yakin ingin menghapus merchandise <strong>${name}</strong>?`;
+            deleteConfirmBtn.setAttribute('data-delete-url', deleteUrl);
+            deleteConfirmBtn.setAttribute('data-merchandise-id', id);
+            
+            deleteModal.style.display = 'flex';
+        });
+    });
+
+    deleteCancelBtn.addEventListener('click', () => {
+        deleteModal.style.display = 'none';
+    });
+    deleteModal.addEventListener('click', (e) => {
+        if (e.target === deleteModal) {
+            deleteModal.style.display = 'none';
+        }
+    });
+
+    deleteConfirmBtn.addEventListener('click', function() {
+        const deleteUrl = this.getAttribute('data-delete-url');
+        const merchandiseId = this.getAttribute('data-merchandise-id');
+        const originalButtonHTML = this.innerHTML;
+
+        this.disabled = true;
+        this.innerHTML = 'Menghapus...';
+
+        fetch(deleteUrl, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken, 
+                'Content-Type': 'application/json' 
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                deleteModal.style.display = 'none';
+                
+                showSuccessPopup(data.message);
+            } else {
+                alert('Gagal menghapus produk.');
+            }
+        })
+        .catch(error => {
+            console.error('Delete Error:', error);
+            alert('Terjadi kesalahan saat menghapus merchandise.');
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.innerHTML = originalButtonHTML;
+        });
     });
 </script>
 {% endblock %}
