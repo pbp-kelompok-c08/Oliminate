@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Keranjangku{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top:40px; max-width:1080px;">
+    <h1 class="h3" style="margin-bottom:18x;">Keranjang Belanja</h1>
+
+    {% if cart and cart.items.all %}
+    {% with items=cart.items.all %}
+    {% if items|length == 0 %}
+    <div class="card" style="padding:24px;">
+        <p class="body">Keranjangmu Kosong</p>
+        <a class="btn btn-primary" href="{% url 'merchandise:merchandise_list' %}" style="margin-top:12px;">Lihat Daftar Merchandise</a>
+    </div>
+    {% else %}
+    <div class="grid" style="display:grid; grid-template-columns:1fr 360px; gap:24px;">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            {% for item in items %}
+            <article class="card" style="display:flex; gap:12px; padding:12px; align-items:flex-start;">
+                <div style="width:110px; flex:0 0 110px;">
+                    {% if item.merchandise.image_url %}
+                    <img src="{{ item.merchandise.image_url }}" alt="{{ item.merchandise.name }}" loading="lazy" style="width:100%; height:80px; object-fit:cover; border-radius:8px;">
+                    {% else %}
+                    <div style="width:100%; height:80px; background:var(--neutral-200); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <span class="footnote">No Image</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div style="flex:1;">
+                    <h3 class="h5" style="margin:0 0 6px 0;">{{ item.merchandise.name }}</h3>
+                    <p class="body" style="margin:0 0 8px 0;">
+                        Price: {{ item.merchandise.price|intcomma }}
+                        &nbsp;•&nbsp;
+                        Stock: {{ item.merchandise.stock}}
+                    </p>
+
+                    <form method="post" action="{% url 'merchandise:cart_update_item' item.id %}" style="display:flex; gap:8px; align-items:center;">
+                        {% csrf_token %}
+                        <label class="footnote" for="qty-{{ item.id }}" style="margin:0;">Jumlah</label>
+                        <input id="qty-{{ item.id }}" type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.merchandise.stock|default:9999 }}" class="form-input" style="width:80px;">
+                        <button type="submit" class="btn btn-outline">Edit</button>
+                        <form method="post" action="{% url 'merchandise:cart_remove_item' item.id %}" style="margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </form>
+
+                    {% if item.quantity > item.merchandise.stock %}
+                    <p class="footnote" style="color:var(--pacil-red-base); margin-top:8px;">
+                        Jumlah yang diminta {{ item.quantity }} melebihi jumlah stok {{ item.merchandise.stock }}.
+                        Mohon kurangi jumlah sebelum checkout.
+                    </p>
+                    {% endif %}
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                    <p class="h5" style="margin:0;">Rp {{ item.subtotal|default:0|intcomma }}</p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        <aside class="card" style="padding:18px; height:fit-content;">
+            <h2 class="h6" style="margin-top:0;">Rangkuman Pembelian</h2>
+            <div style="display:flex; justify-content:space-between; margin:12px 0;">
+                <span class="body">Subtotal</span>
+                <strong class="body">Rp {{ cart.total_price|default:0|intcomma }}</strong>
+            </div>
+
+            {% if any_overstock %}
+            <div style="margin-bottom:12px;">
+                <p class="footnote" style="color:var(--pacil-red-base); margin:0 0 8px 0;">
+                    Beberapa merchandise memiliki jumlah yang melebihi stok. Silahkan ubah terlebih dahulu.
+                </p>
+                <button type="button" class="btn btn-primary" style="width:100%;" disabled>Tidak bisa checkout - Ubah jumlah merchandise</button>
+              </div>
+            {% else %}
+            <form method="post" action="{% url 'merchandise:cart_checkout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="width:100%;">Pembayaran</button>
+            </form>
+            {% endif %}
+            <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-outline" style="width:100%; margin-top:8px;">Lanjut belanja</a>
+        </aside>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% else %}
+    <div class="card" style="padding:24px;">
+        <p class="body">Keranjangmu Kosong</p>
+        <a class="btn btn-primary" href="{% url 'merchandise:merchandise_list' %}" style="margin-top:12px;">Lanjut belanja</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
