@@ -10,7 +10,9 @@
         <a href="{% url 'merchandise:cart_detail' %}" class="btn btn-primary">Keranjang</a>
         {% endif %}
         {% if user.is_authenticated and user.role == 'organizer' %}
-        <a href="{% url 'merchandise:merchandise_create' %}" class="btn btn-primary">+ Tambah Produk</a>
+        <button id="open-merchandise-modal" class="btn btn-primary" data-target="#merchandise-modal">
+            + Tambah Merchandise
+        </button>
         {% endif %}
     </div>
 
@@ -63,6 +65,16 @@
     {% endif %}
 </div>
 
+<div id="merchandise-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="card" style="padding: 24px; max-width: 600px; width: 90%; position: relative;">
+        <h2 class="h4" style="margin-top:0;">Tambah Merchandise Baru</h2>
+        <div id="merchandise-form-container">
+            <p>Loading form...</p>
+        </div>
+        <button id="close-merchandise-modal" style="position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+    </div>
+</div>
+
 <style>
 .container > .grid {
     display: grid;
@@ -93,4 +105,104 @@
 }
 
 </style>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('merchandise-modal');
+        const openButton = document.getElementById('open-merchandise-modal');
+        const closeButton = document.getElementById('close-merchandise-modal');
+        const formContainer = document.getElementById('merchandise-form-container');
+        const createUrl = "{% url 'merchandise:merchandise_create' %}";
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        openButton.addEventListener('click', function() {
+            modal.style.display = 'flex';
+            
+            fetch(createUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' 
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                formContainer.innerHTML = html;
+                setupFormSubmission(); 
+            })
+            .catch(error => console.error('Error loading form:', error));
+        });
+
+        closeButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        function setupFormSubmission() {
+            const form = formContainer.querySelector('form');
+            if (form) {
+                const modalCancelButton = form.querySelector('#modal-cancel-button');
+                if (modalCancelButton) {
+                    modalCancelButton.addEventListener('click', function(e) {
+                        e.preventDefault(); 
+                        modal.style.display = 'none'; 
+                    });
+                }
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(form);
+                    
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Submitting...';
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest', 
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok && response.headers.get('content-type').includes('application/json')) {
+                            return response.json();
+                        }
+                        return response.text().then(text => { throw new Error(text); }); // Throw error or return HTML for form with errors
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            formContainer.innerHTML = `
+                                <div style="text-align:center; padding: 40px 20px;">
+                                    <h3 class="h4" style="color: var(--pacil-blue-base); margin-bottom: 12px;">✅ Berhasil!</h3>
+                                    <p class="body">Merchandise berhasil ditambahkan!</p>
+                                    <button id="success-ok-button" class="btn btn-primary" style="margin-top: 20px;">OK</button>
+                                </div>
+                            `;
+                            
+                            document.getElementById('success-ok-button').addEventListener('click', function() {
+                                modal.style.display = 'none';
+                                window.location.reload(); 
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        if (error.message.includes('<form')) {
+                            formContainer.innerHTML = error.message; 
+                            setupFormSubmission(); 
+                        } else {
+                            console.error('AJAX Submission Error:', error);
+                            alert('An unexpected error occurred.');
+                            submitButton.textContent = 'Submit';
+                            submitButton.disabled = false;
+                        }
+                    });
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}
+
 {% endblock %}

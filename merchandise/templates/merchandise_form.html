@@ -15,7 +15,7 @@
         </div>
         {% endif %}
 
-        <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'merchandise:merchandise_create' %}">
             {% csrf_token %}
             {% for field in form %}
             <div class="flex flex-col gap-2" style="display:grid; grid-template-columns:150px 1fr; gap:16px; margin-bottom:10px;">
