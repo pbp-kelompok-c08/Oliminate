@@ -332,23 +332,18 @@
         button.addEventListener('click', function() {
             const detailUrl = this.getAttribute('data-detail-url');
             
-            // 1. Setup modal for displaying details
             modalTitle.textContent = 'Detail Merchandise';
             modal.style.display = 'flex';
-            // Clear previous content and show loader
             formContainer.innerHTML = '<p class="body" style="text-align:center; padding: 40px;">Loading details...</p>'; 
             
-            // 2. Fetch the Detail content
             fetch(detailUrl, {
                 method: 'GET',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.text())
             .then(html => {
-                // Insert the fetched detail fragment HTML
                 formContainer.innerHTML = html;
                 
-                // Add a close button logic for the detail view (using the ID from the fragment)
                 const closeButton = formContainer.querySelector('#detail-close-button');
                 if (closeButton) {
                     closeButton.addEventListener('click', () => {

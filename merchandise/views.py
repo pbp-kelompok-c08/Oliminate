@@ -25,7 +25,6 @@ def merchandise_detail(request, id):
 
     template_name = "merchandise_detail.html"
     if is_ajax:
-        # Use the fragment template for AJAX requests
         template_name = "merchandise_detail_fragment.html"
         
     return render(request, template_name, context)
