@@ -54,9 +54,12 @@
         </div>
 
         <!-- Tombol -->
-        <div class="border-t border-gray-100 pt-6 mt-6">
-          <button type="submit" class="btn btn-primary w-full">
+        <div class="border-t border-gray-100 pt-6 mt-6 flex gap-3">
+          <button type="button" id="save-btn" class="btn btn-primary flex-1">
             Simpan Harga
+          </button>
+          <button type="button" id="edit-btn" class="btn btn-primary flex-1" disabled>
+            Edit Harga
           </button>
         </div>
       </form>
@@ -90,4 +93,62 @@
 
   </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const scheduleSelect = document.getElementById("id_schedule");
+  const priceInput = document.getElementById("id_price");
+  const saveBtn = document.getElementById("save-btn");
+  const editBtn = document.getElementById("edit-btn");
+
+  // Cek apakah event sudah punya harga
+  scheduleSelect.addEventListener('change', function() {
+    const scheduleId = this.value;
+    if (!scheduleId) return;
+    fetch(`/ticketing/get-price/${scheduleId}/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.price > 0) {
+          priceInput.value = data.price;
+          saveBtn.disabled = true;
+          editBtn.disabled = false;
+        } else {
+          priceInput.value = "";
+          saveBtn.disabled = false;
+          editBtn.disabled = true;
+        }
+      });
+  });
+
+  // Fungsi simpan harga baru atau edit harga
+  function submitPrice() {
+    const scheduleId = scheduleSelect.value;
+    const price = priceInput.value;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch("/ticketing/set-price-ajax/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken,
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: new URLSearchParams({
+        schedule_id: scheduleId,
+        price: price,
+      }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.querySelector(".bg-white.rounded-xl.shadow-lg.overflow-hidden:nth-child(2) .p-6").innerHTML = data.html;
+      } else {
+        alert(data.error);
+      }
+    });
+  }
+
+  saveBtn.addEventListener("click", submitPrice);
+  editBtn.addEventListener("click", submitPrice);
+});
+</script>
+
 {% endblock %}

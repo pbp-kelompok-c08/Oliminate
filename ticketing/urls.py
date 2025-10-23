@@ -13,4 +13,6 @@ urlpatterns = [
     #path('tickets/json/', views.ticket_list_json, name='ticket_list_json'),
     path('json/', views.ticket_list_json, name='ticket_list_json'),
     path('pay/<int:ticket_id>/', views.pay_ticket, name='pay_ticket'),  # <<-- endpoint AJAX yang baru
+    path('set-price-ajax/', views.set_event_price_ajax, name='set_event_price_ajax'),
+
 ]

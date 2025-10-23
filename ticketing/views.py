@@ -11,6 +11,7 @@ from io import BytesIO
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
 def get_user_from_session(request):
     try:
@@ -196,3 +197,30 @@ def pay_ticket(request, ticket_id):
         return JsonResponse({'success': True, 'ticket_id': ticket.id})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+@csrf_exempt
+@login_required(login_url='users:login')
+def set_event_price_ajax(request):
+    """
+    Handle AJAX request untuk menambah/mengupdate harga event tanpa reload halaman.
+    """
+    if request.method == 'POST':
+        schedule_id = request.POST.get('schedule_id')
+        price = request.POST.get('price')
+
+        if not schedule_id or not price:
+            return JsonResponse({'success': False, 'error': 'Data tidak lengkap.'})
+
+        try:
+            schedule = Schedule.objects.get(id=schedule_id)
+            obj, created = EventPrice.objects.update_or_create(
+                schedule=schedule,
+                defaults={'price': price}
+            )
+            # render ulang partial daftar harga
+            prices = EventPrice.objects.all().order_by('schedule__date')
+            html = render_to_string('partials/event_price_list.html', {'prices': prices})
+            return JsonResponse({'success': True, 'html': html})
+        except Schedule.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Schedule tidak ditemukan.'})
+    return JsonResponse({'success': False, 'error': 'Metode tidak valid.'})

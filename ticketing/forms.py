@@ -1,6 +1,7 @@
 from django import forms
 # Import kedua model baru dari models.py
 from .models import Ticket, EventPrice 
+from scheduling.models import Schedule
 
 # ==================================
 # === 1. FORM BARU UNTUK PANITIA ===
@@ -22,6 +23,10 @@ class EventPriceForm(forms.ModelForm):
                 'placeholder': 'Masukkan harga, misal: 50000'
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['schedule'].queryset = Schedule.objects.filter(status='upcoming').order_by('date', 'time')
 
 # ==================================
 # === 2. FORM LAMA (DIUBAH) UNTUK USER ===
