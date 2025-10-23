@@ -35,8 +35,8 @@
                 <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-outline">Kembali</a>
 
                 {% if user.is_authenticated and user == merchandise.organizer %}
-                <a href="{% url 'merchandise:merchandise_update' %}" class="btn btn-primary">Edit</a>
-                <a href="{% url 'merchandise:merchandise_delete' %}" class="btn btn-danger">Delete</a>
+                <a href="{% url 'merchandise:merchandise_update' merchandise.id %}" class="btn btn-primary">Edit</a>
+                <a href="{% url 'merchandise:merchandise_delete' merchandise.id %}" class="btn btn-danger">Delete</a>
                 {% endif %}
             </div>
         </div>

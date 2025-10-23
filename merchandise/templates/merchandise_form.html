@@ -1,10 +1,19 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title|default:"Tambah Merchandise" }}{% endblock %}
 
 {% block content %}
 <div class="container" style="margin-top:48px; max-width:800px;">
     <div class="card">
-        <h1 class="h3" style="margin-bottom:24px;">{{ title }}</h1>
+        <h1 class="h3" style="margin-bottom:24px;">{{ title|default:"Merchandise" }}</h1>
+
+        {# non-field / model-level errors #}
+        {% if form.non_field_errors %}
+        <div class="card" style="background:#fff7f7; border-left:4px solid var(--pacil-red-base); padding:12px; margin-bottom:12px;">
+            {% for err in form.non_field_errors %}
+            <p class="body" style="color:var(--pacil-red-base); margin:0;">{{ err }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
             {% csrf_token %}
@@ -12,6 +21,9 @@
             <div class="flex flex-col gap-2">
                 <label for="{{ field.id_for_label }}" style="font-weight:var(--font-medium); color:var(--neutral-900)">
                     {{ field.label }}
+                    {% if field.field.required %}
+                    <span aria-hidden="true" style="color:var(--pacil-red-base)">*</span>
+                    {% endif %}
                 </label>
                 {{ field }}
                 {% if field.help_text %}
