@@ -1,12 +1,10 @@
-import uuid
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 from merchandise.forms import MerchandiseForm
 from merchandise.models import Merchandise, Cart, CartItem
-from users.models import User
 
 def is_organizer(user):
     return getattr(user, 'role', '').upper() == 'ORGANIZER'
@@ -22,44 +20,88 @@ def merchandise_list(request):
 def merchandise_detail(request, id):
     merchandise = get_object_or_404(Merchandise, pk=id)
     context = {'merchandise': merchandise}
-    return render(request, "merchandise_detail.html", context)
+    
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    template_name = "merchandise_detail.html"
+    if is_ajax:
+        template_name = "merchandise_detail_fragment.html"
+        
+    return render(request, template_name, context)
 
 @login_required
 @user_passes_test(is_organizer)
 def merchandise_create(request):
-    form = MerchandiseForm(request.POST or None)
+    form = MerchandiseForm(request.POST or None, request.FILES or None)
+    
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
     if form.is_valid() and request.method == "POST":
         merchandise = form.save(commit=False)
         merchandise.organizer = request.user
         merchandise.save()
+        
+        if is_ajax:
+            return JsonResponse({'success': True, 'merchandise_id': merchandise.id})
+        
         return redirect('merchandise:merchandise_list')
+    
     context = {
         'form': form,
         'title': 'Tambah Merchandise'
     }
-    return render(request, "merchandise_form.html", context)
+
+    template_name = "merchandise_form.html"
+    if is_ajax:
+        template_name = "merchandise_form_fragment.html"
+
+    return render(request, template_name, context)
 
 @login_required
 @user_passes_test(is_organizer)
 def merchandise_update(request, id):
-    merchandise = get_object_or_404(Merchandise, pk=id)
-    form = MerchandiseForm(request.POST or None, instance=merchandise)
-    if form.is_valid() and request.method == 'POST':
+    merchandise = get_object_or_404(Merchandise, pk=id, organizer=request.user)
+    form = MerchandiseForm(request.POST or None, request.FILES or None, instance=merchandise)
+    
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    if form.is_valid() and request.method == "POST":
         form.save()
-        return redirect('merchandise:merchandise_detail', id=id)
+        
+        if is_ajax:
+            return JsonResponse({'success': True, 'merchandise_id': merchandise.id})
+        
+        return redirect('merchandise:merchandise_list')
+    
     context = {
         'form': form,
-        'title': 'Edit Merchandise'
+        'title': f'Edit {merchandise.name}'
     }
-    return render(request, "merchandise_form.html", context)
+
+    template_name = "merchandise_form.html"
+    if is_ajax:
+        template_name = "merchandise_form_fragment.html"
+
+    return render(request, template_name, context)
 
 @login_required
 @user_passes_test(is_organizer)
 def merchandise_delete(request, id):
-    merchandise = get_object_or_404(Merchandise, pk=id)
+    merchandise = get_object_or_404(Merchandise, pk=id, organizer=request.user)
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
     if request.method == 'POST':
+        merchandise_name = merchandise.name 
         merchandise.delete()
+        
+        if is_ajax:
+            return JsonResponse({
+                'success': True, 
+                'message': f"Merchandise '{merchandise_name}' berhasil dihapus."
+            })
+        
         return redirect('merchandise:merchandise_list')
+
     context = {'merchandise': merchandise}
     return render(request, "merchandise_confirm_delete.html", context)
 
