@@ -48,7 +48,12 @@
                 {% endif %}
                 {% if user.is_authenticated and user == merchandise.organizer %}
                 <div class="flex gap-2 mt-2">
-                    <a href="{% url 'merchandise:merchandise_update' merchandise.id %}" class="btn btn-primary flex-1">Edit</a>
+                    <button 
+                        class="btn btn-primary flex-1 edit-merchandise-btn" 
+                        data-edit-url="{% url 'merchandise:merchandise_update' merchandise.id %}" 
+                        type="button">
+                        Edit
+                    </button>
                     <button 
                         class="btn btn-danger flex-1 delete-merchandise-btn" 
                         data-delete-url="{% url 'merchandise:merchandise_delete' merchandise.id %}"
@@ -144,7 +149,7 @@
     const modalTitle = document.getElementById('modal-title');
     const createBtn = document.getElementById('add-merchandise-btn');
     const formContainer = document.getElementById('modal-form-content');
-    const createUrl = "{% url 'merchandise:merchandise_create' %}"; // URL for creating product
+    const createUrl = "{% url 'merchandise:merchandise_create' %}"; 
 
     function showSuccessPopup(message) {
         modalTitle.textContent = 'Sukses';
@@ -239,6 +244,83 @@
         }
     });
 
+    document.querySelectorAll('.edit-merchandise-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const editUrl = this.getAttribute('data-edit-url');
+            
+            modalTitle.textContent = 'Edit Merchandise';
+            modal.style.display = 'flex';
+            formContainer.innerHTML = '<p class="body" style="text-align:center;">Loading form...</p>';
+            
+            fetch(editUrl, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                formContainer.innerHTML = html;
+                setupUpdateSubmission(editUrl); 
+            })
+            .catch(error => {
+                console.error('Error loading edit form:', error);
+                formContainer.innerHTML = '<p class="body" style="color:red;">Error loading form. Please try again.</p>';
+            });
+        });
+    });
+
+    function setupUpdateSubmission(updateUrl) {
+        const form = formContainer.querySelector('form');
+        if (form) {
+            form.action = updateUrl; 
+
+            const modalCancelButton = form.querySelector('#modal-cancel-button');
+            if (modalCancelButton) {
+                modalCancelButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    modal.style.display = 'none';
+                });
+            }
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Updating...';
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (response.ok && response.headers.get('content-type').includes('application/json')) {
+                        return response.json();
+                    }
+                    if (response.ok) return response.text();
+                    
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    if (typeof data === 'string') {
+                        formContainer.innerHTML = data;
+                        setupUpdateSubmission(updateUrl); 
+                    } else if (data.success) {
+                        showSuccessPopup('Merchandise berhasil diperbarui!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Update submission error:', error);
+                    alert('An unexpected error occurred during update.');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Submit';
+                });
+            });
+        }
+    }
     
     const deleteModal = document.getElementById('delete-confirm-modal');
     const deleteConfirmBtn = document.getElementById('delete-confirm-btn');

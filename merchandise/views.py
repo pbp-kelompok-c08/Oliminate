@@ -53,16 +53,29 @@ def merchandise_create(request):
 @login_required
 @user_passes_test(is_organizer)
 def merchandise_update(request, id):
-    merchandise = get_object_or_404(Merchandise, pk=id)
-    form = MerchandiseForm(request.POST or None, instance=merchandise)
-    if form.is_valid() and request.method == 'POST':
+    merchandise = get_object_or_404(Merchandise, pk=id, organizer=request.user)
+    form = MerchandiseForm(request.POST or None, request.FILES or None, instance=merchandise)
+    
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    if form.is_valid() and request.method == "POST":
         form.save()
-        return redirect('merchandise:merchandise_detail', id=id)
+        
+        if is_ajax:
+            return JsonResponse({'success': True, 'merchandise_id': merchandise.id})
+        
+        return redirect('merchandise:merchandise_list')
+    
     context = {
         'form': form,
-        'title': 'Edit Merchandise'
+        'title': f'Edit {merchandise.name}'
     }
-    return render(request, "merchandise_form.html", context)
+
+    template_name = "merchandise_form.html"
+    if is_ajax:
+        template_name = "merchandise_form_fragment.html"
+
+    return render(request, template_name, context)
 
 @login_required
 @user_passes_test(is_organizer)
