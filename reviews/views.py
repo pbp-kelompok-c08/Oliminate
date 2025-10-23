@@ -43,12 +43,13 @@ def review_detail_page(request, schedule_id):
     half_star = (average_rating - full_stars) >= 0.5  # True kalau ada setengah
     empty_stars = 5 - full_stars - (1 if half_star else 0)
 
+    can_review = False
+
     if request.user.is_authenticated:
         can_review = Ticket.objects.filter(
             buyer=request.user, 
             schedule=schedule
         ).exists()
-    # can_review = True
 
     # Handle submit review
     if request.method == 'POST' and can_review:
