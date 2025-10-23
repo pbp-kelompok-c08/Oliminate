@@ -52,8 +52,8 @@
 
                     {% if item.quantity > item.merchandise.stock %}
                     <p class="footnote" style="color:var(--pacil-red-base); margin-top:8px;">
-                        Jumlah yang diminta {{ item.quantity }} melebihi jumlah stok {{ item.merchandise.stock }}.
-                        Mohon kurangi jumlah sebelum checkout.
+                        Jumlah yang dipesan ({{ item.quantity }}) melebihi jumlah stok ({{ item.merchandise.stock }}).
+                        Mohon kurangi jumlah pesanan sebelum checkout.
                     </p>
                     {% endif %}
                 </div>
@@ -83,7 +83,7 @@
                 <button type="submit" class="btn btn-primary" style="width:100%;">Pembayaran</button>
             </form>
             {% endif %}
-            <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-primary" style="width:84%; margin-top:8px;">Lanjut belanja</a>
+            <a href="{% url 'merchandise:merchandise_list' %}" class="btn btn-primary" style="width:84%; margin-top:8px;">Lanjut Belanja</a>
         </aside>
     </div>
     {% endif %}
@@ -91,7 +91,7 @@
     {% else %}
     <div class="card" style="padding:24px;">
         <p class="body">Keranjangmu Kosong</p>
-        <a class="btn btn-primary" href="{% url 'merchandise:merchandise_list' %}" style="margin-top:12px;">Lanjut belanja</a>
+        <a class="btn btn-primary" href="{% url 'merchandise:merchandise_list' %}" style="margin-top:12px;">Lanjut Belanja</a>
     </div>
     {% endif %}
 </div>
