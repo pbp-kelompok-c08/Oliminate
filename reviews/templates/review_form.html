@@ -1,89 +1,76 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Review</title>
+{% block content %}
+<link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
 
-    {# 1. CSS Links #}
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+<style>
+    .review-page-container {
+        display: flex;
+        justify-content: center;
+        padding: 6rem 1rem 4rem; /* atasnya agak lebih lega */
+    }
+    .card-review-wrapper {
+        max-width: 650px;
+        width: 100%;
+        background-color: #fff;
+        padding: 2.5rem 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    .card-review-wrapper h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    .card-review-wrapper p.description {
+        color: #6B7280;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    :root {
+        --yellow: #FBBF24;
+        --grey-icon: #D1D5DB;
+        --grey-border: #E5E7EB;
+    }
+    .rating-box {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .star-box {
+        background-color: transparent;
+        border: 1px solid var(--grey-border);
+        border-radius: 0.375rem;
+        padding: 0.6rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        appearance: none;
+    }
+    .star-box .star {
+        font-size: 2.5rem;
+        color: var(--grey-icon);
+        transition: color 0.2s, transform 0.2s;
+        line-height: 1;
+    }
+    .star-box:hover .star { transform: scale(1.1); }
+    .star-box .star.active { color: var(--yellow); }
+    #rating-value { display: none; }
+    .error-message {
+        font-size: 0.75rem;
+        color: #EF4444;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+</style>
 
-    {# 2. Custom Styles #}
-    <style>
-        body { /* Basic styling */
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background-color: #F9FAFB;
-            color: #111827;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 1.5rem; margin: 0;
-        }
-        .card-review-wrapper { /* Card size & style */
-            max-width: 650px; width: 100%; background-color: #fff;
-            padding: 2.5rem 3rem; border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-        .card-review-wrapper h2 { /* Header */
-             font-size: 1.5rem; font-weight: 700; color: #111827;
-             text-align: center; margin-bottom: 0.5rem;
-        }
-         .card-review-wrapper p.description { /* Sub-header */
-             color: #6B7280; margin-bottom: 1.5rem; text-align: center;
-        }
-        :root { /* Star Colors */
-            --yellow: #FBBF24;
-            --grey-icon: #D1D5DB;
-            --grey-border: #E5E7EB;
-        }
-        .rating-box { /* Star container */
-            display: flex; justify-content: center;
-            gap: 1rem; margin-bottom: 1.5rem;
-        }
-        /* Styling KOTAK Bintang (Button) - Border TIDAK BERUBAH */
-        .star-box {
-            background-color: transparent;
-            border: 1px solid var(--grey-border); /* Border abu SELALU */
-            border-radius: 0.375rem;
-            padding: 0.6rem;
-            cursor: pointer;
-            transition: transform 0.2s; /* Hanya transisi transform */
-            display: flex; align-items: center; justify-content: center;
-            appearance: none;
-        }
-        /* Styling IKON Bintang (Selalu Solid) */
-        .star-box .star {
-            font-size: 2.5rem;
-            color: var(--grey-icon); /* Warna default abu */
-            transition: color 0.2s, transform 0.2s;
-            line-height: 1;
-        }
-        /* Efek Hover KOTAK (Hanya zoom ikon) */
-        .star-box:hover .star {
-            transform: scale(1.1);
-        }
-        /* Ikon yang AKTIF/SELECTED (KUNING) */
-        .star-box .star.active { /* Class 'active' untuk warna kuning */
-            color: var(--yellow);
-        }
-        /* Sembunyikan input hidden */
-        #rating-value { display: none; }
-        /* Error message */
-        .error-message { font-size: 0.75rem; color: #EF4444; margin-top: 0.5rem; text-align: center; }
-        /* Basic Flex utils */
-        .flex { display: flex; } .justify-end { justify-content: flex-end; }
-        .gap-3 { gap: 0.75rem; } .mt-8 { margin-top: 2rem; }
-        .mb-5 { margin-bottom: 1.25rem; } .mb-6 { margin-bottom: 1.5rem; }
-        .mb-2 { margin-bottom: 0.5rem; } .block { display: block; }
-        .text-sm { font-size: 0.875rem; } .font-medium { font-weight: 500; }
-        .text-gray-700 { color: #374151; } .text-center { text-align: center; }
-
-    </style>
-</head>
-<body>
-
+<div class="review-page-container">
     <div class="card-review-wrapper">
         <div class="text-center mb-4">
             <h2>Help us improve!</h2>
@@ -95,14 +82,10 @@
         <form method="POST">
             {% csrf_token %}
 
-            {# --- RATING BINTANG --- #}
             <div class="mb-5 text-center">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
                 <div class="rating-box">
-                    {# Input Hidden #}
                     {{ review_form.rating }}
-
-                    {# Bintang Boxicons (SOLID) dalam Kotak #}
                     {% for i in "12345" %}
                     <button type="button" class="star-box" data-value="{{ i }}">
                         <i class='bx bxs-star star'></i>
@@ -114,95 +97,79 @@
                 {% endif %}
             </div>
 
-            {# --- KOMENTAR --- #}
             <div class="mb-6">
-                <label for="id_comment" class="block text-sm font-medium text-gray-700 mb-2">What's your overall experience?</label>
-                {# Textarea #}
+                <label for="id_comment" class="block text-sm font-medium text-gray-700 mb-2">
+                    What's your overall experience?
+                </label>
                 {{ review_form.comment }}
                 {% if review_form.comment.errors %}
                     <p class="error-message mt-1">{{ review_form.comment.errors|striptags }}</p>
                 {% endif %}
             </div>
 
-            {# --- TOMBOL --- #}
             <div class="flex justify-end gap-3 mt-8">
                 {% if schedule %}
-                <a href="{% url 'review_detail' schedule.id %}" class="btn btn-outline"> Cancel </a>
+                <a href="{% url 'review_detail' schedule.id %}" class="btn btn-outline">Cancel</a>
                 {% else %}
-                 <a href="#" class="btn btn-outline"> Cancel </a>
+                <a href="#" class="btn btn-outline">Cancel</a>
                 {% endif %}
-                <button type="submit" class="btn btn-primary"> Add Review </button>
+                <button type="submit" class="btn btn-primary">Add Review</button>
             </div>
         </form>
     </div>
+</div>
 
-    {# 3. JavaScript #}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const starBoxes = document.querySelectorAll('.star-box');
-            const ratingValueInput = document.getElementById('rating-value'); // ID dari HiddenInput
-            const form = document.querySelector('form');
-            let currentRating = parseInt(ratingValueInput.value) || 0;
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const starBoxes = document.querySelectorAll('.star-box');
+    const ratingValueInput = document.getElementById('rating-value');
+    const form = document.querySelector('form');
+    let currentRating = parseInt(ratingValueInput?.value) || 0;
 
-            // Fungsi update visual bintang (HANYA warna ikon)
-            function updateStarsVisual(ratingToHighlight) {
-                starBoxes.forEach(box => {
-                    const starValue = parseInt(box.dataset.value, 10);
-                    const starIcon = box.querySelector('.star');
-
-                    // Update Warna Ikon (pakai class 'active')
-                    if (starValue <= ratingToHighlight) {
-                        starIcon.classList.add('active'); // CSS .star.active akan mewarnai kuning
-                    } else {
-                        starIcon.classList.remove('active'); // Kembali ke warna abu default
-                    }
-                    // Border kotak TIDAK diubah
-                });
+    function updateStarsVisual(ratingToHighlight) {
+        starBoxes.forEach(box => {
+            const starValue = parseInt(box.dataset.value, 10);
+            const starIcon = box.querySelector('.star');
+            if (starValue <= ratingToHighlight) {
+                starIcon.classList.add('active');
+            } else {
+                starIcon.classList.remove('active');
             }
-
-            starBoxes.forEach(box => {
-                // --- Event Klik ---
-                box.addEventListener('click', function() {
-                    const rating = parseInt(this.dataset.value, 10);
-                    currentRating = rating;
-                    ratingValueInput.value = rating;
-                    updateStarsVisual(currentRating); // Update visual permanen
-                    console.log('Rating set to:', currentRating);
-                });
-
-                // --- Event Mouse Enter (Hover Masuk) ---
-                box.addEventListener('mouseenter', function() {
-                    const hoverRating = parseInt(this.dataset.value, 10);
-                    updateStarsVisual(hoverRating); // Highlight ikon sementara
-                });
-
-                // --- Event Mouse Leave (Hover Keluar) ---
-                box.addEventListener('mouseleave', function() {
-                    // Kembalikan visual ke rating permanen (currentRating)
-                    updateStarsVisual(currentRating);
-                });
-            });
-
-            // --- Validasi Form Sebelum Submit ---
-            form.addEventListener('submit', function (e) {
-                if (currentRating === 0) {
-                    e.preventDefault();
-                    alert('Please select a star rating before submitting.');
-                    const ratingBoxContainer = document.querySelector('.rating-box');
-                    if(ratingBoxContainer) {
-                        // Feedback error: mungkin outline merah di container
-                        ratingBoxContainer.style.outline = '2px solid red';
-                        setTimeout(() => { ratingBoxContainer.style.outline = 'none'; }, 1500);
-                    }
-                    return false;
-                }
-            });
-
-            // --- Inisialisasi Tampilan Bintang Saat Load ---
-            updateStarsVisual(currentRating);
-            console.log('Initial rating:', currentRating);
         });
-    </script>
+    }
 
-</body>
-</html>
+    starBoxes.forEach(box => {
+        box.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.value, 10);
+            currentRating = rating;
+            ratingValueInput.value = rating;
+            updateStarsVisual(currentRating);
+        });
+
+        box.addEventListener('mouseenter', function() {
+            const hoverRating = parseInt(this.dataset.value, 10);
+            updateStarsVisual(hoverRating);
+        });
+
+        box.addEventListener('mouseleave', function() {
+            updateStarsVisual(currentRating);
+        });
+    });
+
+    form.addEventListener('submit', function (e) {
+        if (currentRating === 0) {
+            e.preventDefault();
+            alert('Please select a star rating before submitting.');
+            const ratingBoxContainer = document.querySelector('.rating-box');
+            if(ratingBoxContainer) {
+                ratingBoxContainer.style.outline = '2px solid red';
+                setTimeout(() => { ratingBoxContainer.style.outline = 'none'; }, 1500);
+            }
+            return false;
+        }
+    });
+
+    updateStarsVisual(currentRating);
+});
+</script>
+{% endblock %}
