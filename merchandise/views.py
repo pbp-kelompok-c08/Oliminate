@@ -176,13 +176,6 @@ def cart_pay(request, cart_id):
 
     with transaction.atomic():
         for item in cart.items.select_related('merchandise').all():
-            if item.quantity > item.merchandise.stock:
-                return render(request, "cart_payment_failed.html", {
-                    'cart': cart,
-                    'error': f"Not enough stock for {item.merchandise.name} (requested {item.quantity}, available {item.merchandise.stock})"
-                })
-
-        for item in cart.items.select_related('merchandise').all():
             m = item.merchandise
             m.stock -= item.quantity
             if m.stock < 0:
