@@ -4,6 +4,7 @@ from scheduling.models import Schedule
 # untuk sekarang kita pakai user bawaan
 from users.models import User
 #from django.contrib.auth.models import User 
+from django.utils import timezone
 
 # ==================================
 # === 1. TAMBAHKAN MODEL BARU INI ===
@@ -46,7 +47,7 @@ class Ticket(models.Model):
     # Ini untuk 'struk' pembelian.
     price = models.DecimalField(max_digits=10, decimal_places=2)
     
-    purchase_date = models.DateTimeField(auto_now_add=True)
+    purchase_date = models.DateTimeField(default=timezone.now)
     qr_code = models.CharField(max_length=255, blank=True, null=True)
     is_used = models.BooleanField(default=False)
     used_at = models.DateTimeField(blank=True, null=True)

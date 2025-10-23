@@ -3,7 +3,7 @@
 {% block title %}Konfirmasi Pembayaran{% endblock %}
 
 {% block content %}
-<div class="container mx-auto mt-8 px-4">
+<div class="container mx-auto mt-8 px-4 text-center">
   <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
     <div class="p-6 md:p-8 border-b border-gray-100">
       <h1 class="h3">Konfirmasi Pembayaran</h1>
@@ -12,12 +12,14 @@
       </p>
     </div>
 
+    {% if ticket.payment_status != 'paid' %}
     <div class="p-6 md:p-8">
       <div class="p-4 rounded-lg bg-blue-50 border border-blue-200 mb-6">
         <p class="body" style="color: var(--pacil-blue-darker-1);">
           Klik tombol "Konfirmasi Bayar" di bawah untuk menandai tiket ini sebagai 'Sudah Dibayar'.
         </p>
       </div>
+    {% endif %}
 
       <div class="space-y-4">
         <div class="flex justify-between">
