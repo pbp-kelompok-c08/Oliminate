@@ -29,17 +29,46 @@
             {{ average_rating|floatformat:1 }}
           </h2>
           <div class="flex items-center">
-            {% for i in "12345" %}
-              {% widthratio i 1 average_rating as star_level %} {% if star_level >= 1 %}
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/></svg>
-              {% else %}
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/></svg>
-              {% endif %}
+            {% for _ in full_stars %}
+              {# --- SVG Bintang Kuning PENUH --- #}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 
+                        1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63
+                        -3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/>
+              </svg>
+            {% endfor %}
+
+            {% if half_star %}
+              {# --- SVG Bintang Kuning SETENGAH --- #}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                class="w-6 h-6">
+              <defs>
+                <linearGradient id="halfGradient" x1="0" x2="1">
+                  <stop offset="50%" stop-color="#facc15"/>  <!-- kuning -->
+                  <stop offset="50%" stop-color="#d1d5db"/>  <!-- abu -->
+                </linearGradient>
+              </defs>
+              <path fill="url(#halfGradient)"
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808
+                  c.97 0 1.372 1.24.588 1.81l-3.084 2.24
+                  1.178 3.629c.3.921-.755 1.688-1.54 1.118
+                  L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118
+                  l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81
+                  h3.808l1.177-3.628z"/>
+            </svg>
+            {% endif %}
+
+            {% for _ in empty_stars %}
+              {# --- SVG Bintang ABU-ABU --- #}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24
+                        1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118
+                        l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/>
+              </svg>
             {% endfor %}
           </div>
         </div>
       </div>
-
     </div>
   </div>
   {% if can_review %} 
@@ -85,8 +114,8 @@
       <div class="flex justify-between items-center mt-4">
         <div class="flex gap-3">
           {% if user == review.reviewer %}
-            <a href="#" class="text-sm font-medium text-gray-500 hover:text-blue-600">Edit</a>
-            <a href="#" class="text-sm font-medium text-red-500 hover:text-red-700">Delete</a>
+            <a href="{% url 'edit_review' review.id %}" class="text-sm font-medium text-gray-500 hover:text-blue-600">Edit</a>
+            <a href="{% url 'delete_review' review.id %}" class="text-sm font-medium text-red-500 hover:text-red-700">Delete</a>
           {% endif %}
         </div>
         </div>
@@ -100,7 +129,9 @@
           </p>
       </div>
     {% endfor %}
-  </div> </div> {% endblock %}
+  </div> 
+</div> 
+{% endblock %}
 
 {% block scripts %}
 {% endblock scripts %}
