@@ -27,6 +27,7 @@ class EventPriceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['schedule'].queryset = Schedule.objects.filter(status='upcoming').order_by('date', 'time')
+        self.fields['schedule'].empty_label = "🎫 Pilih event kamu..."
 
 # ==================================
 # === 2. FORM LAMA (DIUBAH) UNTUK USER ===
@@ -48,7 +49,8 @@ class TicketPurchaseForm(forms.ModelForm):
             }),
         }
     
-    # HAPUS 'clean_price(self)' DARI SINI
-    # def clean_price(self):
-    #     ...
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['schedule'].queryset = Schedule.objects.filter(status='upcoming').order_by('date', 'time')
+        self.fields['schedule'].empty_label = "🎫 Pilih event kamu..."
 
