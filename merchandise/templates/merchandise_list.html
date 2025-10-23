@@ -34,7 +34,13 @@
             </div>
 
             <div style="padding:0 16px 16px 16px;">
-                <a href="{% url 'merchandise:merchandise_detail' merchandise.id %}" class="btn btn-outline w-full" style="margin-bottom: 8px;">Detail</a>
+                <button 
+                    class="btn btn-outline w-full detail-merchandise-btn" 
+                    data-detail-url="{% url 'merchandise:merchandise_detail' merchandise.id %}"
+                    type="button"
+                    style="margin-bottom:6px;">
+                    Detail
+                </button>
                 {% if user.is_authenticated and user.role == 'user' %}
                 {% if merchandise.stock > 0 %}
                 <form method="post" action="{% url 'merchandise:cart_add_item' merchandise.id %}" style="margin-bottom: 8px;">
@@ -321,6 +327,41 @@
             });
         }
     }
+
+    document.querySelectorAll('.detail-merchandise-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const detailUrl = this.getAttribute('data-detail-url');
+            
+            // 1. Setup modal for displaying details
+            modalTitle.textContent = 'Detail Merchandise';
+            modal.style.display = 'flex';
+            // Clear previous content and show loader
+            formContainer.innerHTML = '<p class="body" style="text-align:center; padding: 40px;">Loading details...</p>'; 
+            
+            // 2. Fetch the Detail content
+            fetch(detailUrl, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Insert the fetched detail fragment HTML
+                formContainer.innerHTML = html;
+                
+                // Add a close button logic for the detail view (using the ID from the fragment)
+                const closeButton = formContainer.querySelector('#detail-close-button');
+                if (closeButton) {
+                    closeButton.addEventListener('click', () => {
+                        modal.style.display = 'none';
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading detail view:', error);
+                formContainer.innerHTML = '<p class="body" style="color:red; padding: 40px;">Error loading detail. Please try again.</p>';
+            });
+        });
+    });
     
     const deleteModal = document.getElementById('delete-confirm-modal');
     const deleteConfirmBtn = document.getElementById('delete-confirm-btn');

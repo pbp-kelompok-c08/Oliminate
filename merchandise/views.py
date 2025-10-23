@@ -20,7 +20,15 @@ def merchandise_list(request):
 def merchandise_detail(request, id):
     merchandise = get_object_or_404(Merchandise, pk=id)
     context = {'merchandise': merchandise}
-    return render(request, "merchandise_detail.html", context)
+    
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    template_name = "merchandise_detail.html"
+    if is_ajax:
+        # Use the fragment template for AJAX requests
+        template_name = "merchandise_detail_fragment.html"
+        
+    return render(request, template_name, context)
 
 @login_required
 @user_passes_test(is_organizer)
