@@ -1,26 +1,15 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from django.utils import timezone
 from .models import Schedule
 
 def schedule_list(request):
-    # 🕒 Step 1: auto-mark as completed jika waktu sudah lewat
-    now = timezone.now()
-    for s in Schedule.objects.filter(status='upcoming'):
-        schedule_time = timezone.make_aware(
-            timezone.datetime.combine(s.date, s.time)
-        )
-        if schedule_time < now:
-            s.status = 'completed'
-            s.save(update_fields=['status'])
-
-    # 🧩 Step 2: semua user (termasuk non-login) bisa lihat jadwal
+    # Semua user (termasuk non-login) bisa lihat jadwal
     schedules = Schedule.objects.exclude(status='reviewable').order_by('date', 'time')
 
     # Default filter: "Semua"
     filter_type = 'all'
 
-    # Kalau user login & pilih filter "mine"
+    # Kalau user login & milih filter jadwal saya
     if request.user.is_authenticated and request.GET.get('filter') == 'mine':
         schedules = schedules.filter(organizer=request.user)
         filter_type = 'mine'
@@ -35,7 +24,6 @@ def schedule_list(request):
 def schedule_detail(request, id):
     schedule = get_object_or_404(Schedule, pk=id)
     return render(request, 'scheduling/schedule_detail.html', {'schedule': schedule})
-
 
 def schedule_feed(request):
     """
