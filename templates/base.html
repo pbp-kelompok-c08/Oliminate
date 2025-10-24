@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <title>{% block title %}Oliminate{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
   </head>
 
@@ -59,18 +60,26 @@
         </div>
 
         <div style="display: flex; gap: 12px">
-          <a href="/login/" class="btn btn-outline">Login</a>
-          <a href="/register/" class="btn btn-primary">Register</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'users:main_profile' %}" class="btn btn-outline">Profile</a>
+            <form action="{% url 'logout' %}" method="post" style="display: contents;">
+              {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Logout</button>
+            </form>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline">Login</a>
+            <a href="{% url 'users:register_user' %}" class="btn btn-primary">Register</a>
+          {% endif %}
         </div>
       </div>
     </nav>
 
-    <!-- CONTENT -->
     <main style="flex: 1; padding: 40px 0">
-      {% block content %}{% endblock %}
+      <div class="container">
+        {% block content %}{% endblock %}
+      </div>
     </main>
 
-    <!-- FOOTER -->
     <footer
       style="
         background-color: var(--pacil-blue-darker-2);
@@ -83,5 +92,9 @@
     >
       © 2025 Oliminate
     </footer>
+
+    {% block scripts %}
+    {% endblock %}
+
   </body>
 </html>

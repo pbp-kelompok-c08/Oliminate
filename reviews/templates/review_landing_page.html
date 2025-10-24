@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Review Events</title>
+<link rel="stylesheet" href="{% static 'css/global.css' %}">
+{% endblock meta %}
+
+{% block content %}
+<div class="container mt-2">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="h3">Review Events</h1>
+  </div>
+
+  {% if event_list %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="margin-top: 1rem;">
+      {% for event in event_list %}
+      <div class="card schedule-card flex flex-col"
+           style="margin:0; display:flex; flex-direction:column; overflow:hidden; border-radius:12px; background:white;">
+        {% if event.image_url %}
+          <img src="{{ event.image_url }}" alt="{{ event.category }}"
+               style="width:100%; height:200px; object-fit:cover; border-radius:12px 12px 0 0;">
+        {% else %}
+          <div style="background-color:var(--neutral-100); height:200px; display:flex; align-items:center; justify-content:center;">
+            <span class="footnote">No Image</span>
+          </div>
+        {% endif %}
+
+        <div style="padding:16px; flex:1;">
+          <h2 class="h5">{{ event.team1 }} vs {{ event.team2 }}</h2>
+          <!-- RATING SECTION -->
+          <div class="flex items-center gap-2 mt-2">
+            <div class="flex items-center">
+              {% for _ in event.full_stars %}
+                <!-- BINTANG PENUH -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808
+                          c.97 0 1.372 1.24.588 1.81l-3.084 2.24
+                          1.178 3.629c.3.921-.755 1.688-1.54 1.118
+                          L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118
+                          l1.178-3.63-3.084-2.238
+                          c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/>
+                </svg>
+              {% endfor %}
+
+              {% if event.half_star %}
+                <!-- BINTANG SETENGAH KIRI -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="w-5 h-5">
+                  <defs>
+                    <linearGradient id="halfGradient{{ event.id }}" x1="0" x2="1">
+                      <stop offset="50%" stop-color="#facc15"/>  <!-- kuning -->
+                      <stop offset="50%" stop-color="#d1d5db"/>  <!-- abu -->
+                    </linearGradient>
+                  </defs>
+                  <path fill="url(#halfGradient{{ event.id }})"
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808
+                      c.97 0 1.372 1.24.588 1.81l-3.084 2.24
+                      1.178 3.629c.3.921-.755 1.688-1.54 1.118
+                      L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118
+                      l1.178-3.63-3.084-2.238
+                      c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/>
+                </svg>
+              {% endif %}
+
+              {% for _ in event.empty_stars %}
+                <!-- BINTANG ABU-ABU -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808
+                          c.97 0 1.372 1.24.588 1.81l-3.084 2.24
+                          1.178 3.629c.3.921-.755 1.688-1.54 1.118
+                          L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118
+                          l1.178-3.63-3.084-2.238
+                          c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/>
+                </svg>
+              {% endfor %}
+            </div>
+            <span class="footnote" style="font-weight:var(--font-medium);">
+              <b>{{ event.avg_rating|default:0|floatformat:1 }}</b> ({{ event.review_count|default:0 }} reviews)
+            </span>
+          </div>
+          <p class="footnote">{{ event.category }} — {{ event.location }}</p>
+          <p class="footnote" style="margin-top:8px;">{{ event.caption|truncatechars:80 }}</p>
+          <p class="headline" style="color:var(--pacil-blue-base); margin-top:8px;">
+            {{ event.date }} | {{ event.time }}
+          </p>
+        </div>
+
+        <div style="padding:0 16px 16px 16px;">
+          <a href="{% url 'review_detail' event.id %}" class="btn btn-outline w-full">See Reviews</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card">
+      <p class="body">There are no reviewable events at this time.</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.container > .grid {
+  display: grid ;
+  gap: 1rem ; 
+}
+
+.card {
+  margin: 0 ;
+  display: block ;
+}
+
+.schedule-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  transition: all 0.25s ease;
+}
+</style>
+{% endblock content %}

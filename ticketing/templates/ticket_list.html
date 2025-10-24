@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Riwayat Tiket{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-8 px-4">
+
+  <!-- Header: Judul dan Tombol Aksi Utama -->
+  <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+    <h1 class="h3">Riwayat Tiket Saya</h1>
+    <a href="{% url 'buy_ticket' %}" class="btn btn-primary w-full md:w-auto" style="text-decoration: none;">
+      + Beli Tiket Baru
+    </a>
+  </div>
+
+  <!-- Pesan -->
+  {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+        <div class="p-4 rounded-lg 
+          {% if message.tags == 'error' %} bg-red-50 border border-red-200 text-red-700
+          {% elif message.tags == 'success' %} bg-green-50 border border-green-200 text-green-700
+          {% else %} bg-blue-50 border border-blue-200 text-blue-700 {% endif %}" 
+          role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Tombol Filter -->
+  <div class="flex items-center gap-2 mb-4">
+    <span class="body font-semibold">Filter:</span>
+    
+    <a href="{% url 'ticket_list' %}" 
+        class="btn filter-btn {% if not active_filter %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3">
+        Semua
+    </a>
+
+    <a href="?status=paid" 
+        class="btn filter-btn {% if active_filter == 'paid' %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3">
+        Sudah Dibayar
+    </a>
+
+    <a href="?status=unpaid" 
+        class="btn filter-btn {% if active_filter == 'unpaid' %}btn-primary{% else %}btn-outline{% endif %} text-sm py-2 px-3">
+        Belum Dibayar
+    </a>
+  </div>
+
+  {% if tickets %}
+    <div class="bg-white rounded-xl shadow-lg overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <!-- Table Header -->
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left footnote font-semibold text-neutral-700 uppercase tracking-wide">Event</th>
+            <th class="px-6 py-4 text-left footnote font-semibold text-neutral-700 uppercase tracking-wide">Harga</th>
+            <th class="px-6 py-4 text-left footnote font-semibold text-neutral-700 uppercase tracking-wide">Status Pembayaran</th>
+            <th class="px-6 py-4 text-left footnote font-semibold text-neutral-700 uppercase tracking-wide">Status Penggunaan</th>
+            <th class="px-6 py-4 relative"></th>
+          </tr>
+        </thead>
+
+        <tbody id="ticket-table-body" class="bg-white divide-y divide-gray-200">
+          {% for t in tickets %}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <p class="body font-semibold text-neutral-900">{{ t.schedule }}</p>
+                <p class="footnote text-neutral-700">ID Tiket: #{{ t.id }}</p>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-neutral-700">Rp {{ t.price|floatformat:0 }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {% if t.payment_status == 'paid' %}
+                  <span class="badge badge-green">Sudah Dibayar</span>
+                {% else %}
+                  <span class="badge badge-yellow">{{ t.get_payment_status_display }}</span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {% if t.is_used %}
+                  <span class="badge badge-blue">Sudah Digunakan</span>
+                {% else %}
+                  <span class="badge badge-gray">Belum Digunakan</span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <a href="{% url 'ticket_detail' t.id %}" class="btn btn-outline">Lihat Detail</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% else %}
+    <div class="bg-white rounded-xl shadow-lg p-12 text-center">
+      <h2 class="h5 text-neutral-900">Tidak Ada Tiket</h2>
+      {% if active_filter %}
+        <p class="body text-neutral-700 mt-2">Tidak ada tiket yang cocok dengan filter "{{ active_filter }}".</p>
+      {% else %}
+        <p class="body text-neutral-700 mt-2">Kamu belum membeli tiket apa pun.</p>
+      {% endif %}
+      <a href="{% url 'buy_ticket' %}" class="btn btn-primary mt-6">Cari & Beli Tiket Sekarang</a>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const filterButtons = document.querySelectorAll('.filter-btn');
+
+  filterButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      // biar tombol tetap aktif, reload halaman
+      // karena kalau fetch via JS, tombol aktif kadang tidak update
+    });
+  });
+});
+</script>
+
+<style>
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-green { background-color: #d1fae5; color: #065f46; }
+.badge-yellow { background-color: #fef9c3; color: #b45309; }
+.badge-blue { background-color: #dbeafe; color: #1e40af; }
+.badge-gray { background-color: #f3f4f6; color: #374151; }
+</style>
+
+{% endblock %}
