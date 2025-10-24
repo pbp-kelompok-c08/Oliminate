@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}Confirm Delete{% endblock %}
+{% block title %}Konfirmasi Hapus{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto py-10 px-6">
     <div class="bg-white rounded-lg shadow-md p-6 text-center">
-        <h2 class="text-xl font-semibold mb-4">Delete Review</h2>
+        <h2 class="text-xl font-semibold mb-4">Hapus Review</h2>
         <p class="text-gray-600 mb-6">
-            Are you sure you want to delete your review for <strong>{{ schedule.team1 }} vs {{ schedule.team2 }}</strong>? This action cannot be undone.
+            Apakah Anda yakin ingin menghapus review untuk pertandingan <strong>{{ schedule.team1 }} vs {{ schedule.team2 }}</strong>? Tindakan ini tidak dapat dibatalkan.
         </p>
         <form method="POST">
             {% csrf_token %}
             <div class="flex justify-center gap-4">
-                <a href="{% url 'review_detail' schedule.id %}" class="btn btn-outline">Cancel</a>
-                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a href="{% url 'review_detail' schedule.id %}" class="btn btn-outline">Batal</a>
+                <button type="submit" class="btn btn-danger">Ya, Hapus</button>
             </div>
         </form>
     </div>
