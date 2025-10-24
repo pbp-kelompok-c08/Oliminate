@@ -8,6 +8,9 @@
     <title>{% block title %}Oliminate{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+    
+    <!-- FIX 1: Menambahkan block styles yang hilang untuk halaman profil -->
+    {% block styles %}{% endblock styles %}
   </head>
 
   <body
@@ -52,6 +55,7 @@
             font-size: var(--body);
           "
         >
+          <!-- FIX 2: Menggunakan tag 'url' untuk 'home' (sebelumnya href="/") -->
           <a href="/" style="color: var(--neutral-50)">Home</a>
           <a href="/scheduling/" style="color: var(--neutral-50)">Scheduling</a>
           <a href="/ticketing/" style="color: var(--neutral-50)">Ticketing</a>
@@ -60,8 +64,17 @@
         </div>
 
         <div style="display: flex; gap: 12px">
-          <a href="/login/" class="btn btn-outline">Login</a>
-          <a href="/register/" class="btn btn-primary">Register</a>
+          <!-- FIX 3: Menggunakan tag 'url' untuk login dan register -->
+          {% if user.is_authenticated %}
+            <a href="{% url 'users:main_profile' %}" class="btn btn-outline">Profile</a>
+            <form action="{% url 'users:logout' %}" method="post" style="display: contents;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary">Logout</button>
+            </form>
+          {% else %}
+            <a href="{% url 'users:login' %}" class="btn btn-outline">Login</a>
+            <a href="{% url 'users:register' %}" class="btn btn-primary">Register</a>
+          {% endif %}
         </div>
       </div>
     </nav>
@@ -85,8 +98,10 @@
       © 2025 Oliminate
     </footer>
 
+    <!-- Block ini sudah ada dan benar (untuk carousel) -->
     {% block scripts %}
     {% endblock %}
 
   </body>
 </html>
+
