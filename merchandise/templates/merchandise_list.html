@@ -14,6 +14,31 @@
         {% endif %}
     </div>
 
+    <div style="display:flex; justify-content: flex-end; margin-bottom: 24px; gap: 16px;">
+        <form id="filter-sort-form" method="GET" action="" style="display:flex; gap: 16px; align-items:center;">
+            
+            <div>
+                <label for="category-filter" style="margin-right:8px;" class="body">Category:</label>
+                <select name="category" id="category-filter" class="form-control" style="padding:8px; border-radius:4px; border:1px solid var(--neutral-300);">
+                    <option value="" {% if not current_category %}selected{% endif %}>All Categories</option>
+                    {% for value, label in category_choices %}
+                    <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="sort-by" style="margin-right:8px;" class="body">Sort by:</label>
+                <select name="sort_by" id="sort-by" class="form-control" style="padding:8px; border-radius:4px; border:1px solid var(--neutral-300);">
+                    <option value="" {% if not current_sort %}selected{% endif %}>Name (A-Z)</option>
+                    <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+            </div>
+            
+        </form>
+    </div>
+
     {% if merchandises %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="margin-top: 1rem;">
         {% for merchandise in merchandises %}
@@ -172,6 +197,16 @@
             window.location.reload(); 
         }, 1500);
     }
+
+    const filterSortForm = document.getElementById('filter-sort-form');
+
+    document.getElementById('sort-by').addEventListener('change', function() {
+        filterSortForm.submit();
+    });
+
+    document.getElementById('category-filter').addEventListener('change', function() {
+        filterSortForm.submit();
+    });
 
     document.querySelectorAll('.detail-merchandise-btn').forEach(button => {
         button.addEventListener('click', function() {
