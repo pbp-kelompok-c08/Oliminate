@@ -12,10 +12,20 @@ from .forms import ReviewForm
 # Halaman utama review (daftar event yang dapat direview)
 def review_landing_page(request):
 
+    sort_by = request.GET.get('sort', '-review_count') 
+    
+    valid_sort_options = {
+        'highest_rating': '-avg_rating', 
+        'lowest_rating': 'avg_rating',   
+        'most_reviewed': '-review_count',
+    }
+    
+    order_by_field = valid_sort_options.get(sort_by, '-review_count')
+
     events_to_review = Schedule.objects.filter(status='reviewable').annotate(
         avg_rating=Avg('review__rating'),
         review_count=Count('review')
-    )
+    ).order_by(order_by_field)
 
     for event in events_to_review:
         avg = event.avg_rating or 0
@@ -27,7 +37,8 @@ def review_landing_page(request):
         event.empty_stars = range(empty_stars)
     
     context = {
-        'event_list': events_to_review
+        'event_list': events_to_review,
+        'current_sort': sort_by,
     }
     return render(request, 'review_landing_page.html', context)
 
