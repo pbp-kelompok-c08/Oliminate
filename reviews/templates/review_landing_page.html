@@ -10,7 +10,23 @@
 <div class="container mt-2">
   <div class="flex justify-between items-center mb-6">
     <h1 class="h3">Review Pertandingan</h1>
-  </div>
+    <div class="flex items-center gap-3"> 
+        <select id="review-sort-select" 
+                class="form-select border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500" 
+                onchange="window.location.href = '?sort=' + this.value">
+            
+            <option value="-review_count" {% if current_sort == 'most_reviewed' or current_sort == '-review_count' %}selected{% endif %}>
+                Paling Populer (Ulasan Terbanyak)
+            </option>
+            <option value="highest_rating" {% if current_sort == 'highest_rating' %}selected{% endif %}>
+                Rating Tertinggi (5, 4, 3...)
+            </option>
+            <option value="lowest_rating" {% if current_sort == 'lowest_rating' %}selected{% endif %}>
+                Rating Terendah (1, 2, 3...)
+            </option>
+        </select>
+    </div>
+</div>  
 
   {% if event_list %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="margin-top: 1rem;">
