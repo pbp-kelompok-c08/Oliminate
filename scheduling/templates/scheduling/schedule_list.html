@@ -161,57 +161,81 @@
 
   // === Card ===
   function renderCard(s) {
-    const isOwner = (s.organizer === currentUser);
-    const wrap = document.createElement('div');
-    wrap.className = 'card schedule-card';
-    wrap.style.display = 'flex';
-    wrap.style.flexDirection = 'column';
-    wrap.style.overflow = 'hidden';
-    wrap.style.borderRadius = '12px';
-    wrap.style.background = 'white';
+  const isOwner = (s.organizer === currentUser);
+  const canComplete = isOwner && s.status === 'upcoming';
+  const canReviewable = isOwner && s.status === 'completed';
 
-    wrap.innerHTML = `
-      ${s.image_url ? `
-        <img src="${s.image_url}" alt="${s.category}"
-             style="width:100%; height:200px; object-fit:cover; border-radius:12px 12px 0 0;">
-      ` : `
-        <div style="background-color:var(--neutral-100); height:200px; display:flex; align-items:center; justify-content:center;">
-          <span class="footnote">No Image</span>
-        </div>
-      `}
+  const wrap = document.createElement('div');
+  wrap.className = 'card schedule-card';
+  wrap.style.display = 'flex';
+  wrap.style.flexDirection = 'column';
+  wrap.style.overflow = 'hidden';
+  wrap.style.borderRadius = '12px';
+  wrap.style.background = 'white';
 
-      <div style="padding:16px; flex:1;">
-        <h2 class="h5">${s.team1} vs ${s.team2}</h2>
-        <p class="footnote">${s.category} — ${s.location}</p>
-        ${s.caption ? `<p class="footnote" style="margin-top:8px;">${s.caption}</p>` : ``}
-        <p class="headline" style="color:var(--pacil-blue-base); margin-top:8px;">
-          ${s.date} | ${s.time}
-        </p>
-        <p class="small" style="margin-top:4px; color:var(--neutral-500);">Penyelenggara: ${s.organizer ?? '-'}</p>
+  wrap.innerHTML = `
+    ${s.image_url ? `
+      <img src="${s.image_url}" alt="${s.category}"
+           style="width:100%; height:200px; object-fit:cover; border-radius:12px 12px 0 0;">
+    ` : `
+      <div style="background-color:var(--neutral-100); height:200px; display:flex; align-items:center; justify-content:center;">
+        <span class="footnote">No Image</span>
       </div>
+    `}
 
-      <div style="padding:0 16px 16px 16px; display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
-        <a href="/scheduling/${s.id}/" class="btn btn-outline">Detail</a>
-        ${isOwner ? `
-          <button
-            class="editBtn btn btn-primary"
-            data-id="${s.id}"
-            data-category="${s.category ?? ''}"
-            data-location="${s.location ?? ''}"
-            data-team1="${s.team1 ?? ''}"
-            data-team2="${s.team2 ?? ''}"
-            data-date="${s.date ?? ''}"
-            data-time="${s.time ?? ''}"
-            data-image_url="${s.image_url ?? ''}"
-            data-caption="${(s.caption ?? '').replace(/"/g, '&quot;')}"
-          >Edit</button>
-          <button class="deleteBtn btn btn-danger" data-id="${s.id}">Delete</button>
-          <button class="makeReviewableBtn btn btn-outline" data-id="${s.id}">Reviewable</button>
-        ` : ``}
-      </div>
-    `;
-    return wrap;
-  }
+    <div style="padding:16px; flex:1;">
+      <h2 class="h5">${s.team1} vs ${s.team2}</h2>
+      <p class="footnote">${s.category} — ${s.location}</p>
+      ${s.caption ? `<p class="footnote" style="margin-top:8px;">${s.caption}</p>` : ``}
+      <p class="headline" style="color:var(--pacil-blue-base); margin-top:8px;">
+        ${s.date} | ${s.time}
+      </p>
+      <p class="small" style="margin-top:4px; color:var(--neutral-500);">
+        Penyelenggara: ${s.organizer ?? '-'}
+      </p>
+      <p class="small" style="margin-top:4px; color:var(--neutral-500);">
+        Status: <strong>${s.status}</strong>
+      </p>
+    </div>
+
+    <div style="padding:0 16px 16px 16px; display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+      <a href="/scheduling/${s.id}/" class="btn btn-outline">Detail</a>
+
+      ${isOwner ? `
+        <button
+          class="editBtn btn btn-primary"
+          data-id="${s.id}"
+          data-category="${s.category ?? ''}"
+          data-location="${s.location ?? ''}"
+          data-team1="${s.team1 ?? ''}"
+          data-team2="${s.team2 ?? ''}"
+          data-date="${s.date ?? ''}"
+          data-time="${s.time ?? ''}"
+          data-image_url="${s.image_url ?? ''}"
+          data-caption="${(s.caption ?? '').replace(/"/g, '&quot;')}"
+        >Edit</button>
+
+        <button class="deleteBtn btn btn-danger" data-id="${s.id}">Delete</button>
+
+        <button
+          class="makeCompletedBtn btn btn-outline"
+          data-id="${s.id}"
+          ${canComplete ? '' : 'disabled'}
+          title="${canComplete ? 'Tandai Completed' : 'Hanya aktif saat status Upcoming'}"
+        >Completed</button>
+
+        <button
+          class="makeReviewableBtn btn btn-outline"
+          data-id="${s.id}"
+          ${canReviewable ? '' : 'disabled'}
+          title="${canReviewable ? 'Tandai Reviewable' : 'Aktif setelah Completed'}"
+        >Reviewable</button>
+      ` : ``}
+    </div>
+  `;
+  return wrap;
+}
+
 
   // === Modal helpers ===
   let currentEditingId = null;
@@ -318,6 +342,8 @@
     if (mrBtn) {
       makeReviewable(mrBtn.dataset.id);
     }
+    const mcBtn = e.target.closest('.makeCompletedBtn');
+  if (mcBtn) { makeCompleted(mcBtn.dataset.id); return; }
   });
 
   async function makeReviewable(id) {
@@ -338,6 +364,30 @@
       toast('Terjadi kesalahan jaringan', 'error');
     }
   }
+  
+  async function makeCompleted(id) {
+  try {
+    const res = await fetch(`/scheduling/api/${id}/complete/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrftoken },
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      const msg = (data && data.errors && data.errors.__all__) || 'Gagal menandai completed';
+      toast(msg, 'error');
+      console.error('makeCompleted error:', data);
+      return;
+    }
+
+    toast(data.message || 'Ditandai completed', 'success');
+    await fetchList(); // refresh kartu agar tombol Reviewable jadi aktif
+  } catch (e) {
+    console.error(e);
+    toast('Terjadi kesalahan jaringan', 'error');
+  }
+}
+
 
   // Submit create / update
   scheduleForm.addEventListener('submit', async (e) => {
