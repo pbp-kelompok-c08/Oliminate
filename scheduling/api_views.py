@@ -19,7 +19,6 @@ def _serialize(schedule: Schedule):
         "organizer": schedule.organizer.username if schedule.organizer else "-",
     }
 
-@login_required
 @require_http_methods(["GET"])
 def api_list_schedules(request):
     """
