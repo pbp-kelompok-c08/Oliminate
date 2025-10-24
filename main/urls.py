@@ -1,8 +1,7 @@
 from django.urls import path
 from . import views
 
-app_name = 'main'
-
 urlpatterns = [
-    path('', views.main_page, name='home'),
+    path('', views.homepage, name='homepage'),
+    path('get-schedules-json/', views.get_schedules_json, name='get_schedules_json'),
 ]
