@@ -4,6 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>{% block title %}Oliminate{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
 
@@ -60,17 +61,19 @@
           <a href="/review/" style="color: var(--neutral-50)">Review</a>
         </div>
 
-        <div style="display: flex; gap: 12px">
-          {% if user.is_authenticated %}
-            <a href="{% url 'users:main_profile' %}" class="btn btn-outline">Profile</a>
-            <form action="{% url 'logout' %}" method="post" style="display: contents;">
-              {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Logout</button>
-            </form>
-          {% else %}
-            <a href="{% url 'login' %}" class="btn btn-outline">Login</a>
-            <a href="{% url 'users:register_user' %}" class="btn btn-primary">Register</a>
-          {% endif %}
+      <div style="display: flex; gap: 12px">
+      {% if user.is_authenticated %}
+        <a href="{% url 'users:main_profile' %}" class="btn btn-outline">Profile</a>
+    
+        <form action="{% url 'users:logout' %}" method="post" style="display: contents;">
+        {% csrf_token %}
+          <button type="submit" class="btn btn-primary">Logout</button>
+        </form>
+  
+        {% else %} 
+          <a href="{% url 'users:login' %}" class="btn btn-outline">Login</a>
+          <a href="{% url 'users:register' %}" class="btn btn-primary">Register</a>
+        {% endif %}
         </div>
       </div>
     </nav>
@@ -93,5 +96,9 @@
     >
       © 2025 Oliminate
     </footer>
+
+    {% block scripts %}
+    {% endblock %}
+
   </body>
 </html>
