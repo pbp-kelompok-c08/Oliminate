@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Jadwal Pertandingan{% endblock %}
+
+{% block content %}
+<div class="container mt-2">
+  <!-- Header & Controls -->
+  <div class="flex justify-between items-center mb-6 flex-wrap gap-4 sm:gap-2">
+    <h1 class="h3 text-lg sm:text-xl font-semibold">Jadwal Pertandingan</h1>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <select id="filterSelect" class="card px-3 py-2 text-sm sm:text-base border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-300">
+        <option value="all" {% if filter_type == "all" %}selected{% endif %}>Semua</option>
+        <option value="mine" {% if filter_type != "all" %}selected{% endif %}>Jadwal Saya</option>
+      </select>
+
+      <button id="refreshBtn" class="btn btn-outline text-sm sm:text-base">Refresh</button>
+
+      {% if request.user.is_authenticated %}
+      <button id="createBtn" class="btn btn-primary text-sm sm:text-base">+ Buat Jadwal</button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- States -->
+  <div id="state-loading" class="footnote text-gray-600 hidden">Memuat data jadwal…</div>
+  <div id="state-error" class="footnote text-red-600 hidden">Terjadi error saat memuat jadwal.</div>
+  <div id="state-empty" class="footnote text-gray-400 hidden">Belum ada jadwal pertandingan.</div>
+
+  <!-- Grid Jadwal -->
+  <div id="scheduleList"
+       class="grid gap-6 sm:gap-8"
+       style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 1.25rem;">
+  </div>
+</div>
+
+<!-- Modal: Create / Update -->
+<div id="formModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-40">
+  <div class="card w-[92%] sm:w-[80%] max-w-2xl bg-white p-6 rounded-2xl shadow-lg relative">
+    <div class="flex items-center justify-between mb-4">
+      <h2 id="formModalTitle" class="headline text-lg sm:text-xl font-semibold">Tambah Jadwal</h2>
+      <button id="closeFormModal" class="btn btn-outline text-sm px-3">✕</button>
+    </div>
+
+    <form id="scheduleForm" class="space-y-4">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="footnote text-sm text-gray-600" for="category">Kategori</label>
+          <input id="category" name="category" class="card w-full border border-gray-200 rounded-md px-3 py-2" placeholder="Contoh: Sepak Bola" required />
+        </div>
+        <div>
+          <label class="footnote text-sm text-gray-600" for="location">Lokasi</label>
+          <input id="location" name="location" class="card w-full border border-gray-200 rounded-md px-3 py-2" placeholder="Gelanggang, Lapangan A, ..." required />
+        </div>
+        <div>
+          <label class="footnote text-sm text-gray-600" for="team1">Tim 1</label>
+          <input id="team1" name="team1" class="card w-full border border-gray-200 rounded-md px-3 py-2" required />
+        </div>
+        <div>
+          <label class="footnote text-sm text-gray-600" for="team2">Tim 2</label>
+          <input id="team2" name="team2" class="card w-full border border-gray-200 rounded-md px-3 py-2" required />
+        </div>
+        <div>
+          <label class="footnote text-sm text-gray-600" for="date">Tanggal</label>
+          <input id="date" name="date" type="date" class="card w-full border border-gray-200 rounded-md px-3 py-2" required />
+        </div>
+        <div>
+          <label class="footnote text-sm text-gray-600" for="time">Jam</label>
+          <input id="time" name="time" type="time" class="card w-full border border-gray-200 rounded-md px-3 py-2" required />
+        </div>
+      </div>
+
+      <div>
+        <label class="footnote text-sm text-gray-600" for="image_url">Gambar (URL)</label>
+        <input id="image_url" name="image_url" class="card w-full border border-gray-200 rounded-md px-3 py-2" placeholder="https://..." />
+      </div>
+
+      <div>
+        <label class="footnote text-sm text-gray-600" for="caption">Catatan / Caption</label>
+        <textarea id="caption" name="caption" class="card w-full border border-gray-200 rounded-md px-3 py-2" rows="3" placeholder="Keterangan singkat pertandingan…"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" id="cancelForm" class="btn btn-outline text-sm px-4">Batal</button>
+        <button id="submitForm" class="btn btn-primary text-sm px-4">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Confirm Delete -->
+<div id="confirmModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-40">
+  <div class="card bg-white p-6 rounded-2xl shadow-lg w-[90%] sm:w-[400px] text-center">
+    <h3 class="headline text-lg font-semibold">Hapus Jadwal</h3>
+    <p class="footnote text-gray-600 mt-2">Yakin ingin menghapus jadwal ini?</p>
+    <div class="flex justify-center gap-2 mt-4">
+      <button id="cancelDelete" class="btn btn-outline text-sm px-4">Batal</button>
+      <button id="confirmDeleteBtn" class="btn btn-danger text-sm px-4">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toastStack" class="fixed top-4 right-4 z-50" style="position:fixed; top:16px; right:16px; z-index:50;"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  
+  // === CSRF & user ===
+  function getCookie(name) {
+    const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : '';
+  }
+  const csrftoken   = getCookie('csrftoken');
+  const currentUser = "{{ request.user.username|escapejs }}";
+  const userRole    = "{{ request.user.role|default_if_none:'' }}";
+  const isOrganizer = (userRole === "organizer");
+
+  // === DOM ===
+  const listEl = document.getElementById('scheduleList');
+  const loadingEl = document.getElementById('state-loading');
+  const emptyEl   = document.getElementById('state-empty');
+  const errorEl   = document.getElementById('state-error');
+
+  const filterSelect = document.getElementById('filterSelect');
+  const refreshBtn   = document.getElementById('refreshBtn');
+  const createBtn    = document.getElementById('createBtn');
+
+  const formModal = document.getElementById('formModal');
+  const formTitle = document.getElementById('formModalTitle');
+  const scheduleForm = document.getElementById('scheduleForm');
+  const closeFormModal = document.getElementById('closeFormModal');
+  const cancelForm = document.getElementById('cancelForm');
+  const submitForm = document.getElementById('submitForm');
+
+  const confirmModal = document.getElementById('confirmModal');
+  const cancelDelete = document.getElementById('cancelDelete');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+  // === Toast ===
+  const toastStack = document.getElementById('toastStack');
+  function toast(msg, type='info') {
+    const t = document.createElement('div');
+    t.className = 'card';
+    t.style.background = (type==='success') ? 'var(--pacil-blue-base)' :
+                         (type==='error')   ? 'var(--pacil-red-base)' : 'var(--pacil-blue-lighter-1)';
+    t.style.color = 'white';
+    t.textContent = msg;
+    toastStack.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  }
+
+  // === State helpers ===
+  function setState({loading=false, error=false, empty=false}) {
+    loadingEl.style.display = loading ? '' : 'none';
+    errorEl.style.display   = error   ? '' : 'none';
+    emptyEl.style.display   = empty   ? '' : 'none';
+  }
+
+  // === Card ===
+  function renderCard(s) {
+    const isOwner = (s.organizer === currentUser);
+    const wrap = document.createElement('div');
+    wrap.className = 'card schedule-card';
+    wrap.style.display = 'flex';
+    wrap.style.flexDirection = 'column';
+    wrap.style.overflow = 'hidden';
+    wrap.style.borderRadius = '12px';
+    wrap.style.background = 'white';
+
+    wrap.innerHTML = `
+      ${s.image_url ? `
+        <img src="${s.image_url}" alt="${s.category}"
+             style="width:100%; height:200px; object-fit:cover; border-radius:12px 12px 0 0;">
+      ` : `
+        <div style="background-color:var(--neutral-100); height:200px; display:flex; align-items:center; justify-content:center;">
+          <span class="footnote">No Image</span>
+        </div>
+      `}
+
+      <div style="padding:16px; flex:1;">
+        <h2 class="h5">${s.team1} vs ${s.team2}</h2>
+        <p class="footnote">${s.category} — ${s.location}</p>
+        ${s.caption ? `<p class="footnote" style="margin-top:8px;">${s.caption}</p>` : ``}
+        <p class="headline" style="color:var(--pacil-blue-base); margin-top:8px;">
+          ${s.date} | ${s.time}
+        </p>
+        <p class="small" style="margin-top:4px; color:var(--neutral-500);">Penyelenggara: ${s.organizer ?? '-'}</p>
+      </div>
+
+      <div style="padding:0 16px 16px 16px; display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+        <a href="/scheduling/${s.id}/" class="btn btn-outline">Detail</a>
+        ${isOwner ? `
+          <button
+            class="editBtn btn btn-primary"
+            data-id="${s.id}"
+            data-category="${s.category ?? ''}"
+            data-location="${s.location ?? ''}"
+            data-team1="${s.team1 ?? ''}"
+            data-team2="${s.team2 ?? ''}"
+            data-date="${s.date ?? ''}"
+            data-time="${s.time ?? ''}"
+            data-image_url="${s.image_url ?? ''}"
+            data-caption="${(s.caption ?? '').replace(/"/g, '&quot;')}"
+          >Edit</button>
+          <button class="deleteBtn btn btn-danger" data-id="${s.id}">Delete</button>
+          <button class="makeReviewableBtn btn btn-outline" data-id="${s.id}">Reviewable</button>
+        ` : ``}
+      </div>
+    `;
+    return wrap;
+  }
+
+  // === Modal helpers ===
+  let currentEditingId = null;
+  let pendingDeleteId = null;
+
+  function openFormModal(mode='create', data=null) {
+    formTitle.textContent = (mode === 'create') ? 'Tambah Jadwal' : 'Edit Jadwal';
+    currentEditingId = (mode === 'create') ? null : data.id;
+
+    scheduleForm.category.value  = data?.category  ?? '';
+    scheduleForm.location.value  = data?.location  ?? '';
+    scheduleForm.team1.value     = data?.team1     ?? '';
+    scheduleForm.team2.value     = data?.team2     ?? '';
+    scheduleForm.date.value      = data?.date      ?? '';
+    scheduleForm.time.value      = data?.time      ?? '';
+    scheduleForm.image_url.value = data?.image_url ?? '';
+    scheduleForm.caption.value   = data?.caption   ?? '';
+
+    formModal.style.display = 'flex';
+  }
+  function closeForm() {
+    formModal.style.display = 'none';
+  }
+
+  function openConfirm(id) {
+    pendingDeleteId = id;
+    confirmModal.style.display = 'flex';
+  }
+  function closeConfirm() {
+    confirmModal.style.display = 'none';
+  }
+
+  // === Fetch list ===
+  async function fetchList(showToast=false) {
+    setState({loading:true});
+    listEl.innerHTML = '';
+    try {
+      const f = (filterSelect?.value === 'mine') ? 'mine' : 'all';
+
+      // BENAR: /scheduling/api/list/?filter=...
+      const res = await fetch(`/scheduling/api/list/?filter=${f}&_=${Date.now()}`, {
+        headers: {'X-CSRFToken': csrftoken},
+        cache: 'no-store',
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) throw new Error('not ok');
+
+      if (!data.items || data.items.length === 0) {
+        setState({empty:true});
+        return;
+      }
+
+      setState({});
+      data.items.forEach(s => listEl.appendChild(renderCard(s)));
+      if (showToast) toast('Jadwal berhasil di-refresh', 'success');
+    } catch (e) {
+      console.error(e);
+      setState({error:true});
+      if (showToast) toast('Gagal memuat jadwal', 'error');
+    }
+  }
+
+  // === Events ===
+  refreshBtn?.addEventListener('click', () => fetchList(true));
+  filterSelect?.addEventListener('change', () => fetchList());
+
+  // Penting: attach tanpa syarat isOrganizer (server yang menolak kalau bukan organizer)
+  if (createBtn) {
+    createBtn.addEventListener('click', () => {
+      if (!isOrganizer) {
+        toast('Hanya organizer yang dapat membuat jadwal.', 'error');
+        return;
+      }
+      openFormModal('create');
+    });
+  }
+
+  closeFormModal.addEventListener('click', closeForm);
+  cancelForm.addEventListener('click', closeForm);
+
+  // Delegasi untuk Edit/Delete/MakeReviewable
+  listEl.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.editBtn');
+    if (editBtn) {
+      openFormModal('edit', {
+        id: editBtn.dataset.id,
+        category:  editBtn.dataset.category,
+        location:  editBtn.dataset.location,
+        team1:     editBtn.dataset.team1,
+        team2:     editBtn.dataset.team2,
+        date:      editBtn.dataset.date,
+        time:      editBtn.dataset.time,
+        image_url: editBtn.dataset.image_url,
+        caption:   editBtn.dataset.caption,
+      });
+      return;
+    }
+    const delBtn = e.target.closest('.deleteBtn');
+    if (delBtn) {
+      openConfirm(delBtn.dataset.id);
+      return;
+    }
+    const mrBtn = e.target.closest('.makeReviewableBtn');
+    if (mrBtn) {
+      makeReviewable(mrBtn.dataset.id);
+    }
+  });
+
+  async function makeReviewable(id) {
+    try {
+      const res = await fetch(`/scheduling/api/${id}/make-reviewable/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken}
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        toast('Gagal menandai reviewable', 'error');
+        return;
+      }
+      toast(data.message || 'Ditandai reviewable', 'success');
+      await fetchList();
+    } catch (e) {
+      console.error(e);
+      toast('Terjadi kesalahan jaringan', 'error');
+    }
+  }
+
+  // Submit create / update
+  scheduleForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!isOrganizer && !currentEditingId) {
+      toast('Hanya organizer yang dapat membuat jadwal.', 'error');
+      return;
+    }
+    const formData = new FormData(scheduleForm);
+    const url = currentEditingId
+      ? `/scheduling/api/${currentEditingId}/update/`
+      : `/scheduling/api/create/`;
+
+    submitForm.disabled = true;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        body: formData
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        let msg = 'Gagal menyimpan jadwal.';
+        if (data.errors) {
+          msg += ' ' + Object.entries(data.errors)
+                  .map(([k,v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+                  .join(' | ');
+        }
+        toast(msg, 'error');
+        return;
+      }
+
+      toast(currentEditingId ? 'Jadwal berhasil diupdate' : 'Jadwal berhasil dibuat', 'success');
+      closeForm();
+      await fetchList();
+    } catch (err) {
+      console.error(err);
+      toast('Terjadi kesalahan jaringan', 'error');
+    } finally {
+      submitForm.disabled = false;
+    }
+  });
+
+  // Konfirmasi hapus
+  cancelDelete.addEventListener('click', closeConfirm);
+  confirmDeleteBtn.addEventListener('click', async () => {
+    if (!pendingDeleteId) return;
+    confirmDeleteBtn.disabled = true;
+    try {
+      const res = await fetch(`/scheduling/api/${pendingDeleteId}/delete/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken}
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        toast('Gagal menghapus jadwal', 'error');
+        return;
+      }
+
+      toast('Jadwal terhapus', 'success');
+      closeConfirm();
+      await fetchList();
+    } catch (e) {
+      console.error(e);
+      toast('Terjadi kesalahan jaringan', 'error');
+    } finally {
+      confirmDeleteBtn.disabled = false;
+    }
+  });
+
+  // First load
+  fetchList();
+</script>
+{% endblock %}

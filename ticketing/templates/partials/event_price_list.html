@@ -1,0 +1,18 @@
+<h2 class="h4 mb-4">Daftar Harga Saat Ini</h2>
+{% if prices %}
+  <ul class="divide-y divide-gray-200">
+    {% for p in prices %}
+      <li class="py-3 flex justify-between items-center">
+        <div>
+          <p class="body font-semibold">{{ p.schedule }}</p>
+          <p class="footnote text-gray-600">{{ p.schedule.date }}</p>
+        </div>
+        <span class="body text-blue-600 font-semibold">
+          Rp {{ p.price|floatformat:0 }}
+        </span>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="body text-gray-600">Belum ada harga yang diatur.</p>
+{% endif %}
