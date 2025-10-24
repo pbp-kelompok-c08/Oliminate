@@ -84,6 +84,9 @@
         <div>
           <p class="text-sm text-gray-600">
             Review dari <span class="font-semibold text-blue-600">{{ review.reviewer.username }}</span>
+            {% if review.updated_at|date:"YmdHi" != review.created_at|date:"YmdHi" %}
+            <span class="text-xs text-gray-500 ml-1">(Diedit)</span>
+            {% endif %}
           </p>
           <div class="flex items-center gap-2 mt-1">
             <div class="flex">
