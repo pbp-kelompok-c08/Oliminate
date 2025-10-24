@@ -12,66 +12,41 @@
     {% block styles %}{% endblock styles %}
   </head>
 
-  <body
-    class="flex flex-col min-h-screen font-sans bg-[var(--neutral-50)] text-[var(--neutral-900)]"
-  >
+  <body class="flex flex-col min-h-screen font-sans bg-[var(--neutral-50)] text-[var(--neutral-900)]">
     <!-- NAVBAR -->
-    <nav
-      class="bg-[var(--pacil-blue-darker-2)] shadow-md py-3"
-      x-data="{ open: false }"
-      xmlns:x="http://www.w3.org/1999/xhtml"
-    >
+    <nav class="bg-[var(--pacil-blue-darker-2)] shadow-md py-3">
       <div class="container mx-auto flex justify-between items-center px-4">
         <!-- Logo -->
-        <a href="/" class="text-xl font-semibold text-[var(--neutral-50)]"
-          >Oliminate</a
-        >
+        <a href="/" class="text-xl font-semibold text-[var(--neutral-50)]">Oliminate</a>
 
         <!-- Hamburger (mobile) -->
         <button
-          class="text-[var(--neutral-50)] md:hidden focus:outline-none"
-          @click="open = !open"
+          id="menu-toggle"
+          class="md:hidden flex flex-col justify-center items-center space-y-1.5 focus:outline-none focus:ring-2 focus:ring-white/60 rounded-md p-1 transition"
+          aria-label="Toggle Menu"
+          aria-controls="mobile-menu"
+          aria-expanded="false"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="w-6 h-6"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-            />
-          </svg>
+          <span class="bar-1 w-6 h-0.5 bg-white transition-all duration-300 origin-center"></span>
+          <span class="bar-2 w-6 h-0.5 bg-white transition-all duration-300 origin-center"></span>
+          <span class="bar-3 w-6 h-0.5 bg-white transition-all duration-300 origin-center"></span>
         </button>
 
-        <!-- Menu utama -->
-        <div
-          :class="{'block': open, 'hidden': !open}"
-          class="w-full md:w-auto md:flex md:items-center md:gap-6 hidden flex-col md:flex-row text-[var(--neutral-50)] text-sm md:text-base mt-4 md:mt-0"
-        >
+        <!-- Menu utama (desktop) -->
+        <div class="hidden md:flex gap-6 items-center text-[var(--neutral-50)] text-sm md:text-base">
           <a href="/" class="hover:underline">Home</a>
           <a href="/scheduling/" class="hover:underline">Scheduling</a>
           <a href="/ticketing/" class="hover:underline">Ticketing</a>
           <a href="/merchandise/" class="hover:underline">Merchandise</a>
           <a href="/review/" class="hover:underline">Review</a>
 
-          <!-- Tombol kanan -->
-          <div class="flex flex-wrap justify-center md:justify-end gap-2 mt-4 md:mt-0">
+          <div class="flex flex-wrap justify-center md:justify-end gap-2">
             {% if user.is_authenticated %}
               <a
                 href="{% url 'users:main_profile' %}"
                 class="border border-[var(--neutral-50)] text-[var(--neutral-50)] px-3 py-1 rounded-lg hover:bg-[var(--neutral-50)] hover:text-[var(--pacil-blue-darker-2)] transition"
-                >Profile</a
-              >
-              <form
-                action="{% url 'users:logout' %}"
-                method="post"
-                class="inline-block"
-              >
+              >Profile</a>
+              <form action="{% url 'users:logout' %}" method="post" class="inline-block">
                 {% csrf_token %}
                 <button
                   type="submit"
@@ -84,16 +59,37 @@
               <a
                 href="{% url 'users:login' %}"
                 class="border border-[var(--neutral-50)] text-[var(--neutral-50)] px-3 py-1 rounded-lg hover:bg-[var(--neutral-50)] hover:text-[var(--pacil-blue-darker-2)] transition"
-                >Login</a
-              >
+              >Login</a>
               <a
                 href="{% url 'users:register' %}"
                 class="bg-[var(--neutral-50)] text-[var(--pacil-blue-darker-2)] px-3 py-1 rounded-lg font-medium hover:opacity-90 transition"
-                >Register</a
-              >
+              >Register</a>
             {% endif %}
           </div>
         </div>
+      </div>
+
+      <!-- Mobile Dropdown Menu -->
+      <div
+        id="mobile-menu"
+        class="hidden md:hidden flex-col space-y-2 py-3 px-6 text-[var(--neutral-50)] bg-[var(--pacil-blue-darker-2)] border-t border-[var(--pacil-blue-lighter-1)]"
+      >
+        <a href="/" class="block hover:underline">Home</a>
+        <a href="/scheduling/" class="block hover:underline">Scheduling</a>
+        <a href="/ticketing/" class="block hover:underline">Ticketing</a>
+        <a href="/merchandise/" class="block hover:underline">Merchandise</a>
+        <a href="/review/" class="block hover:underline">Review</a>
+
+        {% if user.is_authenticated %}
+          <a href="{% url 'users:main_profile' %}" class="block border border-[var(--neutral-50)] text-center rounded-lg py-1 mt-2">Profile</a>
+          <form action="{% url 'users:logout' %}" method="post" class="mt-2">
+            {% csrf_token %}
+            <button type="submit" class="w-full bg-[var(--neutral-50)] text-[var(--pacil-blue-darker-2)] rounded-lg py-1 font-medium">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'users:login' %}" class="block border border-[var(--neutral-50)] text-center rounded-lg py-1 mt-2">Login</a>
+          <a href="{% url 'users:register' %}" class="block bg-[var(--neutral-50)] text-[var(--pacil-blue-darker-2)] text-center rounded-lg py-1 mt-2 font-medium">Register</a>
+        {% endif %}
       </div>
     </nav>
 
@@ -103,15 +99,46 @@
     </main>
 
     <!-- FOOTER -->
-    <footer
-      class="bg-[var(--pacil-blue-darker-2)] text-[var(--neutral-50)] text-center py-4 text-sm mt-auto"
-    >
+    <footer class="bg-[var(--pacil-blue-darker-2)] text-[var(--neutral-50)] text-center py-4 text-sm mt-auto">
       © 2025 Oliminate
     </footer>
 
     {% block scripts %}
-    <!-- Alpine.js untuk toggle menu -->
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+      const menuToggle = document.getElementById("menu-toggle");
+      const mobileMenu = document.getElementById("mobile-menu");
+      const bar1 = menuToggle?.querySelector(".bar-1");
+      const bar2 = menuToggle?.querySelector(".bar-2");
+      const bar3 = menuToggle?.querySelector(".bar-3");
+
+      let open = false;
+
+      function openMenu() {
+        open = true;
+        menuToggle.setAttribute("aria-expanded", "true");
+        mobileMenu.classList.remove("hidden");
+        bar1.classList.add("translate-y-1.5","rotate-45");
+        bar2.classList.add("opacity-0");
+        bar3.classList.add("-translate-y-1.5","-rotate-45");
+      }
+
+      function closeMenu() {
+        open = false;
+        menuToggle.setAttribute("aria-expanded", "false");
+        mobileMenu.classList.add("hidden");
+        bar1.classList.remove("translate-y-1.5","rotate-45");
+        bar2.classList.remove("opacity-0");
+        bar3.classList.remove("-translate-y-1.5","-rotate-45");
+      }
+
+      menuToggle?.addEventListener("click", () => {
+        open ? closeMenu() : openMenu();
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && open) closeMenu();
+      });
+    </script>
     {% endblock %}
 
     {% block extra_scripts %}{% endblock %}
