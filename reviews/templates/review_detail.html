@@ -74,8 +74,8 @@
     {% for review in reviews %}
     <div class="bg-white rounded-xl shadow-lg p-5"> 
       <div class="flex items-center gap-3 mb-3">
-        {% if review.reviewer.profile.avatar %}
-          <img src="{{ review.reviewer.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover" alt="{{ review.reviewer.username }}">
+        {% if review.reviewer.profile_picture %}
+          <img src="{{ review.reviewer.profile_picture.url }}" class="w-10 h-10 rounded-full object-cover" alt="{{ review.reviewer.username }}">
         {% else %}
           <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
             <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
