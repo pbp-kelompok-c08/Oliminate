@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- ===== HERO BANNER ===== -->
+<section 
+  class="relative w-full h-[400px] bg-cover bg-center flex items-center justify-center text-center"
+  style="background-image: url('{% static "images/banner2.jpg" %}')"
+>
+  <!-- Layer untuk blur -->
+  <div class="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm"></div>
+  
+  <div class="relative z-10 text-white">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text 
+         bg-gradient-to-r from-[var(--pacil-blue-lighter-1)] to-[var(--pacil-red-lighter-1)] 
+         drop-shadow-md mb-4">
+      Selamat Datang di Oliminate!
+    </h1>
+    <h2 class="text-2xl font-bold mb-4">Temukan dan beli tiket pertandingan favoritmu!</h2>
+    <!-- <p class="text-lg">Temukan dan beli tiket pertandingan favoritmu!</p> -->
+  </div>
+</section>
+
+
+<!-- ===== TENTANG KAMI ===== -->
+<section class="bg-gray-100 py-0 w-full">
+  <div class="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-8 py-12 md:py-20 gap-8">
+    <!-- Text -->
+    <div class="flex-1 text-left">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text 
+           bg-gradient-to-r from-[var(--pacil-blue-darker-1)] to-[var(--pacil-blue-darker-2)] 
+           drop-shadow-md mb-4">
+      Tentang Kami
+    </h2>
+      <p class="text-gray-700 text-lg leading-relaxed max-w-2xl">
+        Oliminate adalah aplikasi yang dirancang untuk membantu event organizer dalam mengelola perlombaan secara efisien dan terintegrasi.
+        Produk ini dibuat oleh <span class="font-semibold text-blue-600">Kelompok C08</span> dengan tujuan mempermudah pengelolaan event kompetisi,
+        mulai dari penjadwalan, penjualan tiket, hingga pengalaman menonton secara langsung maupun daring.
+      </p>
+    </div>
+
+    <!-- Image -->
+    <div class="flex-1 flex justify-center">
+      <img 
+        src="{% static 'images/gambar1.png' %}" 
+        alt="Tentang Kami" 
+        class="w-full max-w-md rounded-lg transform transition-transform duration-500 hover:scale-105"
+      >
+    </div>
+  </div>
+</section>
+
+<section class="relative left-[-2rem] w-[calc(100%+4rem)] px-8 py-12">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text 
+           bg-gradient-to-r from-[var(--pacil-blue-darker-1)] to-[var(--pacil-blue-darker-2)] 
+           drop-shadow-md text-center mb-4">
+  Jadwal Terdekat
+</h2>
+  {% if schedules %}
+  <div class="flex gap-6 overflow-x-auto py-6 scrollbar-hide snap-x snap-mandatory min-h-[300px] pl-6">
+    {% for schedule in schedules %}
+      <div 
+        class="min-w-[250px] bg-white rounded-xl shadow-md overflow-hidden flex-shrink-0 
+               transition-transform duration-300 transform 
+               hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:z-10
+               active:scale-110 active:-translate-y-3 active:shadow-3xl active:z-20
+               snap-center cursor-pointer">
+        {% if schedule.image_url %}
+          <img src="{{ schedule.image_url }}" alt="{{ schedule.category }}" class="h-40 w-full object-cover">
+        {% else %}
+          <img src="{% static 'images/default.jpg' %}" alt="Default" class="h-40 w-full object-cover">
+        {% endif %}
+        <div class="p-4">
+          <h3 class="text-lg font-semibold mb-1">{{ schedule.team1 }} vs {{ schedule.team2 }}</h3>
+          <p class="text-sm text-gray-500 mb-1 uppercase">{{ schedule.category }}</p>
+          <p class="text-sm text-gray-600">
+            📅 {{ schedule.date|date:"d M Y" }}<br>
+            🕒 {{ schedule.time|time:"H:i" }}<br>
+            📍 {{ schedule.location }}
+          </p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p class="text-gray-500">Belum ada jadwal upcoming.</p>
+  {% endif %}
+</section>
+
+
+<!-- ===== AJAKAN BELI TIKET ===== -->
+<section class="bg-gray-100 py-15 w-full">
+  <div class="grid md:grid-cols-2 items-center justify-between max-w-7xl mx-auto px-16 gap-10">
+
+    <!-- Bagian teks -->
+    <div class="text-right">
+      <h2 class="text-4xl font-extrabold mb-4 text-gray-800">
+        Ingin Dapatkan Tiketmu Sekarang?
+      </h2>
+      <p class="text-lg text-gray-600 mb-8">
+        Jangan sampai ketinggalan keseruan pertandingan favoritmu!
+      </p>
+      <a href="{% url 'ticket_list' %}" 
+        class="px-8 py-3 rounded-lg font-semibold transition"
+        style="background-color: var(--pacil-red-lighter-1); color: var(--neutral-50); border: 2px solid var(--pacil-red-lighter-1);"
+        onmouseover="this.style.backgroundColor='var(--pacil-red-base)'; this.style.borderColor='var(--pacil-red-base)';"
+        onmouseout="this.style.backgroundColor='var(--pacil-red-lighter-1)'; this.style.borderColor='var(--pacil-red-lighter-1)';">
+        🎟️ Beli Tiket Sekarang
+      </a>
+    </div>
+
+    <!-- Bagian gambar -->
+    <div class="flex justify-center">
+      <img 
+        src="{% static 'images/gambar3.png' %}" 
+        alt="Beli Tiket" 
+        class="w-full max-w-md rounded-lg transform transition-transform duration-500 hover:scale-105"
+      >
+    </div>
+  </div>
+</section>
+
+
+<!-- ===== AJAKAN LIHAT REVIEW ===== -->
+<section class="bg-gray-100 py-15 w-full">
+  <div class="grid md:grid-cols-2 items-center justify-between max-w-7xl mx-auto px-16 gap-10">
+
+    <!-- Bagian gambar -->
+    <div class="flex justify-center">
+      <img 
+        src="{% static 'images/gambar4.png' %}" 
+        alt="Lihat Review" 
+        class="w-full max-w-md rounded-lg transform transition-transform duration-500 hover:scale-105"
+      >
+    </div>
+
+    <!-- Bagian teks -->
+    <div class="text-left">
+      <h2 class="text-4xl font-extrabold mb-4 text-gray-800">
+        Lihat Review dari Penonton Lain!
+      </h2>
+      <p class="text-lg text-gray-600 mb-8">
+        Ketahui pengalaman mereka sebelum kamu datang ke event berikutnya.
+      </p>
+      <a href="{% url 'review_landing' %}" 
+        class="px-8 py-3 rounded-lg font-semibold transition"
+        style="background-color: var(--pacil-red-lighter-1); color: var(--neutral-50); border: 2px solid var(--pacil-red-lighter-1);"
+        onmouseover="this.style.backgroundColor='var(--pacil-red-base)'; this.style.borderColor='var(--pacil-red-base)';"
+        onmouseout="this.style.backgroundColor='var(--pacil-red-lighter-1)'; this.style.borderColor='var(--pacil-red-lighter-1)';">
+        ⭐ Lihat Review
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== AJAX SCRIPT UNTUK JADWAL TERDEKAT ===== -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+$(document).ready(function() {
+    function loadSchedules() {
+        $.ajax({
+            url: "{% url 'get_schedules_json' %}",
+            method: "GET",
+            success: function(data) {
+                var container = $(".flex.gap-6.overflow-x-auto");
+                container.empty();  // kosongkan dulu container
+                
+                if (data.length === 0) {
+                    container.append('<p class="text-gray-500 pl-6">Belum ada jadwal upcoming.</p>');
+                    return;
+                }
+
+                data.slice(0, 5).forEach(function(schedule) {
+                    var imageUrl = schedule.image_url ? schedule.image_url : "{% static 'images/default.jpg' %}";
+                    var scheduleCard = `
+                        <div class="min-w-[250px] bg-white rounded-xl shadow-md overflow-hidden flex-shrink-0 
+                                    transition-transform duration-300 transform 
+                                    hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:z-10
+                                    active:scale-110 active:-translate-y-3 active:shadow-3xl active:z-20
+                                    snap-center cursor-pointer">
+                            <img src="${imageUrl}" alt="${schedule.category}" class="h-40 w-full object-cover">
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold mb-1">${schedule.team1} vs ${schedule.team2}</h3>
+                                <p class="text-sm text-gray-500 mb-1 uppercase">${schedule.category}</p>
+                                <p class="text-sm text-gray-600">
+                                    📅 ${new Date(schedule.date).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' })}<br>
+                                    🕒 ${schedule.time}<br>
+                                    📍 ${schedule.location}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    container.append(scheduleCard);
+                });
+            },
+            error: function() {
+                console.error("Gagal mengambil jadwal!");
+            }
+        });
+    }
+
+    // Load schedules saat halaman pertama kali dibuka
+    loadSchedules();
+});
+</script>
+
+{% endblock %}
+
