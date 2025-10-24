@@ -11,7 +11,7 @@
     <div class="flex flex-wrap items-center gap-2">
       <select id="filterSelect" class="card px-3 py-2 text-sm sm:text-base border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-300">
         <option value="all" {% if filter_type == "all" %}selected{% endif %}>Semua</option>
-        <option value="mine" {% if filter_type != "all" %}selected{% endif %}>Jadwal Saya</option>
+        <option value="mine" {% if filter_type == "mine" %}selected{% endif %}>Jadwal Saya</option>
       </select>
 
       <button id="refreshBtn" class="btn btn-outline text-sm sm:text-base">Refresh</button>
@@ -251,7 +251,6 @@
     try {
       const f = (filterSelect?.value === 'mine') ? 'mine' : 'all';
 
-      // BENAR: /scheduling/api/list/?filter=...
       const res = await fetch(`/scheduling/api/list/?filter=${f}&_=${Date.now()}`, {
         headers: {'X-CSRFToken': csrftoken},
         cache: 'no-store',
