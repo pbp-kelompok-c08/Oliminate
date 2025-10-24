@@ -5,7 +5,11 @@
 <div class="container mt-8">
     <div class="card" style="padding:0; overflow:hidden;">
         {% if merchandise.image_url %}
-        <img src="{{ merchandise.image_url }}" alt="{{ merchandise.category }}" style="width:100%; height:300px; object-fit:cover; border-bottom:1px solid var(--neutral-100);"/>
+        <img src="{{ merchandise.image_url }}" alt="{{ merchandise.name }}" style="width:100%; height:300px; object-fit:contain; object-position:left; border-bottom:1px solid var(--neutral-100);"/>
+        {% else %}
+        <div style="background-color:var(--neutral-100); height:200px; display:flex; align-items:center; justify-content:center;">
+            <span class="footnote">No Image</span>
+        </div>
         {% endif %}
 
         <div style="padding:24px;">

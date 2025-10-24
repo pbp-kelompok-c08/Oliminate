@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
+{% block styles %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+{% endblock styles %}
 
+
+{% block content %}
+<!-- FIX: Mengganti 'h-full' dengan 'flex-1' agar mengisi parent <main> yang 'display: flex' -->
 <div class="w-full flex-1 bg-gradient-to-b from-[#73B9F9] to-white">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-x-clip">
@@ -14,7 +18,7 @@
             </h1>
         </header>
 
-        <main class="mt-12">
+        <div class="mt-12">
             <section class="bg-white shadow-lg rounded-xl p-8 max-w-3xl mx-auto my-12">
                 <h3 class="text-3xl font-semibold text-center">What is OLIMINATE?</h3>
                 <p class="text-lg text-center mt-4">
@@ -123,22 +127,22 @@
                     </button>
                 </div>
             </section>
-
+                
             <section class="text-center my-16">
                 <h3 class="text-3xl font-semibold mb-6">Explore More!</h3>
                 
                 {% if user.is_authenticated %}
-                    <a href="#" class="inline-block py-3 px-7 rounded-xl font-medium text-xl bg-[#3293ec] text-white shadow-lg hover:bg-[#22629E] hover:shadow-xl transform transition-all duration-300 hover:-translate-y-0.5">
+                    <a href="{% url 'users:edit_profile' %}" class="inline-block py-3 px-7 rounded-xl font-medium text-xl bg-[#3293ec] text-white shadow-lg hover:bg-[#22629E] hover:shadow-xl transform transition-all duration-300 hover:-translate-y-0.5">
                         My Profile
                     </a>
                 {% else %}
-                    <a href="#" class="inline-block py-3 px-7 rounded-xl font-medium text-xl bg-[#3293ec] text-white shadow-lg hover:bg-[#22629E] hover:shadow-xl transform transition-all duration-300 hover:-translate-y-0.5">
-                        Sign me UP!
+                    <a href="{% url 'users:login' %}" class="inline-block py-3 px-7 rounded-xl font-medium text-xl bg-[#3293ec] text-white shadow-lg hover:bg-[#22629E] hover:shadow-xl transform transition-all duration-300 hover:-translate-y-0.5">
+                        Take me now!
                     </a>
                 {% endif %}
             </section>
 
-        </main>
+        </div>
     </div>
 </div>
 {% endblock %}

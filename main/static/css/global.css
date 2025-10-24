@@ -161,8 +161,12 @@ a:hover {
   border-radius: 12px;
   padding: 16px 24px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-<<<<<<< HEAD
 }
-=======
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
->>>>>>> origin/feature/main
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

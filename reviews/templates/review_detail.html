@@ -1,0 +1,479 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review untuk {{ schedule.team1 }} vs {{ schedule.team2 }}{% endblock %} 
+
+{% block content %}
+<link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
+<div class="max-w-5xl mx-auto py-10 px-6">
+
+  <div class="mb-6 border-b border-gray-200 pb-4">
+    <h1 class="text-3xl font-bold text-gray-900">
+      {{ schedule.category }}: {{ schedule.team1 }} vs {{ schedule.team2 }}
+    </h1>
+    <p class="text-gray-600">{{ schedule.location }} • {{ schedule.date|date:"d M Y" }} • {{ schedule.time|time:"H:i" }}</p> 
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-10">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-around gap-6">
+      <div class="flex flex-col items-center">
+        <p class="text-sm text-gray-600 mb-1">Total Review</p>
+        <h2 class="text-4xl font-bold text-gray-900">
+          {{ total_reviews }}
+        </h2>
+      </div>
+      <div class="flex flex-col items-center">
+        <p class="text-sm text-gray-600 mb-1">Rating Rata-Rata</p>
+        <div class="flex items-center gap-2">
+          <h2 class="text-4xl font-bold text-gray-900">
+            {{ average_rating|floatformat:1 }}
+          </h2>
+          <div class="flex items-center">
+            {% for _ in full_stars %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63 -3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/>
+              </svg>
+            {% endfor %}
+            {% if half_star %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="w-6 h-6">
+                <defs>
+                  <linearGradient id="halfGradient" x1="0" x2="1">
+                    <stop offset="50%" stop-color="#facc15"/>  <stop offset="50%" stop-color="#d1d5db"/>  </linearGradient>
+                </defs>
+                <path fill="url(#halfGradient)"
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808
+                    c.97 0 1.372 1.24.588 1.81l-3.084 2.24
+                    1.178 3.629c.3.921-.755 1.688-1.54 1.118
+                    L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118
+                    l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81
+                    h3.808l1.177-3.628z"/>
+              </svg>
+            {% endif %}
+            {% for _ in empty_stars %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/>
+              </svg>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-end mb-6">
+    <button id="add-review-btn" 
+            data-create-url="{% url 'add_review' schedule.id %}" 
+            data-can-review="{{ can_review|yesno:'true,false' }}"
+            class="btn btn-primary">
+      + Tambah Review
+    </button>
+  </div>
+
+  <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-left">Review Pertandingan</h2>
+  <div class="space-y-5">
+    {% for review in reviews %}
+    <div class="bg-white rounded-xl shadow-lg p-5"> 
+      <div class="flex items-center gap-3 mb-3">
+        {% if review.reviewer.profile_picture %}
+          <img src="{{ review.reviewer.profile_picture.url }}" class="w-10 h-10 rounded-full object-cover" alt="{{ review.reviewer.username }}">
+        {% else %}
+          <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+            <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+          </div>
+        {% endif %}
+        <div>
+          <p class="text-sm text-gray-600">
+            Review dari <span class="font-semibold text-blue-600">{{ review.reviewer.username }}</span>
+            {% if review.updated_at|date:"YmdHi" != review.created_at|date:"YmdHi" %}
+            <span class="text-xs text-gray-500 ml-1">(Diedit)</span>
+            {% endif %}
+          </p>
+          <div class="flex items-center gap-2 mt-1">
+            <div class="flex">
+              {% for i in "12345" %}
+                {% if i|add:"0" <= review.rating %}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/></svg>
+                {% else %}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.178 3.628h3.808c.97 0 1.372 1.24.588 1.81l-3.084 2.24 1.178 3.629c.3.921-.755 1.688-1.54 1.118L10 12.347l-3.078 2.006c-.785.57-1.84-.197-1.54-1.118l1.178-3.63-3.084-2.238c-.784-.57-.382-1.81.588-1.81h3.808l1.177-3.628z"/></svg>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <span class="text-xs text-gray-500">{{ review.created_at|date:"d/m/Y" }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <p class="text-gray-700 leading-relaxed">{{ review.comment }}</p>
+      
+      <div class="flex justify-between items-center mt-4">
+        <div class="flex gap-3">
+          {% if user == review.reviewer %}
+            <button type="button" 
+                    class="edit-review-btn text-sm font-medium text-gray-500 hover:text-blue-600 focus:outline-none"
+                    data-edit-url="{% url 'edit_review' review.id %}">
+                    Edit
+            </button>
+            <button type="button" 
+                    class="delete-review-btn text-sm font-medium text-red-500 hover:text-red-700 focus:outline-none"
+                    data-delete-url="{% url 'delete_review' review.id %}"
+                    data-review-user="{{ review.reviewer.username }}">
+                    Hapus
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div> 
+    {% empty %}
+      <div class="text-center py-16 px-8 bg-white rounded-xl shadow-lg">
+        <h2 class="text-xl font-semibold text-gray-800">
+          Belum ada review.
+        </h2>
+        <p class="text-gray-500 mt-1">
+          Jadilah yang pertama untuk memberikan review!
+        </p>
+      </div>
+    {% endfor %}
+  </div> 
+</div> 
+
+<div id="ajax-modal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+  <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div id="ajax-modal-form-content">
+      <p class="text-center text-gray-600">Loading form...</p>
+    </div>
+  </div>
+</div>
+
+<div id="delete-confirm-modal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+  <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+    <h2 class="text-2xl font-semibold mb-4">Konfirmasi Hapus</h2>
+    <p class="text-gray-700 mb-6" id="delete-review-name">
+      Apakah Anda yakin ingin menghapus review ini?
+    </p>
+    <div class="flex justify-end gap-2">
+      <button id="delete-cancel-btn" class="btn btn-outline">Batal</button>
+      <button id="delete-confirm-btn" class="btn btn-danger" data-delete-url="">Ya, Hapus</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // Variabel Modal
+  const ajaxModal = document.getElementById('ajax-modal');
+  const ajaxModalTitle = document.getElementById('ajax-modal-title');
+  const ajaxFormContainer = document.getElementById('ajax-modal-form-content');
+  const addReviewBtn = document.getElementById('add-review-btn');
+  
+  const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+  const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+  const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+  const deleteReviewName = document.getElementById('delete-review-name');
+
+  // Fungsi untuk menampilkan popup sukses
+  function showSuccessPopup(message) {
+    ajaxFormContainer.innerHTML = `
+      <div class="text-center p-10">
+        <h3 class="text-2xl font-semibold text-green-600 mb-3">✅ ${message}</h3>
+        <p class="text-gray-700">The page will reload shortly...</p>
+      </div>
+    `;
+    ajaxModal.classList.remove('hidden');
+    ajaxModal.classList.add('flex');
+    
+    setTimeout(() => {
+      ajaxModal.classList.add('hidden');
+      ajaxModal.classList.remove('flex');
+      window.location.reload(); 
+    }, 1500);
+  }
+
+  function initializeStarRating(container) {
+    // Cari elemen di dalam 'container' (yaitu modal)
+    const starBoxes = container.querySelectorAll('.star-box');
+    const ratingValueInput = container.querySelector('[name="rating"]'); 
+    
+    if (!ratingValueInput) {
+        console.warn("Input rating tidak ditemukan di dalam modal.");
+        return;
+    }
+
+    let currentRating = parseInt(ratingValueInput.value, 10) || 0;
+
+    function updateStarsVisual(ratingToHighlight) {
+      starBoxes.forEach(box => {
+        const starValue = parseInt(box.dataset.value, 10);
+        const starIcon = box.querySelector('.star');
+        if (starValue <= ratingToHighlight) {
+          starIcon.classList.add('active');
+        } else {
+          starIcon.classList.remove('active');
+        }
+      });
+    }
+
+    starBoxes.forEach(box => {
+      box.addEventListener('click', function() {
+        const rating = parseInt(this.dataset.value, 10);
+        currentRating = rating;
+        ratingValueInput.value = rating; // Set nilai di input Django
+        updateStarsVisual(currentRating);
+      });
+
+      box.addEventListener('mouseenter', function() {
+        const hoverRating = parseInt(this.dataset.value, 10);
+        updateStarsVisual(hoverRating);
+      });
+
+      box.addEventListener('mouseleave', function() {
+        updateStarsVisual(currentRating);
+      });
+    });
+
+    // Inisialisasi bintang saat modal edit dimuat
+    updateStarsVisual(currentRating);
+  }
+
+  // --- Logic untuk Tombol "Add Review" ---
+  if (addReviewBtn) {
+    addReviewBtn.addEventListener('click', function() {
+      const canReview = this.dataset.canReview === 'true';
+      const createUrl = this.dataset.createUrl;
+
+      if (canReview) {
+        ajaxModal.classList.remove('hidden');
+        ajaxModal.classList.add('flex');
+        ajaxFormContainer.innerHTML = '<p class="text-center text-gray-600">Loading form...</p>';
+        
+        fetch(createUrl, {
+          method: 'GET',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+          ajaxFormContainer.innerHTML = html;
+          setupFormSubmission(ajaxFormContainer.querySelector('form'));
+          initializeStarRating(ajaxFormContainer);
+        })
+        .catch(error => {
+          console.error('Error loading form:', error);
+          ajaxFormContainer.innerHTML = '<p class="text-center text-red-500">Error loading form. Please try again.</p>';
+        });
+      } else {
+        ajaxFormContainer.innerHTML = `
+          <div class="text-center p-10">
+            <h3 class="text-2xl font-semibold text-yellow-600 mb-4">⚠️ Tidak Memenuhi Syarat</h3>
+            <p class="text-gray-700 mb-6">Anda harus membeli tiket untuk pertandingan ini agar bisa menambahkan review.</p>
+            <button type="button" id="modal-warning-close-btn" class="btn btn-primary">
+              OK
+            </button>
+          </div>
+        `;
+        // Tambahkan listener untuk tombol OK yang baru kita buat
+        const closeBtn = document.getElementById('modal-warning-close-btn');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            ajaxModal.classList.add('hidden');
+            ajaxModal.classList.remove('flex');
+          });
+        }
+        ajaxModal.classList.remove('hidden');
+        ajaxModal.classList.add('flex');
+      }
+    });
+  }
+
+  // --- Logic untuk Tombol "Edit Review" ---
+  document.querySelectorAll('.edit-review-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const editUrl = this.dataset.editUrl;
+      ajaxModal.classList.remove('hidden');
+      ajaxModal.classList.add('flex');
+      // ajaxModalTitle.textContent = 'Edit Review';
+      ajaxFormContainer.innerHTML = '<p class="text-center text-gray-600">Loading form...</p>';
+
+      fetch(editUrl, {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.text())
+      .then(html => {
+        ajaxFormContainer.innerHTML = html;
+        setupFormSubmission(ajaxFormContainer.querySelector('form'));
+        initializeStarRating(ajaxFormContainer);
+      })
+      .catch(error => {
+        console.error('Error loading form:', error);
+        ajaxFormContainer.innerHTML = '<p class="text-center text-red-500">Error loading form. Please try again.</p>';
+      });
+    });
+  });
+
+  // Fungsi generik untuk menangani submit form di modal
+  function setupFormSubmission(form) {
+    if (form) {
+      // Tombol cancel di dalam form modal
+      const modalCancelButton = form.querySelector('#modal-cancel-button');
+      if (modalCancelButton) {
+        modalCancelButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          ajaxModal.classList.add('hidden');
+          ajaxModal.classList.remove('flex');
+        });
+      }
+      
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const ratingInput = form.querySelector('[name="rating"]');
+        let currentRating = 0;
+        if (ratingInput) {
+            currentRating = parseInt(ratingInput.value, 10) || 0;
+        }
+        if (currentRating === 0) {
+          const errorEl = form.querySelector('.rating-box + .error-message');
+          if(errorEl) errorEl.textContent = 'Please select a star rating before submitting.';
+          return false;
+      }
+      const errorEl = form.querySelector('.rating-box + .error-message');
+      if(errorEl) errorEl.textContent = '';
+
+      const formData = new FormData(form);
+      const submitButton = form.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.textContent;
+      submitButton.disabled = true;
+
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => {
+          // Cek jika response adalah JSON (sukses) atau HTML (error form)
+          const contentType = response.headers.get('content-type');
+          if (response.ok && contentType && contentType.includes('application/json')) {
+            return response.json();
+          }
+          if (response.ok) {
+            return response.text();
+          }
+          throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+          if (typeof data === 'string') {
+            // Ini adalah HTML (form tidak valid), render ulang form dengan error
+            ajaxFormContainer.innerHTML = data;
+            setupFormSubmission(ajaxFormContainer.querySelector('form')); 
+          } else if (data.success) {
+            // Ini adalah JSON sukses
+            showSuccessPopup(data.message || 'Review submitted successfully!');
+          }
+        })
+        .catch(error => {
+          console.error('Submission error:', error);
+          alert('An unexpected error occurred during submission.');
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonText;
+        });
+      });
+    }
+  }
+  
+  // Menutup modal jika klik di luar area konten
+  ajaxModal.addEventListener('click', (e) => {
+    if (e.target === ajaxModal) {
+      ajaxModal.classList.add('hidden');
+      ajaxModal.classList.remove('flex');
+    }
+  });
+
+  // --- Logic untuk Tombol "Delete Review" ---
+  document.querySelectorAll('.delete-review-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+      const deleteUrl = this.getAttribute('data-delete-url');
+      const name = this.getAttribute('data-review-user');
+
+      deleteReviewName.innerHTML = `Apakah Anda yakin ingin menghapus review ini?`;
+      deleteConfirmBtn.setAttribute('data-delete-url', deleteUrl);
+      
+      deleteConfirmModal.classList.remove('hidden');
+      deleteConfirmModal.classList.add('flex');
+    });
+  });
+
+  // Tombol "Cancel" di modal delete
+  deleteCancelBtn.addEventListener('click', () => {
+    deleteConfirmModal.classList.add('hidden');
+    deleteConfirmModal.classList.remove('flex');
+  });
+
+  // Menutup modal delete jika klik di luar
+  deleteConfirmModal.addEventListener('click', (e) => {
+    if (e.target === deleteConfirmModal) {
+      deleteConfirmModal.classList.add('hidden');
+      deleteConfirmModal.classList.remove('flex');
+    }
+  });
+
+  // Tombol "Yes, Delete" (Konfirmasi Hapus)
+  deleteConfirmBtn.addEventListener('click', function() {
+    const deleteUrl = this.getAttribute('data-delete-url');
+    const originalButtonHTML = this.innerHTML;
+
+    this.disabled = true;
+    // this.innerHTML = 'Deleting...';
+
+    fetch(deleteUrl, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrftoken, 
+        'Content-Type': 'application/json' 
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok.');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        deleteConfirmModal.classList.add('hidden');
+        deleteConfirmModal.classList.remove('flex');
+        // Tampilkan popup sukses (yang akan me-reload halaman)
+        showSuccessPopup(data.message || 'Review deleted successfully.');
+      } else {
+        alert(data.message || 'Failed to delete review.');
+      }
+    })
+    .catch(error => {
+      console.error('Delete Error:', error);
+      alert('An error occurred while deleting the review.');
+    })
+    .finally(() => {
+      this.disabled = false;
+      this.innerHTML = originalButtonHTML;
+    });
+  });
+</script>
+{% endblock extra_scripts %}

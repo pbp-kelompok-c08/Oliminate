@@ -11,26 +11,83 @@
     --card-bg: #ffffff;
     --muted: #6b7280;
     --radius: 12px;
+
+    /* Tambahan variabel dari global.css */
+    --pacil-blue-darker-1: #22629E;
+    --pacil-red-darker-1: #9E292D;
   }
   *{box-sizing:border-box}
-  body{min-height:100vh; margin:0; font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(to bottom, #AED4F7 0%, #ffffff 85%); display:flex; align-items:center; justify-content:center; padding:40px; color:#113352}
+
+  body{
+    min-height:100vh;
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background: linear-gradient(135deg, var(--pacil-blue-darker-1) 0%, var(--pacil-red-darker-1) 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+    color:#113352;
+  }
 
   .container{width:100%; max-width:420px}
-  .card{background:var(--card-bg); border-radius:var(--radius); padding:28px; box-shadow: 0 10px 30px rgba(16,24,40,0.12);}
+  .card{
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    padding:28px;
+    box-shadow: 0 10px 30px rgba(16,24,40,0.12);
+  }
+
   h1{margin:0 0 18px 0; text-align:center; font-size:22px}
 
   label{display:block; font-weight:700; margin-bottom:8px}
-  input[type="text"], input[type="password"], input[type="email"]{width:100%; padding:12px 14px; border-radius:10px; border:1px solid #e6edf6; font-size:15px; outline:none; font-family: inherit; color: inherit;}
-  input:focus{box-shadow:0 8px 20px rgba(50,147,236,0.12); border-color:var(--blue-base)}
+
+  input[type="text"], input[type="password"], input[type="email"]{
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid #e6edf6;
+    font-size:15px;
+    outline:none;
+    font-family: inherit;
+    color: inherit;
+  }
+
+  input:focus{
+    box-shadow:0 8px 20px rgba(50,147,236,0.12);
+    border-color:var(--blue-base);
+  }
 
   .form-row{margin-bottom:14px}
-  .btn{display:block; width:100%; padding:12px 14px; border-radius:10px; border:0; font-weight:700; background:var(--blue-base); color:white; font-size:15px; cursor:pointer; box-shadow:0 8px 20px rgba(50,147,236,0.18);}
+
+  /* === UBAHAN UTAMA: Tombol login gradasi === */
+  .btn{
+    display:block;
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:0;
+    font-weight:700;
+    background: linear-gradient(90deg, var(--pacil-blue-darker-1) 0%, var(--pacil-red-darker-1) 100%);
+    color:white;
+    font-size:15px;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(50,147,236,0.18);
+    transition: all 0.3s ease;
+  }
+
+  /* Efek hover gradasi yang sedikit lebih terang */
+  .btn:hover {
+    background: linear-gradient(90deg, #2E7BC3 0%, #B83B3F 100%);
+    transform: translateY(-1px);
+    box-shadow:0 10px 25px rgba(50,147,236,0.25);
+  }
 
   .foot{margin-top:18px; text-align:center; color:var(--muted); font-size:14px}
-  .foot a{color:var(--blue-base); text-decoration:underline; font-weight:700}
+  .foot a{color:var(--pacil-blue-darker-1); text-decoration:underline; font-weight:700}
   .link-row{display:flex; justify-content:center; margin-top:18px}
-  
-  /* Style untuk error list dari form Django */
+
+  /* Error list Django */
   .errorlist { list-style-type: none; padding: 0; color: #D8000C; font-size: 13px; margin-top: 5px; }
   .errorlist li { margin-bottom: 5px; }
 </style>
@@ -68,7 +125,7 @@
       </form>
 
       <div class="link-row">
-        <p class="foot">No account yet? <a id="toRegister" href="{% url 'users:register_user' %}">Register here</a></p>
+        <p class="foot">No account yet? <a id="toRegister" href="{% url 'users:register' %}">Register here</a></p>
       </div>
     </section>
   </main>

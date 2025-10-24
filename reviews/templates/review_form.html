@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
+
+<style>
+    .review-page-container {
+        display: flex;
+        justify-content: center;
+        padding: 6rem 1rem 4rem; /* atasnya agak lebih lega */
+    }
+    .card-review-wrapper {
+        max-width: 650px;
+        width: 100%;
+        background-color: #fff;
+        padding: 2.5rem 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    .card-review-wrapper h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    .card-review-wrapper p.description {
+        color: #6B7280;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    :root {
+        --yellow: #FBBF24;
+        --grey-icon: #D1D5DB;
+        --grey-border: #E5E7EB;
+    }
+    .rating-box {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .star-box {
+        background-color: transparent;
+        border: 1px solid var(--grey-border);
+        border-radius: 0.375rem;
+        padding: 0.6rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        appearance: none;
+    }
+    .star-box .star {
+        font-size: 2.5rem;
+        color: var(--grey-icon);
+        transition: color 0.2s, transform 0.2s;
+        line-height: 1;
+    }
+    .star-box:hover .star { transform: scale(1.1); }
+    .star-box .star.active { color: var(--yellow); }
+    #rating-value { display: none; }
+    .error-message {
+        font-size: 0.75rem;
+        color: #EF4444;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+</style>
+
+<div class="review-page-container">
+    <div class="card-review-wrapper">
+        <div class="text-center mb-4">
+            <h2>Help us improve!</h2>
+        </div>
+        <p class="description">
+            How would you like to describe your experience with this event?
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-5 text-center">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                <div class="rating-box">
+                    {{ review_form.rating }}
+                    {% for i in "12345" %}
+                    <button type="button" class="star-box" data-value="{{ i }}">
+                        <i class='bx bxs-star star'></i>
+                    </button>
+                    {% endfor %}
+                </div>
+                {% if review_form.rating.errors %}
+                    <p class="error-message">{{ review_form.rating.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div class="mb-6">
+                <label for="id_comment" class="block text-sm font-medium text-gray-700 mb-2">
+                    What's your overall experience?
+                </label>
+                {{ review_form.comment }}
+                {% if review_form.comment.errors %}
+                    <p class="error-message mt-1">{{ review_form.comment.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8">
+                {% if schedule %}
+                <a href="{% url 'review_detail' schedule.id %}" class="btn btn-outline">Batal</a>
+                {% else %}
+                <a href="#" class="btn btn-outline">Batal</a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">Tambah Review</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const starBoxes = document.querySelectorAll('.star-box');
+    const ratingValueInput = document.getElementById('rating-value');
+    const form = document.querySelector('form');
+    let currentRating = parseInt(ratingValueInput?.value) || 0;
+
+    function updateStarsVisual(ratingToHighlight) {
+        starBoxes.forEach(box => {
+            const starValue = parseInt(box.dataset.value, 10);
+            const starIcon = box.querySelector('.star');
+            if (starValue <= ratingToHighlight) {
+                starIcon.classList.add('active');
+            } else {
+                starIcon.classList.remove('active');
+            }
+        });
+    }
+
+    starBoxes.forEach(box => {
+        box.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.value, 10);
+            currentRating = rating;
+            ratingValueInput.value = rating;
+            updateStarsVisual(currentRating);
+        });
+
+        box.addEventListener('mouseenter', function() {
+            const hoverRating = parseInt(this.dataset.value, 10);
+            updateStarsVisual(hoverRating);
+        });
+
+        box.addEventListener('mouseleave', function() {
+            updateStarsVisual(currentRating);
+        });
+    });
+
+    form.addEventListener('submit', function (e) {
+        if (currentRating === 0) {
+            e.preventDefault();
+            alert('Please select a star rating before submitting.');
+            const ratingBoxContainer = document.querySelector('.rating-box');
+            if(ratingBoxContainer) {
+                ratingBoxContainer.style.outline = '2px solid red';
+                setTimeout(() => { ratingBoxContainer.style.outline = 'none'; }, 1500);
+            }
+            return false;
+        }
+    });
+
+    updateStarsVisual(currentRating);
+});
+</script>
+{% endblock %}

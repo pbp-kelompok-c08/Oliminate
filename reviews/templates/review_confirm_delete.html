@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Konfirmasi Hapus{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto py-10 px-6">
+    <div class="bg-white rounded-lg shadow-md p-6 text-center">
+        <h2 class="text-xl font-semibold mb-4">Hapus Review</h2>
+        <p class="text-gray-600 mb-6">
+            Apakah Anda yakin ingin menghapus review untuk pertandingan <strong>{{ schedule.team1 }} vs {{ schedule.team2 }}</strong>? Tindakan ini tidak dapat dibatalkan.
+        </p>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="flex justify-center gap-4">
+                <a href="{% url 'review_detail' schedule.id %}" class="btn btn-outline">Batal</a>
+                <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
