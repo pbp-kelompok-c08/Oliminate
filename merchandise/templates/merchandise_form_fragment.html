@@ -1,0 +1,35 @@
+<form method="POST" enctype="multipart/form-data" action="{% url 'merchandise:merchandise_create' %}">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="flex flex-col gap-2" style="display:grid; grid-template-columns:150px 1fr; gap:16px; margin-bottom:10px;">
+        <label for="{{ field.id_for_label }}" style="font-weight:var(--font-medium); color:var(--neutral-900); text-align:left; margin-top:-4px;">
+            {{ field.label }}
+            {% if field.field.required %}
+            <span aria-hidden="true" style="color:var(--pacil-red-base)">*</span>
+            {% endif %}
+        </label>
+        <div style="grid-column:2/3; display:flex; flex-direction:column; gap:4px;">
+            {{ field }}
+            {% if field.help_text %}
+            <p class="description" style="color:var(--neutral-500);">
+                {{ field.help_text }}
+            </p>
+            {% endif %}
+            {% if field.errors %}
+            <p class="footnote" style="color:var(--pacil-red-base); margin-top:-4px;">
+                {{ field.errors|striptags }}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="flex justify-end gap-2 mt-6" style="display:flex; margin-left:166px; margin-top:24px; gap:16px;">
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+        <button type="button" id="modal-cancel-button" class="btn btn-outline">
+            Cancel
+        </button>
+    </div>
+</form>

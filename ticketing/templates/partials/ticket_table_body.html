@@ -1,0 +1,38 @@
+{% for t in tickets %}
+<tr>
+  <td class="px-6 py-4 whitespace-nowrap">
+    <p class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">{{ t.schedule }}</p>
+    <p class="footnote" style="color: var(--neutral-700);">ID Tiket: #{{ t.id }}</p>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap">
+    <p class="body" style="color: var(--neutral-700);">Rp {{ t.price|floatformat:0 }}</p>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap">
+    {% if t.payment_status == 'paid' %}
+      <span class="text-xs font-semibold inline-block py-1 px-3 rounded-full text-green-700 bg-green-100">
+        Sudah Dibayar
+      </span>
+    {% else %}
+      <span class="text-xs font-semibold inline-block py-1 px-3 rounded-full text-yellow-700 bg-yellow-100">
+        {{ t.get_payment_status_display }}
+      </span>
+    {% endif %}
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap">
+    {% if t.is_used %}
+      <span class="text-xs font-semibold inline-block py-1 px-3 rounded-full text-blue-700 bg-blue-100">
+        Sudah Digunakan
+      </span>
+    {% else %}
+      <span class="text-xs font-semibold inline-block py-1 px-3 rounded-full text-gray-700 bg-gray-100">
+        Belum Digunakan
+      </span>
+    {% endif %}
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap text-right">
+    <a href="{% url 'ticket_detail' t.id %}" class="btn btn-outline" style="text-decoration: none;">
+      Lihat Detail
+    </a>
+  </td>
+</tr>
+{% endfor %}
