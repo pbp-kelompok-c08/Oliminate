@@ -52,6 +52,6 @@ jobs:
           git config --global --add safe.directory $(pwd)
 
           # Push ke production
-          git push production main --force
+          git push production master --force
           git remote set-url production https://pbp.cs.ui.ac.id/adjie.m/oliminate
 
