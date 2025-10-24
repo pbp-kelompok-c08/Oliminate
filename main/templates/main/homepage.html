@@ -69,7 +69,9 @@
             {% if schedule.image_url %}
               <img src="{{ schedule.image_url }}" alt="{{ schedule.category }}" class="h-40 w-full object-cover">
             {% else %}
-              <img src="{% static 'images/default.jpg' %}" alt="Default" class="h-40 w-full object-cover">
+              <div class="bg-[var(--neutral-100)] h-40 w-full flex items-center justify-center">
+                  <span class="footnote">No Image</span>
+              </div>
             {% endif %}
             <div class="p-4">
               <h3 class="text-lg font-semibold mb-1">{{ schedule.team1 }} vs {{ schedule.team2 }}</h3>
@@ -162,14 +164,26 @@ $(document).ready(function() {
                 }
 
                 data.slice(0, 10).forEach(function(schedule) {
-                    var imageUrl = schedule.image_url ? schedule.image_url : "{% static 'images/default.jpg' %}";
+                    // 1. Tentukan konten gambar atau placeholder
+                    var imageContent;
+                    if (schedule.image_url) {
+                        imageContent = `<img src="${schedule.image_url}" alt="${schedule.category}" class="h-40 w-full object-cover">`;
+                    } else {
+                        imageContent = `
+                            <div class="bg-[var(--neutral-100)] h-40 w-full flex items-center justify-center">
+                                <span class="footnote">No Image</span>
+                            </div>
+                        `;
+                    }
+                        
+                    // 2. Gabungkan konten
                     var scheduleCard = `
                         <div class="min-w-[250px] bg-white rounded-xl shadow-md overflow-hidden flex-shrink-0 
                                     transition-transform duration-300 transform 
                                     hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:z-10
                                     active:scale-110 active:-translate-y-3 active:shadow-3xl active:z-20
                                     snap-center cursor-pointer">
-                            <img src="${imageUrl}" alt="${schedule.category}" class="h-40 w-full object-cover">
+                            ${imageContent}
                             <div class="p-4">
                                 <h3 class="text-lg font-semibold mb-1">${schedule.team1} vs ${schedule.team2}</h3>
                                 <p class="text-sm text-gray-500 mb-1 uppercase">${schedule.category}</p>
