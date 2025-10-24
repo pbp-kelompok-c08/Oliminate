@@ -7,27 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>{% block title %}Oliminate{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
-    <style>
-      /* Smooth dropdown animation */
-      .menu-enter {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      .menu-enter-active {
-        opacity: 1;
-        transform: translateY(0);
-        transition: all 0.2s ease-in-out;
-      }
-      .menu-exit {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      .menu-exit-active {
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: all 0.2s ease-in-out;
-      }
-    </style>
+
+    <link rel="icon" href="{% static 'images/icon.png' %}">
+
+    {% block styles %}{% endblock styles %}
   </head>
 
   <body
