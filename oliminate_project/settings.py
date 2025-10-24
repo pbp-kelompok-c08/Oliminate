@@ -19,6 +19,10 @@ ALLOWED_HOSTS = [
     "adjie-m-oliminate.pbp.cs.ui.ac.id",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://adjie-m-oliminate.pbp.cs.ui.ac.id",
+]
+
 # ============================
 #  APPLICATION CONFIGURATION
 # ============================
