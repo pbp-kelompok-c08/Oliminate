@@ -1,3 +1,5 @@
+from django.urls import reverse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count
@@ -51,22 +53,21 @@ def review_detail_page(request, schedule_id):
             schedule=schedule
         ).exists()
 
-    # Handle submit review
-    if request.method == 'POST' and can_review:
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            new_review = form.save(commit=False)
-            new_review.reviewer = request.user
-            new_review.schedule = schedule
-            new_review.save()
-            return redirect('review_detail', schedule_id=schedule.id)
-    else:
-        form = ReviewForm()
+    # if request.method == 'POST' and can_review:
+    #     form = ReviewForm(request.POST)
+    #     if form.is_valid():
+    #         new_review = form.save(commit=False)
+    #         new_review.reviewer = request.user
+    #         new_review.schedule = schedule
+    #         new_review.save()
+    #         return redirect('review_detail', schedule_id=schedule.id)
+    # else:
+    #     form = ReviewForm()
     
     context = {
         'schedule': schedule,
         'reviews': reviews,
-        'review_form': form,
+        # 'review_form': form,
         'total_reviews': total_reviews,
         'average_rating': average_rating,
         'full_stars': range(full_stars),
@@ -80,14 +81,19 @@ def review_detail_page(request, schedule_id):
 def add_review(request, schedule_id):
     # Ambil schedule yang mau direview
     schedule = get_object_or_404(Schedule, id=schedule_id)
-    
-    # can_review = True
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
     can_review = Ticket.objects.filter(
             buyer=request.user, 
             schedule=schedule
         ).exists()
+    
     if not can_review:
-        return redirect('review_detail', schedule_id=schedule_id) 
+        message = "You are not eligible to review this event (ticket required)."
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': message}, status=403)
+        else:
+            return redirect('review_detail', schedule_id=schedule_id)
 
     if request.method == 'POST':
         form = ReviewForm(request.POST)
@@ -96,46 +102,87 @@ def add_review(request, schedule_id):
             review.schedule = schedule     
             review.reviewer = request.user  
             review.save()
-            return redirect('review_detail', schedule_id=schedule.id)
+            if is_ajax:
+                return JsonResponse({'success': True, 'message': 'Review added successfully!'})
+            else:
+                return redirect('review_detail', schedule_id=schedule.id)
+        else:
+            context = {'review_form': form, 'schedule': schedule}
+            if is_ajax:
+                return render(request, 'review_form_fragment.html', context, status=400)
+            else:
+                return render(request, 'review_form.html', context)
     else:
         form = ReviewForm()
-        
-    # Siapkan data untuk dikirim ke template
-    context = {
-        'schedule': schedule,
-        'review_form': form
-    }
-    return render(request, 'review_form.html', context)
+        context = {
+            'schedule': schedule,
+            'review_form': form,
+            'title': 'Add Review', # <-- 1. Hilangkan tanda komentar ini
+            'form_action_url': reverse('add_review', args=[schedule.id])
+        }
+        template_name = "review_form.html"
+        if is_ajax:
+            template_name = "review_form_fragment.html"
+        return render(request, template_name, context)
 
 @login_required
 def edit_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     schedule = review.schedule 
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
+    if review.reviewer != request.user:
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': 'You are not authorized to edit this review.'}, status=403)
+        else:
+            return HttpResponseForbidden("You are not authorized to edit this review.")
+        
     if request.method == 'POST':
         form = ReviewForm(request.POST, instance=review)
         if form.is_valid():
             form.save()
-            return redirect('review_detail', schedule_id=schedule.id)
+            if is_ajax:
+                return JsonResponse({'success': True, 'message': 'Review updated successfully!'})
+            else:
+                return redirect('review_detail', schedule_id=schedule.id)
     else:
         form = ReviewForm(instance=review)
 
     context = {
         'review_form': form,
         'schedule': schedule,
-        'review': review 
+        'review': review,
+        'title': 'Edit Review',
+        'form_action_url': reverse('edit_review', args=[review.id])
     }
-    return render(request, 'review_edit.html', context) 
+    template_name = "review_edit.html"  
+    if is_ajax:
+        template_name = "review_form_fragment.html"
+
+    return render(request, template_name, context) 
 
 @login_required
 def delete_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     schedule = review.schedule
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
+    if review.reviewer != request.user:
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': 'You are not authorized to delete this review.'}, status=403)
+        else:
+            return HttpResponseForbidden("You are not authorized to delete this review.")
+        
     if request.method == 'POST':
+        reviewer_name = review.reviewer.username
         review.delete()
-        return redirect('review_detail', schedule_id=schedule.id)
-    
+        if is_ajax:
+            return JsonResponse({
+                'success': True, 
+                'message': f"Review from {reviewer_name} has been deleted."
+            })
+        else:
+            return redirect('review_detail', schedule_id=schedule.id)
     context = {
         'review': review,
         'schedule': schedule
