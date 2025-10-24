@@ -1,15 +1,17 @@
 from django.urls import path
-from . import views
+from . import views, api_views  # tambahkan api_views
 
 app_name = 'scheduling'
 
 urlpatterns = [
+    # === HTML views ===
     path('', views.schedule_list, name='schedule_list'),
     path('<int:id>/', views.schedule_detail, name='schedule_detail'),
     path('feed/', views.schedule_feed, name='schedule_feed'),
-    path('create/', views.schedule_create, name='schedule_create'),
-    path('<int:id>/edit/', views.schedule_update, name='schedule_update'),
-    path('<int:id>/delete/', views.schedule_delete, name='schedule_delete'),
-    path('<int:id>/make-reviewable/', views.make_reviewable, name='make_reviewable'),
-]
 
+    # === API endpoints (AJAX) ===
+    path('api/list/', api_views.api_list_schedules, name='api_list_schedules'),
+    path('api/create/', api_views.api_create_schedule, name='api_create_schedule'),
+    path('api/<int:id>/update/', api_views.api_update_schedule, name='api_update_schedule'),
+    path('api/<int:id>/delete/', api_views.api_delete_schedule, name='api_delete_schedule'),
+]
