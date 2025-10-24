@@ -3,16 +3,23 @@ from django.http import JsonResponse
 from .models import Schedule
 
 def schedule_list(request):
-    """
-    Render halaman utama daftar jadwal.
-    Halaman ini akan memakai AJAX untuk memuat data, tapi kita tetap bisa
-    kirimkan 'schedules' sebagai fallback jika perlu.
-    """
+    # Semua user (termasuk non-login) bisa lihat jadwal
     schedules = Schedule.objects.exclude(status='reviewable').order_by('date', 'time')
+
+    # Default filter: "Semua"
+    filter_type = 'all'
+
+    # Kalau user login & milih filter jadwal saya
+    if request.user.is_authenticated and request.GET.get('filter') == 'mine':
+        schedules = schedules.filter(organizer=request.user)
+        filter_type = 'mine'
+
     return render(request, 'scheduling/schedule_list.html', {
         'schedules': schedules,
-        'user': request.user,  # agar template bisa akses request.user.role
+        'filter_type': filter_type,
+        'user': request.user,
     })
+
 
 def schedule_detail(request, id):
     schedule = get_object_or_404(Schedule, pk=id)
