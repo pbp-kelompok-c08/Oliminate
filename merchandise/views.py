@@ -14,7 +14,25 @@ def is_regular_user(user):
 
 def merchandise_list(request):
     merchandises = Merchandise.objects.all()
-    context = {'merchandises': merchandises}
+
+    category_filter = request.GET.get('category')
+    if category_filter:
+        merchandises = merchandises.filter(category=category_filter)
+
+    sort_by = request.GET.get('sort_by')
+    if sort_by == 'price_asc':
+        merchandises = merchandises.order_by('price', 'name')
+    elif sort_by == 'price_desc':
+        merchandises = merchandises.order_by('-price', 'name')
+    else:
+        merchandises = merchandises.order_by('name', 'price')
+
+    context = {
+        'merchandises': merchandises,
+        'current_sort': sort_by,
+        'current_category': category_filter,
+        'category_choices': Merchandise.CATEGORY_CHOICES 
+    }
     return render(request, "merchandise_list.html", context)
 
 def merchandise_detail(request, id):
