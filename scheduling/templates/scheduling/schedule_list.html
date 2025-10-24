@@ -5,7 +5,9 @@
 <div class="container mt-2">
   <div class="flex justify-between items-center mb-6">
     <h1 class="h3">Jadwal Pertandingan</h1>
+    {% if user.is_authenticated and user.role == "organizer" %}
     <a href="{% url 'scheduling:schedule_create' %}" class="btn btn-primary">+ Buat Jadwal</a>
+    {% endif %}
   </div>
 
   {% if schedules %}

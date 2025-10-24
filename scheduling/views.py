@@ -5,17 +5,16 @@ from .forms import ScheduleForm
 from django.shortcuts import redirect
 
 
-# Daftar semua jadwal
+
 def schedule_list(request):
     schedules = Schedule.objects.exclude(status='reviewable').order_by('date', 'time')
     return render(request, 'scheduling/schedule_list.html', {'schedules': schedules})
 
-# Detail satu pertandingan
 def schedule_detail(request, id):
     schedule = get_object_or_404(Schedule, pk=id)
     return render(request, 'scheduling/schedule_detail.html', {'schedule': schedule})
 
-# 3️⃣ Data JSON untuk kalender
+
 def schedule_feed(request):
     schedules = Schedule.objects.all()
     data = [
@@ -29,22 +28,27 @@ def schedule_feed(request):
     ]
     return JsonResponse(data, safe=False)
 
-
+@login_required
 def schedule_create(request):
+    if request.user.role != 'organizer':
+        messages.error(request, "Hanya pengguna dengan peran 'Organizer' yang dapat membuat jadwal.")
+        return HttpResponseForbidden("Kamu tidak memiliki izin untuk membuat jadwal.")
+
     if request.method == "POST":
         form = ScheduleForm(request.POST)
         if form.is_valid():
             schedule = form.save(commit=False)
-            # Kalau user login → assign user, kalau tidak → None
-            if request.user.is_authenticated:
-                schedule.organizer = request.user
-            else:
-                schedule.organizer = None
+            schedule.organizer = request.user  # organizer otomatis = user login
             schedule.save()
+            messages.success(request, "Jadwal baru berhasil ditambahkan!")
             return redirect('scheduling:schedule_list')
     else:
         form = ScheduleForm()
-    return render(request, 'scheduling/schedule_form.html', {'form': form, 'title': 'Tambah Jadwal'})
+
+    return render(request, 'scheduling/schedule_form.html', {
+        'form': form,
+        'title': 'Tambah Jadwal',
+    })
 
 def schedule_update(request, id):
     schedule = get_object_or_404(Schedule, id=id)
