@@ -1,0 +1,57 @@
+{% load static %}
+
+{% if tickets %}
+  <div class="bg-white rounded-xl shadow-lg overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-4 text-left footnote font-semibold text-neutral-700 uppercase tracking-wide">Event</th>
+          <th class="px-6 py-4 text-left footnote font-semibold text-neutral-700 uppercase tracking-wide">Harga</th>
+          <th class="px-6 py-4 text-left footnote font-semibold text-neutral-700 uppercase tracking-wide">Status Pembayaran</th>
+          <th class="px-6 py-4 text-left footnote font-semibold text-neutral-700 uppercase tracking-wide">Status Penggunaan</th>
+          <th class="px-6 py-4 relative"></th>
+        </tr>
+      </thead>
+
+      <tbody id="ticket-table-body" class="bg-white divide-y divide-gray-200">
+        {% for t in tickets %}
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <p class="body font-semibold text-neutral-900">{{ t.schedule }}</p>
+              <p class="footnote text-neutral-700">ID Tiket: #{{ t.id }}</p>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-neutral-700">Rp {{ t.price|floatformat:0 }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if t.payment_status == 'paid' %}
+                <span class="badge badge-green">Sudah Dibayar</span>
+              {% else %}
+                <span class="badge badge-yellow">{{ t.get_payment_status_display }}</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if t.is_used %}
+                <span class="badge badge-blue">Sudah Digunakan</span>
+              {% else %}
+                <span class="badge badge-gray">Belum Digunakan</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right">
+              <a href="{% url 'ticket_detail' t.id %}" class="btn btn-outline">Lihat Detail</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% else %}
+  <div class="bg-white rounded-xl shadow-lg p-12 text-center">
+    <h2 class="h5 text-neutral-900">Tidak Ada Tiket</h2>
+    {% if active_filter %}
+      <p class="body text-neutral-700 mt-2">Tidak ada tiket yang cocok dengan filter "{{ active_filter }}".</p>
+    {% else %}
+      <p class="body text-neutral-700 mt-2">Kamu belum membeli tiket apa pun.</p>
+    {% endif %}
+    <a href="{% url 'buy_ticket' %}" class="btn btn-primary mt-6">Cari & Beli Tiket Sekarang</a>
+  </div>
+{% endif %}
