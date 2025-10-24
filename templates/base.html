@@ -6,8 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <title>{% block title %}Oliminate{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+
+    <link rel="icon" href="{% static 'images/icon.png' %}">
+
+    {% block styles %}{% endblock styles %}
   </head>
 
   <body
