@@ -39,6 +39,15 @@ jobs:
         run: python manage.py migrate --noinput
 
       - name: Deploy to PBP server
+        env:
+          PBP_USERNAME: ${{ secrets.PBP_USERNAME }}
+          PBP_PASSWORD: ${{ secrets.PBP_PASSWORD }}
         run: |
-          git remote add production https://pbp.cs.ui.ac.id/adjie.m/oliminate || true
+          # Tambahkan remote dengan kredensial dari secret
+          git remote add production "https://${PBP_USERNAME}:${PBP_PASSWORD}@pbp.cs.ui.ac.id/adjie.m/oliminate" || true
+
+          # Matikan pesan "detected dubious ownership" (kalau perlu)
+          git config --global --add safe.directory $(pwd)
+
+          # Push ke production
           git push production main --force
