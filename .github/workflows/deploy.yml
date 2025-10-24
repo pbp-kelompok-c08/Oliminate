@@ -53,3 +53,5 @@ jobs:
 
           # Push ke production
           git push production main --force
+          git remote set-url production https://pbp.cs.ui.ac.id/adjie.m/oliminate
+
