@@ -72,17 +72,16 @@
 </style>
 
 <div class="text-center mb-4">
-    <h2>Help us improve!</h2>
+    <h2>Bantu kami menjadi lebih baik!</h2>
 </div>
 <p class="description">
-    How would you like to describe your experience with this event?
+    Bagaimana Anda akan mendeskripsikan pengalaman Anda tentang pertandingan ini?
 </p>
 
 <form method="POST" action="{{ form_action_url }}" novalidate>
     {% csrf_token %}
 
     <div class="mb-5 text-center">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
         <div class="rating-box">
             {{ review_form.rating }}
             {% for i in "12345" %}
@@ -100,7 +99,7 @@
 
     <div class="mb-6">
         <label for="id_comment" class="block text-sm font-medium text-gray-700 mb-2">
-            What's your overall experience?
+            Bagikan Pengalaman Anda
         </label>
         {{ review_form.comment }}
         {% if review_form.comment.errors %}
@@ -109,9 +108,9 @@
     </div>
 
     <div class="flex justify-end gap-3 mt-8">
-        <button type="button" id="modal-cancel-button" class="btn btn-outline">Cancel</button>
+        <button type="button" id="modal-cancel-button" class="btn btn-outline">Batal</button>
         <button type="submit" class="btn btn-primary">
-          {% if review %}Update Review{% else %}Add Review{% endif %}
+          {% if review %}Perbarui Review{% else %}Tambah Review{% endif %}
         </button>
     </div>
 </form>
