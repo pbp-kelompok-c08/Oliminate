@@ -6,123 +6,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <title>{% block title %}Oliminate{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
-
-    <link rel="icon" href="{% static 'images/icon.png' %}">
-
-    {% block styles %}{% endblock styles %}
   </head>
 
   <body
-    class="flex flex-col min-h-screen font-inter bg-[var(--neutral-50)] text-[var(--neutral-900)]"
+    style="
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background-color: var(--neutral-50);
+      color: var(--neutral-900);
+      margin: 0;
+    "
   >
     <!-- NAVBAR -->
-    <nav class="bg-[var(--pacil-blue-darker-2)] shadow-md">
+    <nav
+      style="
+        background-color: var(--pacil-blue-darker-2);
+        padding: 12px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      "
+    >
       <div
-        class="container mx-auto flex justify-between items-center py-3 px-4 md:px-0"
+        class="container"
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
       >
-        <!-- Logo -->
         <a
           href="/"
-          class="text-white font-semibold text-lg md:text-xl tracking-wide"
+          class="h4"
+          style="color: var(--neutral-50); font-weight: var(--font-semibold)"
           >Oliminate</a
         >
 
-        <!-- Hamburger Button (mobile only) -->
-        <button
-          id="menu-toggle"
-          class="md:hidden flex flex-col justify-center items-center space-y-1 focus:outline-none"
-          aria-label="Toggle Menu"
-        >
-          <span class="w-6 h-0.5 bg-white"></span>
-          <span class="w-6 h-0.5 bg-white"></span>
-          <span class="w-6 h-0.5 bg-white"></span>
-        </button>
-
-        <!-- Desktop Menu -->
         <div
-          id="menu"
-          class="hidden md:flex gap-6 items-center text-[var(--neutral-50)] text-sm md:text-base"
+          style="
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            font-size: var(--body);
+          "
         >
-          <a href="/" class="hover:text-[var(--pacil-blue-lighter-2)]">Home</a>
-          <a href="/scheduling/" class="hover:text-[var(--pacil-blue-lighter-2)]">Scheduling</a>
-          <a href="/ticketing/" class="hover:text-[var(--pacil-blue-lighter-2)]">Ticketing</a>
-          <a href="/merchandise/" class="hover:text-[var(--pacil-blue-lighter-2)]">Merchandise</a>
-          <a href="/review/" class="hover:text-[var(--pacil-blue-lighter-2)]">Review</a>
-
-          {% if user.is_authenticated %}
-            <a href="{% url 'users:main_profile' %}" class="btn btn-outline">Profile</a>
-            <form action="{% url 'users:logout' %}" method="post" style="display: contents;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-primary">Logout</button>
-            </form>
-          {% else %}
-            <a href="{% url 'users:login' %}" class="btn btn-outline">Login</a>
-            <a href="{% url 'users:register' %}" class="btn btn-primary">Register</a>
-          {% endif %}
+          <a href="/" style="color: var(--neutral-50)">Home</a>
+          <a href="/scheduling/" style="color: var(--neutral-50)">Scheduling</a>
+          <a href="/ticketing/" style="color: var(--neutral-50)">Ticketing</a>
+          <a href="/merchandise/" style="color: var(--neutral-50)">Merchandise</a>
+          <a href="/review/" style="color: var(--neutral-50)">Review</a>
         </div>
-      </div>
 
-      <!-- Mobile Dropdown Menu -->
-      <div
-        id="mobile-menu"
-        class="hidden flex-col space-y-2 py-3 px-6 text-[var(--neutral-50)] bg-[var(--pacil-blue-darker-2)] md:hidden border-t border-[var(--pacil-blue-lighter-1)]"
-      >
-        <a href="/" class="block hover:text-[var(--pacil-blue-lighter-2)]">Home</a>
-        <a href="/scheduling/" class="block hover:text-[var(--pacil-blue-lighter-2)]">Scheduling</a>
-        <a href="/ticketing/" class="block hover:text-[var(--pacil-blue-lighter-2)]">Ticketing</a>
-        <a href="/merchandise/" class="block hover:text-[var(--pacil-blue-lighter-2)]">Merchandise</a>
-        <a href="/review/" class="block hover:text-[var(--pacil-blue-lighter-2)]">Review</a>
-
-        {% if user.is_authenticated %}
-          <a href="{% url 'users:main_profile' %}" class="block btn btn-outline text-center mt-2">Profile</a>
-          <form action="{% url 'users:logout' %}" method="post" class="mt-2">
-            {% csrf_token %}
-            <button type="submit" class="w-full btn btn-primary text-center">Logout</button>
-          </form>
-        {% else %}
-          <a href="{% url 'users:login' %}" class="block btn btn-outline text-center mt-2">Login</a>
-          <a href="{% url 'users:register' %}" class="block btn btn-primary text-center mt-2">Register</a>
-        {% endif %}
+        <div style="display: flex; gap: 12px">
+          <a href="/login/" class="btn btn-outline">Login</a>
+          <a href="/register/" class="btn btn-primary">Register</a>
+        </div>
       </div>
     </nav>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 py-10 px-4 md:px-0">
-      <div class="container mx-auto">
-        {% block content %}{% endblock %}
-      </div>
+    <!-- CONTENT -->
+    <main style="flex: 1; display: flex; flex-direction: column;">
+      {% block content %}{% endblock %}
     </main>
 
     <!-- FOOTER -->
     <footer
-      class="bg-[var(--pacil-blue-darker-2)] text-[var(--neutral-50)] text-center py-4 text-sm mt-auto"
+      style="
+        background-color: var(--pacil-blue-darker-2);
+        color: var(--neutral-50);
+        text-align: center;
+        padding: 16px 0;
+        font-size: var(--footnote);
+        margin-top: auto;
+      "
     >
       © 2025 Oliminate
     </footer>
 
-    <!-- Scripts -->
-    <script>
-      const menuToggle = document.getElementById("menu-toggle");
-      const mobileMenu = document.getElementById("mobile-menu");
+    {% block scripts %}
+    {% endblock %}
 
-      let isMenuOpen = false;
-
-      menuToggle?.addEventListener("click", () => {
-        isMenuOpen = !isMenuOpen;
-        if (isMenuOpen) {
-          mobileMenu.classList.remove("hidden");
-          mobileMenu.classList.add("menu-enter-active");
-        } else {
-          mobileMenu.classList.add("menu-exit-active");
-          setTimeout(() => {
-            mobileMenu.classList.add("hidden");
-            mobileMenu.classList.remove("menu-exit-active");
-          }, 200);
-        }
-      });
-    </script>
-
-    {% block extra_scripts %}{% endblock %}
   </body>
 </html>
