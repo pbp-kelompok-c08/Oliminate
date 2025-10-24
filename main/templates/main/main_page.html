@@ -132,7 +132,7 @@
                 
                 {% if user.is_authenticated %}
                     {# Pengguna sudah login, arahkan ke halaman edit_profile #}
-                    <a href="{% url 'edit_profile' %}" class="inline-block py-3 px-7 rounded-xl font-medium text-xl bg-[#3293ec] text-white shadow-lg hover:bg-[#22629E] hover:shadow-xl transform transition-all duration-300 hover:-translate-y-0.5">
+                    <a href="{% url 'users:edit_profile' %}" class="inline-block py-3 px-7 rounded-xl font-medium text-xl bg-[#3293ec] text-white shadow-lg hover:bg-[#22629E] hover:shadow-xl transform transition-all duration-300 hover:-translate-y-0.5">
                         My Profile
                     </a>
                 {% else %}
