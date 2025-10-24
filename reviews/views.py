@@ -89,7 +89,7 @@ def add_review(request, schedule_id):
         ).exists()
     
     if not can_review:
-        message = "You are not eligible to review this event (ticket required)."
+        message = "Anda tidak memenuhi syarat untuk menambahkan review pertandingan ini (diperlukan tiket)."
         if is_ajax:
             return JsonResponse({'success': False, 'message': message}, status=403)
         else:
@@ -103,7 +103,7 @@ def add_review(request, schedule_id):
             review.reviewer = request.user  
             review.save()
             if is_ajax:
-                return JsonResponse({'success': True, 'message': 'Review added successfully!'})
+                return JsonResponse({'success': True, 'message': 'Review berhasil ditambahkan!'})
             else:
                 return redirect('review_detail', schedule_id=schedule.id)
         else:
@@ -117,7 +117,7 @@ def add_review(request, schedule_id):
         context = {
             'schedule': schedule,
             'review_form': form,
-            'title': 'Add Review', # <-- 1. Hilangkan tanda komentar ini
+            'title': 'Tambah Review',
             'form_action_url': reverse('add_review', args=[schedule.id])
         }
         template_name = "review_form.html"
@@ -133,16 +133,16 @@ def edit_review(request, review_id):
 
     if review.reviewer != request.user:
         if is_ajax:
-            return JsonResponse({'success': False, 'message': 'You are not authorized to edit this review.'}, status=403)
+            return JsonResponse({'success': False, 'message': 'Anda tidak memiliki izin untuk mengedit review ini.'}, status=403)
         else:
-            return HttpResponseForbidden("You are not authorized to edit this review.")
-        
+            return HttpResponseForbidden("Anda tidak memiliki izin untuk mengedit review ini.")
+
     if request.method == 'POST':
         form = ReviewForm(request.POST, instance=review)
         if form.is_valid():
             form.save()
             if is_ajax:
-                return JsonResponse({'success': True, 'message': 'Review updated successfully!'})
+                return JsonResponse({'success': True, 'message': 'Review berhasil diperbarui!'})
             else:
                 return redirect('review_detail', schedule_id=schedule.id)
     else:
@@ -169,9 +169,9 @@ def delete_review(request, review_id):
 
     if review.reviewer != request.user:
         if is_ajax:
-            return JsonResponse({'success': False, 'message': 'You are not authorized to delete this review.'}, status=403)
+            return JsonResponse({'success': False, 'message': 'Anda tidak memiliki izin untuk menghapus review ini.'}, status=403)
         else:
-            return HttpResponseForbidden("You are not authorized to delete this review.")
+            return HttpResponseForbidden("Anda tidak memiliki izin untuk menghapus review ini.")
         
     if request.method == 'POST':
         reviewer_name = review.reviewer.username
@@ -179,7 +179,7 @@ def delete_review(request, review_id):
         if is_ajax:
             return JsonResponse({
                 'success': True, 
-                'message': f"Review from {reviewer_name} has been deleted."
+                'message': f"Review berhasil dihapus.",
             })
         else:
             return redirect('review_detail', schedule_id=schedule.id)

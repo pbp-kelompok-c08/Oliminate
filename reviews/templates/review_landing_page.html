@@ -2,14 +2,14 @@
 {% load static %}
 
 {% block meta %}
-<title>Review Events</title>
+<title>Review Pertandingan</title>
 <link rel="stylesheet" href="{% static 'css/global.css' %}">
 {% endblock meta %}
 
 {% block content %}
 <div class="container mt-2">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="h3">Review Events</h1>
+    <h1 class="h3">Review Pertandingan</h1>
   </div>
 
   {% if event_list %}
@@ -75,7 +75,7 @@
               {% endfor %}
             </div>
             <span class="footnote" style="font-weight:var(--font-medium);">
-              <b>{{ event.avg_rating|default:0|floatformat:1 }}</b> ({{ event.review_count|default:0 }} reviews)
+              <b>{{ event.avg_rating|default:0|floatformat:1 }}</b> ({{ event.review_count|default:0 }} review)
             </span>
           </div>
           <p class="footnote">{{ event.category }} — {{ event.location }}</p>
@@ -86,14 +86,14 @@
         </div>
 
         <div style="padding:0 16px 16px 16px;">
-          <a href="{% url 'review_detail' event.id %}" class="btn btn-outline w-full">See Reviews</a>
+          <a href="{% url 'review_detail' event.id %}" class="btn btn-outline w-full">Lihat Review</a>
         </div>
       </div>
       {% endfor %}
     </div>
   {% else %}
     <div class="card">
-      <p class="body">There are no reviewable events at this time.</p>
+      <p class="body"> Belum ada pertandingan yang tersedia</p>
     </div>
   {% endif %}
 </div>

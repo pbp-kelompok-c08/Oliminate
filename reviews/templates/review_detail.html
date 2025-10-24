@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Reviews for {{ schedule.team1 }} vs {{ schedule.team2 }}{% endblock %} 
+{% block title %}Review untuk {{ schedule.team1 }} vs {{ schedule.team2 }}{% endblock %} 
 
 {% block content %}
 <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
@@ -17,13 +17,13 @@
   <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-10">
     <div class="flex flex-col md:flex-row md:items-center md:justify-around gap-6">
       <div class="flex flex-col items-center">
-        <p class="text-sm text-gray-600 mb-1">Total Reviews</p>
+        <p class="text-sm text-gray-600 mb-1">Total Review</p>
         <h2 class="text-4xl font-bold text-gray-900">
           {{ total_reviews }}
         </h2>
       </div>
       <div class="flex flex-col items-center">
-        <p class="text-sm text-gray-600 mb-1">Average Rating</p>
+        <p class="text-sm text-gray-600 mb-1">Rating Rata-Rata</p>
         <div class="flex items-center gap-2">
           <h2 class="text-4xl font-bold text-gray-900">
             {{ average_rating|floatformat:1 }}
@@ -65,11 +65,11 @@
             data-create-url="{% url 'add_review' schedule.id %}" 
             data-can-review="{{ can_review|yesno:'true,false' }}"
             class="btn btn-primary">
-      + Add Review
+      + Tambah Review
     </button>
   </div>
 
-  <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-left">User Reviews</h2>
+  <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-left">Review Pertandingan</h2>
   <div class="space-y-5">
     {% for review in reviews %}
     <div class="bg-white rounded-xl shadow-lg p-5"> 
@@ -83,7 +83,7 @@
         {% endif %}
         <div>
           <p class="text-sm text-gray-600">
-            Review by <span class="font-semibold text-blue-600">{{ review.reviewer.username }}</span>
+            Review dari <span class="font-semibold text-blue-600">{{ review.reviewer.username }}</span>
           </p>
           <div class="flex items-center gap-2 mt-1">
             <div class="flex">
@@ -114,7 +114,7 @@
                     class="delete-review-btn text-sm font-medium text-red-500 hover:text-red-700 focus:outline-none"
                     data-delete-url="{% url 'delete_review' review.id %}"
                     data-review-user="{{ review.reviewer.username }}">
-                    Delete
+                    Hapus
             </button>
           {% endif %}
         </div>
@@ -123,10 +123,10 @@
     {% empty %}
       <div class="text-center py-16 px-8 bg-white rounded-xl shadow-lg">
         <h2 class="text-xl font-semibold text-gray-800">
-          No reviews yet.
+          Belum ada review.
         </h2>
         <p class="text-gray-500 mt-1">
-          Be the first to review!
+          Jadilah yang pertama untuk memberikan review!
         </p>
       </div>
     {% endfor %}
@@ -143,13 +143,13 @@
 
 <div id="delete-confirm-modal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
   <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-    <h2 class="text-2xl font-semibold mb-4">Confirm Deletion</h2>
+    <h2 class="text-2xl font-semibold mb-4">Konfirmasi Hapus</h2>
     <p class="text-gray-700 mb-6" id="delete-review-name">
-      Are you sure you want to delete this review?
+      Apakah Anda yakin ingin menghapus review ini?
     </p>
     <div class="flex justify-end gap-2">
-      <button id="delete-cancel-btn" class="btn btn-outline">Cancel</button>
-      <button id="delete-confirm-btn" class="btn btn-danger" data-delete-url="">Yes, Delete</button>
+      <button id="delete-cancel-btn" class="btn btn-outline">Batal</button>
+      <button id="delete-confirm-btn" class="btn btn-danger" data-delete-url="">Ya, Hapus</button>
     </div>
   </div>
 </div>
@@ -277,8 +277,8 @@
       } else {
         ajaxFormContainer.innerHTML = `
           <div class="text-center p-10">
-            <h3 class="text-2xl font-semibold text-yellow-600 mb-4">⚠️ Not Eligible</h3>
-            <p class="text-gray-700 mb-6">You must purchase a ticket for this event to be able to leave a review.</p>
+            <h3 class="text-2xl font-semibold text-yellow-600 mb-4">⚠️ Tidak Memenuhi Syarat</h3>
+            <p class="text-gray-700 mb-6">Anda harus membeli tiket untuk pertandingan ini agar bisa menambahkan review.</p>
             <button type="button" id="modal-warning-close-btn" class="btn btn-primary">
               OK
             </button>
@@ -409,7 +409,7 @@
       const deleteUrl = this.getAttribute('data-delete-url');
       const name = this.getAttribute('data-review-user');
 
-      deleteReviewName.innerHTML = `Are you sure you want to delete the review by <strong>${name}</strong>?`;
+      deleteReviewName.innerHTML = `Apakah Anda yakin ingin menghapus review ini?`;
       deleteConfirmBtn.setAttribute('data-delete-url', deleteUrl);
       
       deleteConfirmModal.classList.remove('hidden');

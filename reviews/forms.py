@@ -13,7 +13,7 @@ class ReviewForm(forms.ModelForm):
                 attrs={
                     'class': 'mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50',
                     'rows': 8,
-                    'placeholder': 'Share your thoughts...'
+                    'placeholder': 'Ceritakan pengalaman Anda di sini...'
                 }
             ),
         }
@@ -21,11 +21,11 @@ class ReviewForm(forms.ModelForm):
     def clean_rating(self):
         rating = self.cleaned_data.get('rating')
         if not rating:
-            raise forms.ValidationError("Please select a star rating.")
+            raise forms.ValidationError("Silakan pilih rating Anda.")
         try:
             rating_int = int(float(rating))
             if not 1 <= rating_int <= 5:
-                 raise forms.ValidationError("Invalid rating value.")
+                 raise forms.ValidationError("Nilai rating tidak valid.")
         except (ValueError, TypeError):
-             raise forms.ValidationError("Invalid rating format.")
+             raise forms.ValidationError("Format rating tidak valid.")
         return rating_int
