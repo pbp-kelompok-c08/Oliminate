@@ -8,7 +8,10 @@ from django.shortcuts import redirect
 
 def schedule_list(request):
     schedules = Schedule.objects.exclude(status='reviewable').order_by('date', 'time')
-    return render(request, 'scheduling/schedule_list.html', {'schedules': schedules})
+    return render(request, 'scheduling/schedule_list.html', {
+        'schedules': schedules,
+        'user': request.user  
+    })
 
 def schedule_detail(request, id):
     schedule = get_object_or_404(Schedule, pk=id)
