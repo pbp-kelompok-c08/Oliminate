@@ -4,6 +4,8 @@ Django settings for oliminate_project project.
 import os
 from pathlib import Path
 
+from corsheaders.defaults import default_headers, default_methods
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -16,10 +18,16 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "adjie-m-oliminate.pbp.cs.ui.ac.id",
+    "10.0.2.2",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://adjie-m-oliminate.pbp.cs.ui.ac.id",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://10.0.2.2:8000",
+    "http://localhost:5173",  # Flutter web dev server
+    "http://127.0.0.1:5173",
 ]
 
 # ============================
@@ -35,13 +43,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
+    #cors
+    'corsheaders',
+
     # custom apps
+    'authentication',
     'scheduling',
     'ticketing',
     'reviews',
     'users',
     'merchandise',
     'main',
+
 ]
 
 MIDDLEWARE = [
@@ -54,7 +67,17 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://10.0.2.2:5173",
+]
+CORS_ALLOW_HEADERS = list(default_headers) + ['X-CSRFToken']
+CORS_ALLOW_METHODS = list(default_methods)
 
 ROOT_URLCONF = 'oliminate_project.urls'
 
@@ -139,3 +162,5 @@ MEDIA_ROOT = BASE_DIR / "media"
 # ============================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+

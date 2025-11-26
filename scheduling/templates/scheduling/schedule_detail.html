@@ -44,12 +44,41 @@
         <a href="{% url 'scheduling:schedule_list' %}" class="btn btn-outline">Kembali</a>
 
         {% if user.is_authenticated and user == schedule.organizer %}
-          <a href="{% url 'scheduling:schedule_update' schedule.id %}" class="btn btn-primary">Edit</a>
-          <a href="{% url 'scheduling:schedule_delete' schedule.id %}" class="btn btn-danger">Delete</a>
-          <a href="{% url 'scheduling:make_reviewable' schedule.id %}" class="btn btn-outline">Reviewable</a>
+          <button
+          class="editBtn btn btn-primary"
+          data-id="${s.id}"
+          data-category="${s.category ?? ''}"
+          data-location="${s.location ?? ''}"
+          data-team1="${s.team1 ?? ''}"
+          data-team2="${s.team2 ?? ''}"
+          data-date="${s.date ?? ''}"
+          data-time="${s.time ?? ''}"
+          data-image_url="${s.image_url ?? ''}"
+          data-caption="${(s.caption ?? '').replace(/"/g, '&quot;')}"
+        >Edit</button>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  listEl.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.editBtn');
+    if (editBtn) {
+      openFormModal('edit', {
+        id: editBtn.dataset.id,
+        category:  editBtn.dataset.category,
+        location:  editBtn.dataset.location,
+        team1:     editBtn.dataset.team1,
+        team2:     editBtn.dataset.team2,
+        date:      editBtn.dataset.date,
+        time:      editBtn.dataset.time,
+        image_url: editBtn.dataset.image_url,
+        caption:   editBtn.dataset.caption,
+      });
+      return;
+    }
+  });
+</script>
 {% endblock %}
