@@ -58,7 +58,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # MUST be before CommonMiddleware
     'django.middleware.security.SecurityMiddleware',
     # WhiteNoise untuk serve static files di production
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -68,24 +67,17 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
-# CORS_ALLOW_CREDENTIALS = True
-# # TODO: dont forget ilangin kalo udah di production
-# CORS_ALLOW_ALL_ORIGINS = True
-# # CORS_ALLOWED_ORIGINS = [
-# #     "http://localhost:5173",
-# #     "http://127.0.0.1:5173",
-# #     "http://10.0.2.2:5173",
-# # ]
-# CORS_ALLOW_HEADERS = list(default_headers) + ['X-CSRFToken']
-# CORS_ALLOW_METHODS = list(default_methods)
-CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SAMESITE = 'None'
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://10.0.2.2:5173",
+]
+CORS_ALLOW_HEADERS = list(default_headers) + ['X-CSRFToken']
+CORS_ALLOW_METHODS = list(default_methods)
 
 ROOT_URLCONF = 'oliminate_project.urls'
 
