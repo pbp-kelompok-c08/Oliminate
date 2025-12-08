@@ -3,106 +3,243 @@
 {% block title %}Beli Tiket{% endblock %}
 
 {% block content %}
-<div class="container mx-auto mt-10 px-4">
-  <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-    <form method="POST" class="p-6 md:p-8 space-y-6">
-      {% csrf_token %}
+<div class="container mx-auto mt-12 px-4 pb-20">
 
-      <!-- Judul -->
-      <h1 class="text-2xl font-semibold text-center text-gray-800 mb-4">Form Pembelian Tiket</h1>
-
-      <!-- Pesan error/sukses -->
-      {% if messages %}
-        <div>
-          {% for message in messages %}
-            <div class="p-3 rounded-lg text-sm {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <!-- Pilih Jadwal -->
-      <div>
-        <label for="{{ form.schedule.id_for_label }}" class="block font-medium mb-2 text-gray-700">
-          Pilih Event / Jadwal
-        </label>
-        {{ form.schedule }}
-      </div>
-
-      <!-- Harga Tiket -->
-      <div id="price-display-wrapper" class="hidden p-3 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-between">
-        <span class="text-gray-700 font-medium">Harga Tiket:</span>
-        <span id="ticket-price" class="text-blue-600 font-semibold"></span>
-      </div>
-
-      <!-- Metode Pembayaran -->
-      <div>
-        <label class="block font-medium mb-3 text-gray-700">Metode Pembayaran</label>
-        <div class="space-y-2">
-          {% for radio in form.payment_method %}
-            <label for="{{ radio.id_for_label }}" class="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-blue-50 has-[:checked]:border-blue-400 cursor-pointer transition-all">
-              {{ radio.tag }}
-              <span class="ml-2 text-gray-800 text-sm">{{ radio.choice_label }}</span>
-            </label>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Tombol -->
-      <div class="border-t border-gray-100 pt-4 mt-4 flex flex-col md:flex-row gap-3">
-        <button type="submit" id="submit-button" class="btn btn-primary w-full md:w-auto text-center justify-center">
-          Lanjut ke Pembayaran
-        </button>
-        <a href="{% url 'ticket_list' %}" class="btn btn-outline w-full md:w-auto text-center justify-center">
-          Batal
+    <div class="max-w-2xl mx-auto mb-6">
+        <a href="{% url 'ticket_list' %}"
+            class="inline-flex items-center gap-2 text-[var(--neutral-600)] hover:text-[var(--pacil-blue-base)] transition-colors font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                    clip-rule="evenodd" />
+            </svg>
+            <span>Kembali ke Daftar Tiket</span>
         </a>
-      </div>
-    </form>
-  </div>
+    </div>
+
+    <div
+        class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-[var(--neutral-100)] transform transition-all hover:shadow-2xl duration-500">
+
+        <div
+            class="bg-gradient-to-r from-[var(--pacil-blue-darker-2)] to-[var(--pacil-blue-base)] p-8 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 bg-white opacity-10 rounded-full blur-3xl"></div>
+
+            <h1 class="h3 font-bold text-white relative z-10">Beli Tiket Pertandingan</h1>
+            <p class="text-white/80 mt-2 text-sm relative z-10 w-full max-w-lg mx-auto">Dukung tim favoritmu secara
+                langsung
+                di lapangan.</p>
+        </div>
+
+        <form method="POST" class="p-8 space-y-8">
+            {% csrf_token %}
+
+            {% if messages %}
+            <div class="space-y-3">
+                {% for message in messages %}
+                <div
+                    class="p-4 rounded-xl flex items-center gap-3 shadow-sm animate-fade-in {% if message.tags == 'error' %} bg-red-50 border border-red-200 text-red-700 {% else %} bg-blue-50 border border-blue-200 text-blue-700 {% endif %}">
+                    <span class="font-medium text-sm">{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="space-y-2 group">
+                <label for="{{ form.schedule.id_for_label }}"
+                    class="block text-sm font-bold text-[var(--neutral-600)] uppercase tracking-wide group-focus-within:text-[var(--pacil-blue-base)] transition-colors">
+                    Pilih Event / Jadwal
+                </label>
+                <div class="relative">
+                    {{ form.schedule }}
+                    <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[var(--neutral-500)]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs text-[var(--neutral-500)]">Pilih pertandingan yang statusnya "Upcoming".</p>
+            </div>
+
+            <div id="price-display-wrapper" class="hidden transform transition-all duration-300">
+                <div
+                    class="p-5 rounded-xl bg-gradient-to-br from-[var(--pacil-blue-lighter-3)] to-blue-50 border border-[var(--pacil-blue-lighter-2)] flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-full bg-[var(--pacil-blue-base)] text-white flex items-center justify-center shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-[var(--pacil-blue-darker-1)] uppercase">Total
+                                Harga</span>
+                            <span class="text-xs text-[var(--pacil-blue-base)]">Siap untuk dibayar</span>
+                        </div>
+                    </div>
+                    <span id="ticket-price" class="text-2xl font-bold text-[var(--pacil-blue-darker-2)]"></span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <label class="block text-sm font-bold text-[var(--neutral-600)] uppercase tracking-wide">Metode
+                    Pembayaran</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for radio in form.payment_method %}
+                    <label for="{{ radio.id_for_label }}"
+                        class="relative flex items-center p-4 rounded-xl border-2 border-[var(--neutral-200)] cursor-pointer hover:border-[var(--pacil-blue-lighter-1)] hover:bg-blue-50/50 transition-all duration-300 group has-[:checked]:border-[var(--pacil-blue-base)] has-[:checked]:bg-[var(--pacil-blue-lighter-3)] has-[:checked]:shadow-md">
+                        <div class="flex items-center h-5">{{ radio.tag }}</div>
+
+                        <span
+                            class="ml-3 text-[var(--neutral-700)] font-medium group-has-[:checked]:text-[var(--pacil-blue-darker-2)]">
+                            {{ radio.choice_label }}</span>
+
+                        <div
+                            class="absolute top-4 right-4 opacity-0 group-has-[:checked]:opacity-100 transition-opacity text-[var(--pacil-blue-base)]">
+                            <!-- <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd" />
+                            </svg> -->
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="pt-6 flex flex-col md:flex-row gap-4">
+                <a href="{% url 'ticket_list' %}"
+                    class="btn btn-outline w-full md:w-1/3 order-2 md:order-1 text-center font-semibold">
+                    Batal
+                </a>
+                <button type="submit" id="submit-button"
+                    class="btn btn-primary w-full md:w-2/3 order-1 md:order-2 shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed py-3 text-lg font-bold flex items-center justify-center gap-2">
+                    <span>Lanjut ke Pembayaran</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+        </form>
+    </div>
 </div>
+
+<style>
+    /* Custom styles for form inputs to match premium look */
+    select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: var(--neutral-50);
+        border: 1px solid var(--neutral-300);
+        border-radius: 0.75rem;
+        color: var(--neutral-900);
+        font-size: 0.95rem;
+        appearance: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    select:focus {
+        outline: none;
+        border-color: var(--pacil-blue-base);
+        box-shadow: 0 0 0 3px rgba(50, 147, 236, 0.15);
+        background-color: white;
+    }
+
+    input[type="radio"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--pacil-blue-base);
+        border-color: var(--neutral-300);
+        border-width: 2px;
+        background-color: white;
+    }
+
+    input[type="radio"]:checked {
+        border-color: var(--pacil-blue-base);
+        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    input[type="radio"]:focus {
+        outline: 2px solid var(--pacil-blue-base);
+        outline-offset: 2px;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+    }
+</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const scheduleSelect = document.querySelector('[name="schedule"]');
-  const priceWrapper = document.getElementById("price-display-wrapper");
-  const priceText = document.getElementById("ticket-price");
-  const submitButton = document.getElementById("submit-button");
+    document.addEventListener("DOMContentLoaded", function () {
+        const scheduleSelect = document.querySelector('[name="schedule"]');
+        const priceWrapper = document.getElementById("price-display-wrapper");
+        const priceText = document.getElementById("ticket-price");
+        const submitButton = document.getElementById("submit-button");
 
-  if (!scheduleSelect) return;
+        if (!scheduleSelect) return;
 
-  async function fetchPrice() {
-    const scheduleId = scheduleSelect.value;
-    if (scheduleId) {
-      try {
-        const urlTemplate = "{% url 'get_price' 0 %}".replace('0', scheduleId);
-        const response = await fetch(urlTemplate);
-        const data = await response.json();
-        if (data.price > 0) {
-          priceText.textContent = new Intl.NumberFormat('id-ID', {
-            style: 'currency', currency: 'IDR', minimumFractionDigits: 0
-          }).format(data.price);
-          priceWrapper.classList.remove('hidden');
-          submitButton.disabled = false;
-        } else {
-          priceText.textContent = "Harga belum diatur";
-          priceWrapper.classList.remove('hidden');
-          submitButton.disabled = true;
+        async function fetchPrice() {
+            const scheduleId = scheduleSelect.value;
+            if (scheduleId) {
+                // Show loading state slightly
+                priceText.classList.add('opacity-50');
+
+                try {
+                    const urlTemplate = "{% url 'get_price' 0 %}".replace('0', scheduleId);
+                    const response = await fetch(urlTemplate);
+                    const data = await response.json();
+
+                    priceText.classList.remove('opacity-50');
+
+                    if (data.price > 0) {
+                        priceText.textContent = new Intl.NumberFormat('id-ID', {
+                            style: 'currency', currency: 'IDR', minimumFractionDigits: 0
+                        }).format(data.price);
+
+                        priceWrapper.classList.remove('hidden');
+                        submitButton.disabled = false;
+                    } else {
+                        priceText.textContent = "Harga belum diatur";
+                        priceWrapper.classList.remove('hidden');
+                        submitButton.disabled = true;
+                    }
+                } catch (error) {
+                    priceText.textContent = "Error mengambil harga";
+                    priceWrapper.classList.remove('hidden');
+                    submitButton.disabled = true;
+                }
+            } else {
+                priceWrapper.classList.add('hidden');
+                submitButton.disabled = false; // Default state might allow submission but validation catches it
+            }
         }
-      } catch (error) {
-        priceText.textContent = "Error mengambil harga";
-        priceWrapper.classList.remove('hidden');
-        submitButton.disabled = true;
-      }
-    } else {
-      priceWrapper.classList.add('hidden');
-      submitButton.disabled = false;
-    }
-  }
 
-  scheduleSelect.addEventListener("change", fetchPrice);
-});
+        scheduleSelect.addEventListener("change", fetchPrice);
+    });
 </script>
 {% endblock %}

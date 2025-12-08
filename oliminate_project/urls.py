@@ -29,6 +29,7 @@ urlpatterns = [
     path('ticketing/', include('ticketing.urls')),
     path('review/', include('reviews.urls')),
     path('merchandise/', include('merchandise.urls')),
+    path('authentication/', include('authentication.urls')),  # Flutter API endpoints
 ]
 
 if settings.DEBUG:

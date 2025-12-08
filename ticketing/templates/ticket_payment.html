@@ -3,151 +3,217 @@
 {% block title %}Konfirmasi Pembayaran{% endblock %}
 
 {% block content %}
-<div class="container mx-auto mt-8 px-4 text-center">
-  <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-    <div class="p-6 md:p-8 border-b border-gray-100">
-      <h1 class="h3">Konfirmasi Pembayaran</h1>
-      <p class="body" style="color: var(--neutral-700); margin-top: 8px;">
-        Selesaikan pembelian tiket Anda dengan mengonfirmasi detail di bawah ini.
-      </p>
-    </div>
+<div class="container mx-auto mt-12 px-4 pb-20">
+  <div
+    class="max-w-xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-[var(--neutral-100)] relative">
 
-    {% if ticket.payment_status != 'paid' %}
-    <div class="p-6 md:p-8">
-      <div class="p-4 rounded-lg bg-blue-50 border border-blue-200 mb-6">
-        <p class="body" style="color: var(--pacil-blue-darker-1);">
-          Klik tombol "Konfirmasi Bayar" di bawah untuk menandai tiket ini sebagai 'Sudah Dibayar'.
+    <!-- Decorative top accent -->
+    <div class="h-3 bg-gradient-to-r from-[var(--pacil-blue-darker-2)] to-[var(--pacil-blue-base)] w-full"></div>
+
+    <div class="p-8 md:p-10">
+
+      <!-- Header with Icon -->
+      <div class="text-center mb-8">
+        <div
+          class="w-16 h-16 bg-[var(--pacil-blue-lighter-3)] rounded-full flex items-center justify-center mx-auto mb-4 text-[var(--pacil-blue-base)]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h1 class="h3 font-bold text-[var(--neutral-900)]">Konfirmasi Pembayaran</h1>
+        <p class="body text-[var(--neutral-500)] mt-2">
+          Mohon periksa detail pembayaran Anda di bawah ini.
         </p>
       </div>
-    {% endif %}
 
-      <div class="space-y-4">
-        <div class="flex justify-between">
-          <span class="body" style="color: var(--neutral-700);">Event</span>
-          <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
-            {{ ticket.schedule }}
-          </span>
+      <!-- Invoice Card -->
+      <div
+        class="bg-[var(--neutral-50)] rounded-2xl border border-[var(--neutral-200)] p-6 mb-8 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-5 pointer-events-none"
+          style="background-image: radial-gradient(var(--pacil-blue-base) 1px, transparent 1px); background-size: 20px 20px;">
         </div>
 
-        <div class="flex justify-between">
-          <span class="body" style="color: var(--neutral-700);">Metode Pembayaran</span>
-          <span class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
-            {{ ticket.get_payment_method_display }}
-          </span>
+        {% if ticket.payment_status != 'paid' %}
+        <div class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-100 flex gap-3 items-start">
+          <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-sm text-blue-800">
+            Klik tombol <strong>"Konfirmasi Bayar"</strong> di bawah untuk menyelesaikan transaksi ini.
+          </p>
         </div>
+        {% endif %}
 
-        <div class="flex justify-between">
-          <span class="body" style="color: var(--neutral-700);">Status Saat Ini</span>
-          <span id="payment-status" class="body" style="color: var(--neutral-900); font-weight: var(--font-semibold);">
-            {{ ticket.get_payment_status_display }}
-          </span>
-        </div>
+        <div class="space-y-4 relative z-10">
+          <div class="flex justify-between items-start border-b border-[var(--neutral-200)] pb-4">
+            <span class="text-sm font-medium text-[var(--neutral-500)] uppercase tracking-wide">Event</span>
+            <span class="text-right text-[var(--neutral-900)] font-bold max-w-[60%]">
+              {{ ticket.schedule }}
+            </span>
+          </div>
 
-        <hr class="pt-2">
+          <div class="flex justify-between items-center border-b border-[var(--neutral-200)] pb-4">
+            <span class="text-sm font-medium text-[var(--neutral-500)] uppercase tracking-wide">Metode</span>
+            <span class="text-right text-[var(--neutral-900)] font-semibold">
+              {{ ticket.get_payment_method_display }}
+            </span>
+          </div>
 
-        <div class="flex justify-between">
-          <span class="headline" style="color: var(--neutral-700);">Total Harga</span>
-          <span class="headline" style="color: var(--pacil-blue-base); font-weight: var(--font-semibold);">
-            Rp {{ ticket.price|floatformat:0 }}
-          </span>
+          <div class="flex justify-between items-center border-b border-[var(--neutral-200)] pb-4">
+            <span class="text-sm font-medium text-[var(--neutral-500)] uppercase tracking-wide">Status</span>
+            <span id="payment-status">
+              <!-- Badge rendered via JS or Initial Load -->
+              {% if ticket.payment_status == 'paid' %}
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                Lunas
+              </span>
+              {% else %}
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">
+                Belum Bayar
+              </span>
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="flex justify-between items-center pt-2">
+            <span class="text-base font-bold text-[var(--neutral-700)]">Total Tagihan</span>
+            <span class="text-2xl font-bold text-[var(--pacil-blue-darker-1)]">
+              Rp {{ ticket.price|floatformat:0 }}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="bg-gray-50 px-6 py-4 md:px-8 md:py-6">
-      <div class="flex flex-col md:flex-row gap-4">
-        <button id="payButton" class="btn btn-primary w-full md:w-auto">
+      <!-- Action Buttons -->
+      <div class="flex flex-col gap-3">
+        <button id="payButton"
+          class="btn btn-primary w-full py-4 text-lg font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
           Konfirmasi Bayar
         </button>
-        <a href="{% url 'ticket_detail' ticket.id %}" class="btn btn-outline w-full md:w-auto text-center" style="text-decoration: none;">
-          Kembali ke Detail
+
+        <a href="{% url 'ticket_detail' ticket.id %}"
+          class="btn btn-outline w-full py-3 text-center border-transparent hover:bg-[var(--neutral-50)] text-[var(--neutral-600)] hover:text-[var(--neutral-900)] transition-colors">
+          Kembali ke Detail Tiket
         </a>
       </div>
-      <p id="message" class="text-center text-sm mt-3 text-gray-600"></p>
+
+      <div id="message" class="text-center font-medium mt-6 min-h-[1.5rem] transition-all duration-300"></div>
+
     </div>
   </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const payBtn = document.getElementById("payButton");
-  const msgEl = document.getElementById("message");
-  const statusEl = document.getElementById("payment-status");
+  document.addEventListener("DOMContentLoaded", function () {
+    const payBtn = document.getElementById("payButton");
+    const msgEl = document.getElementById("message");
+    const statusEl = document.getElementById("payment-status");
 
-  if (!payBtn) return;
+    // If already paid, hide pay button initially (optional logic but handled in JS too)
+    const isPaid = "{{ ticket.payment_status|escapejs }}" === "paid";
+    if (isPaid && payBtn) {
+      payBtn.style.display = 'none';
+    }
 
-  // Ambil cookie csrf (standard Django)
-  function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  }
-  const csrftoken = getCookie('csrftoken');
+    if (!payBtn) return;
 
-  payBtn.addEventListener("click", function () {
-    // disable tombol sementara
-    payBtn.disabled = true;
-    msgEl.textContent = "Memproses...";
-    msgEl.style.color = "inherit";
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    const csrftoken = getCookie('csrftoken');
 
-    // URL endpoint AJAX — pastikan kamu menambahkan view/url yang sesuai
-    const url = "{% url 'pay_ticket' ticket.id %}";
+    payBtn.addEventListener("click", function () {
+      payBtn.disabled = true;
+      payBtn.classList.add('opacity-75', 'cursor-wait');
+      msgEl.innerHTML = '<span class="flex items-center justify-center gap-2 text-[var(--neutral-500)]"><svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses Pembayaran...</span>';
 
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": csrftoken,
-        "Accept": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      },
-      body: null
-    })
-    .then(async (response) => {
-      // Jika backend mereturn JSON
-      const contentType = response.headers.get("content-type") || "";
-      if (!response.ok) {
-        // coba parse body jika json
-        let errText = "Terjadi kesalahan jaringan.";
-        try {
-          if (contentType.includes("application/json")) {
-            const j = await response.json();
-            if (j && j.error) errText = j.error;
-          } else {
-            const txt = await response.text();
-            if (txt) errText = txt;
+      const url = "{% url 'pay_ticket' ticket.id %}";
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrftoken,
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: null
+      })
+        .then(async (response) => {
+          const contentType = response.headers.get("content-type") || "";
+          if (!response.ok) {
+            let errText = "Terjadi kesalahan jaringan.";
+            try {
+              if (contentType.includes("application/json")) {
+                const j = await response.json();
+                if (j && j.error) errText = j.error;
+              } else {
+                const txt = await response.text();
+                if (txt) errText = txt;
+              }
+            } catch (e) { }
+            throw new Error(errText);
           }
-        } catch (e) { /* ignore */ }
-        throw new Error(errText);
-      }
-      if (contentType.includes("application/json")) {
-        return response.json();
-      } else {
-        // fallback: balikan teks jika bukan json
-        return { success: true };
-      }
-    })
-    .then((data) => {
-      if (data && data.success) {
-        statusEl.innerText = "Sudah Dibayar";
-        msgEl.innerText = "✅ Pembayaran berhasil dikonfirmasi!";
-        msgEl.style.color = "green";
+          if (contentType.includes("application/json")) {
+            return response.json();
+          } else {
+            return { success: true };
+          }
+        })
+        .then((data) => {
+          if (data && data.success) {
+            // Update status badge nicely
+            statusEl.innerHTML = `
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 animate-fade-in">
+                Lunas
+            </span>
+        `;
 
-        // Sembunyikan tombol setelah berhasil bayar
-        payBtn.style.display = "none";
-      } else {
-        msgEl.innerText = data?.error || "⚠️ Terjadi kesalahan.";
-        msgEl.style.color = "red";
-      }
-    })
+            msgEl.innerHTML = '<span class="text-green-600 flex items-center justify-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Pembayaran berhasil dikonfirmasi!</span>';
 
-    .catch((err) => {
-      msgEl.innerText = err.message || "❌ Terjadi kesalahan jaringan.";
-      msgEl.style.color = "red";
-    })
-    .finally(() => {
-      payBtn.disabled = false;
+            // Hide button with animation
+            payBtn.style.transition = "all 0.5s";
+            payBtn.style.opacity = "0";
+            payBtn.style.padding = "0";
+            payBtn.style.height = "0";
+            setTimeout(() => payBtn.style.display = "none", 500);
+
+          } else {
+            msgEl.innerHTML = `<span class="text-red-600">⚠️ ${data?.error || "Terjadi kesalahan."}</span>`;
+            payBtn.disabled = false;
+            payBtn.classList.remove('opacity-75', 'cursor-wait');
+          }
+        })
+        .catch((err) => {
+          msgEl.innerHTML = `<span class="text-red-600">❌ ${err.message || "Terjadi kesalahan jaringan."}</span>`;
+          payBtn.disabled = false;
+          payBtn.classList.remove('opacity-75', 'cursor-wait');
+        });
     });
   });
-});
 </script>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+</style>
 {% endblock %}

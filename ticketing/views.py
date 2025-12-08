@@ -35,9 +35,10 @@ def ticket_list(request):
     Sekarang dengan tambahan filter berdasarkan status.
     """
 
-    filter_status = request.GET.get('status', None)
+    # Ambil parameter filter dari URL
+    payment_status = request.GET.get('payment_status', 'all')
+    usage_status = request.GET.get('usage_status', 'all')
 
-    # GUNAKAN CARA INI:
     if request.user.is_authenticated:
         buyer = request.user # Langsung ambil user yang login
 
@@ -45,25 +46,30 @@ def ticket_list(request):
             # Jika dia organizer, lempar ke halaman atur harga
             return redirect('set_event_price')
 
-        base_query = Ticket.objects.filter(buyer=buyer)
+        tickets = Ticket.objects.filter(buyer=buyer)
 
-        if filter_status == 'paid':
-            tickets_query = base_query.filter(payment_status='paid')
-        elif filter_status == 'unpaid':
-            tickets_query = base_query.filter(payment_status='unpaid')
-        else:
-            tickets_query = base_query
+        # Filter Payment Status
+        if payment_status == 'paid':
+            tickets = tickets.filter(payment_status='paid')
+        elif payment_status == 'unpaid':
+            tickets = tickets.filter(payment_status='unpaid')
+        
+        # Filter Usage Status
+        if usage_status == 'used':
+            tickets = tickets.filter(is_used=True)
+        elif usage_status == 'unused':
+            tickets = tickets.filter(is_used=False)
 
-        tickets = tickets_query.order_by('-purchase_date')
+        tickets = tickets.order_by('-purchase_date')
 
-    else: # Ini pengganti blok 'except'
+    else:
         tickets = Ticket.objects.none() 
-        if not filter_status:
-            messages.info(request, "Silakan login untuk melihat riwayat tiket Anda.")
+        messages.info(request, "Silakan login untuk melihat riwayat tiket Anda.")
 
     return render(request, 'ticket_list.html', {
         'tickets': tickets,
-        'active_filter': filter_status 
+        'payment_status': payment_status,
+        'usage_status': usage_status,
     })
 
 def generate_qr(request, ticket_id):
@@ -162,29 +168,55 @@ def buy_ticket(request):
 
 def ticket_list_json(request):
     """
-    View AJAX GET untuk mengambil daftar tiket dalam bentuk HTML partial (tabel body).
+    View AJAX GET untuk mengambil daftar tiket dalam bentuk JSON.
+    Mendukung dual filter: payment_status dan usage_status.
     """
-    filter_status = request.GET.get('status')
+    payment_status = request.GET.get('payment_status', 'all')
+    usage_status = request.GET.get('usage_status', 'all')
 
-    # Ganti pengecekan session dengan request.user
     if request.user.is_authenticated and request.user.role == 'user':
         buyer = request.user
-        base_query = Ticket.objects.filter(buyer=buyer)
+        tickets = Ticket.objects.filter(buyer=buyer)
 
-        if filter_status == 'paid':
-            tickets_query = base_query.filter(payment_status='paid')
-        elif filter_status == 'unpaid':
-            tickets_query = base_query.filter(payment_status='unpaid')
-        else:
-            tickets_query = base_query
+        # Filter Payment Status
+        if payment_status == 'paid':
+            tickets = tickets.filter(payment_status='paid')
+        elif payment_status == 'unpaid':
+            tickets = tickets.filter(payment_status='unpaid')
 
-        tickets = tickets_query.order_by('-purchase_date')
+        # Filter Usage Status
+        if usage_status == 'used':
+            tickets = tickets.filter(is_used=True)
+        elif usage_status == 'unused':
+            tickets = tickets.filter(is_used=False)
+
+        tickets = tickets.order_by('-purchase_date')
     else:
         tickets = Ticket.objects.none()
 
-    # render partial HTML
-    html = render_to_string('partials/ticket_table_body.html', {'tickets': tickets})
-    return JsonResponse({'html': html})
+    # Build JSON response
+    tickets_data = []
+    for t in tickets:
+        schedule = t.schedule
+        tickets_data.append({
+            'id': t.id,
+            'team1': schedule.team1,
+            'team2': schedule.team2,
+            'category': schedule.category,
+            'date': schedule.date.strftime('%A, %d %b %Y'),
+            'time': schedule.time.strftime('%H:%M'),
+            'location': schedule.location,
+            'price': float(t.price),
+            'payment_status': t.payment_status,
+            'is_used': t.is_used,
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'tickets': tickets_data,
+        'payment_status': payment_status,
+        'usage_status': usage_status,
+    })
 
 @require_POST
 def pay_ticket(request, ticket_id):
@@ -224,3 +256,267 @@ def set_event_price_ajax(request):
         except Schedule.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Schedule tidak ditemukan.'})
     return JsonResponse({'success': False, 'error': 'Metode tidak valid.'})
+
+
+# ============================================
+# FLUTTER API ENDPOINTS
+# ============================================
+
+@csrf_exempt
+def schedules_json_flutter(request):
+    """
+    GET /ticketing/schedules/json/
+    Returns all schedules with their prices for Flutter app.
+    """
+    schedules = Schedule.objects.all().order_by('date', 'time')
+    
+    result = []
+    for s in schedules:
+        # Get price if exists
+        try:
+            event_price = EventPrice.objects.get(schedule=s)
+            price = float(event_price.price)
+        except EventPrice.DoesNotExist:
+            price = None
+        
+        result.append({
+            'id': s.id,
+            'category': s.category,
+            'team1': s.team1,
+            'team2': s.team2,
+            'location': s.location,
+            'date': s.date.strftime('%Y-%m-%d'),
+            'time': s.time.strftime('%H:%M:%S'),
+            'status': s.status,
+            'image_url': s.image_url or '',
+            'caption': s.caption or '',
+            'price': price,
+        })
+    
+    return JsonResponse({'schedules': result})
+
+
+@csrf_exempt
+def tickets_flutter(request):
+    """
+    GET /ticketing/tickets-flutter/?username=xxx&ticket_id=xxx
+    Returns tickets for a specific user or a specific ticket.
+    """
+    username = request.GET.get('username')
+    ticket_id = request.GET.get('ticket_id')
+    
+    if ticket_id:
+        # Get specific ticket
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+            schedule = ticket.schedule
+            tickets_data = [{
+                'id': str(ticket.id),
+                'event_name': f"{schedule.category.upper()}: {schedule.team1} vs {schedule.team2}",
+                'schedule': str(schedule),
+                'price': float(ticket.price),
+                'status': ticket.payment_status,
+                'is_used': ticket.is_used,
+                'buyer_username': ticket.buyer.username if ticket.buyer else '',
+                'category': schedule.category,
+                'date': schedule.date.strftime('%Y-%m-%d'),
+                'time': schedule.time.strftime('%H:%M:%S'),
+                'location': schedule.location,
+                'schedule_image': schedule.image_url or '',
+            }]
+            return JsonResponse({'status': 'success', 'tickets': tickets_data})
+        except Ticket.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Ticket not found', 'tickets': []})
+    
+    if not username:
+        return JsonResponse({'status': 'error', 'message': 'Username required', 'tickets': []})
+    
+    try:
+        user = User.objects.get(username=username)
+        tickets = Ticket.objects.filter(buyer=user).order_by('-purchase_date')
+        
+        tickets_data = []
+        for t in tickets:
+            schedule = t.schedule
+            tickets_data.append({
+                'id': str(t.id),
+                'event_name': f"{schedule.category.upper()}: {schedule.team1} vs {schedule.team2}",
+                'schedule': str(schedule),
+                'price': float(t.price),
+                'status': t.payment_status,
+                'is_used': t.is_used,
+                'buyer_username': t.buyer.username if t.buyer else '',
+                'category': schedule.category,
+                'date': schedule.date.strftime('%Y-%m-%d'),
+                'time': schedule.time.strftime('%H:%M:%S'),
+                'location': schedule.location,
+                'schedule_image': schedule.image_url or '',
+            })
+        
+        return JsonResponse({'status': 'success', 'tickets': tickets_data})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found', 'tickets': []})
+
+
+@csrf_exempt
+def buy_flutter(request):
+    """
+    POST /ticketing/buy-flutter/
+    Body JSON: {schedule_id, payment_method, username}
+    Creates a new ticket for Flutter app.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'POST required'}, status=405)
+    
+    try:
+        import json
+        data = json.loads(request.body)
+        schedule_id = data.get('schedule_id')
+        payment_method = data.get('payment_method', 'ewallet')
+        username = data.get('username')
+        
+        if not schedule_id or not username:
+            return JsonResponse({'status': 'error', 'message': 'schedule_id and username required'})
+        
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'User not found'})
+        
+        try:
+            schedule = Schedule.objects.get(id=schedule_id)
+        except Schedule.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Schedule not found'})
+        
+        # Get price
+        try:
+            event_price = EventPrice.objects.get(schedule=schedule)
+            price = event_price.price
+        except EventPrice.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Harga belum diatur untuk event ini'})
+        
+        # Create ticket
+        ticket = Ticket.objects.create(
+            buyer=user,
+            schedule=schedule,
+            price=price,
+            payment_status='unpaid',
+            payment_method=payment_method,
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Tiket berhasil dibuat',
+            'ticket_id': ticket.id,
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+@csrf_exempt
+def pay_flutter(request, ticket_id):
+    """
+    POST /ticketing/pay-flutter/<ticket_id>/
+    Confirms payment for Flutter app.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'POST required'}, status=405)
+    
+    try:
+        ticket = Ticket.objects.get(id=ticket_id)
+        ticket.payment_status = 'paid'
+        ticket.save()
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Pembayaran berhasil dikonfirmasi',
+            'ticket_id': ticket.id,
+        })
+    except Ticket.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Ticket not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+@csrf_exempt
+def scan_flutter(request, ticket_id):
+    """
+    GET /ticketing/scan-flutter/<ticket_id>/
+    Validates/scans a ticket for Flutter app.
+    """
+    try:
+        ticket = Ticket.objects.get(id=ticket_id)
+        
+        if ticket.payment_status != 'paid':
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Tiket belum dibayar, tidak bisa digunakan!',
+            })
+        
+        if ticket.is_used:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Tiket sudah pernah digunakan!',
+            })
+        
+        ticket.is_used = True
+        ticket.used_at = timezone.now()
+        ticket.save()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Tiket berhasil divalidasi! Selamat menonton!',
+        })
+    except Ticket.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Ticket not found'}, status=404)
+
+
+@csrf_exempt
+def set_price_flutter(request):
+    """
+    POST /ticketing/set-price-flutter/
+    Body JSON: {schedule_id, price, username}
+    Sets price for a schedule (organizer only) for Flutter app.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'POST required'}, status=405)
+    
+    try:
+        import json
+        data = json.loads(request.body)
+        schedule_id = data.get('schedule_id')
+        price = data.get('price')
+        username = data.get('username')
+        
+        if not schedule_id or price is None:
+            return JsonResponse({'status': 'error', 'message': 'schedule_id and price required'})
+        
+        # Check if user is organizer
+        if username:
+            try:
+                user = User.objects.get(username=username)
+                if user.role != 'organizer':
+                    return JsonResponse({'status': 'error', 'message': 'Hanya organizer yang dapat mengatur harga'})
+            except User.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'User not found'})
+        
+        try:
+            schedule = Schedule.objects.get(id=schedule_id)
+        except Schedule.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Schedule not found'})
+        
+        # Update or create price
+        EventPrice.objects.update_or_create(
+            schedule=schedule,
+            defaults={'price': price}
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Harga untuk {schedule} berhasil diatur',
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
