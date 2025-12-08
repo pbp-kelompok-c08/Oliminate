@@ -43,7 +43,7 @@
       <div class="flex gap-2 mt-6">
         <a href="{% url 'scheduling:schedule_list' %}" class="btn btn-outline">Kembali</a>
 
-        {% if user.is_authenticated and user == schedule.organizer %}
+        {% if user.is_authenticated and user.role == 'organizer' and user == schedule.organizer %}
           <button
           class="editBtn btn btn-primary"
           data-id="${s.id}"
