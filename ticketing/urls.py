@@ -15,4 +15,11 @@ urlpatterns = [
     path('pay/<int:ticket_id>/', views.pay_ticket, name='pay_ticket'),  # <<-- endpoint AJAX yang baru
     path('set-price-ajax/', views.set_event_price_ajax, name='set_event_price_ajax'),
 
+    # Flutter API Endpoints
+    path('schedules/json/', views.schedules_json_flutter, name='schedules_json_flutter'),
+    path('tickets-flutter/', views.tickets_flutter, name='tickets_flutter'),
+    path('buy-flutter/', views.buy_flutter, name='buy_flutter'),
+    path('pay-flutter/<int:ticket_id>/', views.pay_flutter, name='pay_flutter'),
+    path('scan-flutter/<int:ticket_id>/', views.scan_flutter, name='scan_flutter'),
+    path('set-price-flutter/', views.set_price_flutter, name='set_price_flutter'),
 ]
