@@ -35,9 +35,10 @@ def ticket_list(request):
     Sekarang dengan tambahan filter berdasarkan status.
     """
 
-    filter_status = request.GET.get('status', None)
+    # Ambil parameter filter dari URL
+    payment_status = request.GET.get('payment_status', 'all')
+    usage_status = request.GET.get('usage_status', 'all')
 
-    # GUNAKAN CARA INI:
     if request.user.is_authenticated:
         buyer = request.user # Langsung ambil user yang login
 
@@ -45,25 +46,30 @@ def ticket_list(request):
             # Jika dia organizer, lempar ke halaman atur harga
             return redirect('set_event_price')
 
-        base_query = Ticket.objects.filter(buyer=buyer)
+        tickets = Ticket.objects.filter(buyer=buyer)
 
-        if filter_status == 'paid':
-            tickets_query = base_query.filter(payment_status='paid')
-        elif filter_status == 'unpaid':
-            tickets_query = base_query.filter(payment_status='unpaid')
-        else:
-            tickets_query = base_query
+        # Filter Payment Status
+        if payment_status == 'paid':
+            tickets = tickets.filter(payment_status='paid')
+        elif payment_status == 'unpaid':
+            tickets = tickets.filter(payment_status='unpaid')
+        
+        # Filter Usage Status
+        if usage_status == 'used':
+            tickets = tickets.filter(is_used=True)
+        elif usage_status == 'unused':
+            tickets = tickets.filter(is_used=False)
 
-        tickets = tickets_query.order_by('-purchase_date')
+        tickets = tickets.order_by('-purchase_date')
 
-    else: # Ini pengganti blok 'except'
+    else:
         tickets = Ticket.objects.none() 
-        if not filter_status:
-            messages.info(request, "Silakan login untuk melihat riwayat tiket Anda.")
+        messages.info(request, "Silakan login untuk melihat riwayat tiket Anda.")
 
     return render(request, 'ticket_list.html', {
         'tickets': tickets,
-        'active_filter': filter_status 
+        'payment_status': payment_status,
+        'usage_status': usage_status,
     })
 
 def generate_qr(request, ticket_id):
@@ -162,29 +168,55 @@ def buy_ticket(request):
 
 def ticket_list_json(request):
     """
-    View AJAX GET untuk mengambil daftar tiket dalam bentuk HTML partial (tabel body).
+    View AJAX GET untuk mengambil daftar tiket dalam bentuk JSON.
+    Mendukung dual filter: payment_status dan usage_status.
     """
-    filter_status = request.GET.get('status')
+    payment_status = request.GET.get('payment_status', 'all')
+    usage_status = request.GET.get('usage_status', 'all')
 
-    # Ganti pengecekan session dengan request.user
     if request.user.is_authenticated and request.user.role == 'user':
         buyer = request.user
-        base_query = Ticket.objects.filter(buyer=buyer)
+        tickets = Ticket.objects.filter(buyer=buyer)
 
-        if filter_status == 'paid':
-            tickets_query = base_query.filter(payment_status='paid')
-        elif filter_status == 'unpaid':
-            tickets_query = base_query.filter(payment_status='unpaid')
-        else:
-            tickets_query = base_query
+        # Filter Payment Status
+        if payment_status == 'paid':
+            tickets = tickets.filter(payment_status='paid')
+        elif payment_status == 'unpaid':
+            tickets = tickets.filter(payment_status='unpaid')
 
-        tickets = tickets_query.order_by('-purchase_date')
+        # Filter Usage Status
+        if usage_status == 'used':
+            tickets = tickets.filter(is_used=True)
+        elif usage_status == 'unused':
+            tickets = tickets.filter(is_used=False)
+
+        tickets = tickets.order_by('-purchase_date')
     else:
         tickets = Ticket.objects.none()
 
-    # render partial HTML
-    html = render_to_string('partials/ticket_table_body.html', {'tickets': tickets})
-    return JsonResponse({'html': html})
+    # Build JSON response
+    tickets_data = []
+    for t in tickets:
+        schedule = t.schedule
+        tickets_data.append({
+            'id': t.id,
+            'team1': schedule.team1,
+            'team2': schedule.team2,
+            'category': schedule.category,
+            'date': schedule.date.strftime('%A, %d %b %Y'),
+            'time': schedule.time.strftime('%H:%M'),
+            'location': schedule.location,
+            'price': float(t.price),
+            'payment_status': t.payment_status,
+            'is_used': t.is_used,
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'tickets': tickets_data,
+        'payment_status': payment_status,
+        'usage_status': usage_status,
+    })
 
 @require_POST
 def pay_ticket(request, ticket_id):
