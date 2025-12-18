@@ -1,3 +1,5 @@
+import json
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -199,3 +201,138 @@ def delete_review(request, review_id):
         'schedule': schedule
     }
     return render(request, 'review_confirm_delete.html', context)
+
+def get_review_landing_json(request):
+    sort_by = request.GET.get('sort', '-review_count') 
+    valid_sort_options = {
+        'highest_rating': '-avg_rating', 
+        'lowest_rating': 'avg_rating',   
+        'most_reviewed': '-review_count',
+    }
+    order_by_field = valid_sort_options.get(sort_by, '-review_count')
+
+    events = Schedule.objects.filter(status='reviewable').annotate(
+        avg_rating=Avg('review__rating'),
+        review_count=Count('review')
+    ).order_by(order_by_field)
+
+    data = []
+    for event in events:
+        data.append({
+            "id": event.id,
+            "team1": event.team1,
+            "team2": event.team2,
+            "category": event.category,
+            "location": event.location,
+            "date": str(event.date),
+            "time": str(event.time),
+            "image_url": event.image_url,
+            "avg_rating": event.avg_rating or 0.0,
+            "review_count": event.review_count,
+        })
+    return JsonResponse(data, safe=False)
+
+def get_review_detail_json(request, schedule_id):
+    schedule = get_object_or_404(Schedule, id=schedule_id)
+    reviews = Review.objects.filter(schedule=schedule).select_related('reviewer').order_by('-created_at')
+    
+    can_review = False
+    if request.user.is_authenticated:
+        can_review = Ticket.objects.filter(buyer=request.user, schedule=schedule).exists()
+    
+    reviews_data = []
+    for r in reviews:
+        pfp_url = None
+        if r.reviewer.profile_picture:
+            pfp_url = request.build_absolute_uri(r.reviewer.profile_picture.url)
+        
+        is_edited = False
+        if r.updated_at and r.created_at:
+             # Beri toleransi 1 detik agar tidak dianggap edit saat baru dibuat
+            is_edited = (r.updated_at - r.created_at).total_seconds() > 1
+            
+        reviews_data.append({
+            "id": r.id,
+            "reviewer": r.reviewer.username,
+            "rating": r.rating,
+            "comment": r.comment,
+            "created_at": r.created_at.strftime("%d %B %Y"),
+            "is_owner": request.user == r.reviewer,
+            "profile_picture": pfp_url,
+            "is_edited": is_edited,
+        })
+
+    return JsonResponse({
+        "schedule": {
+            "team1": schedule.team1,
+            "team2": schedule.team2,
+            "category": schedule.category,
+            "location": schedule.location,
+            "date": str(schedule.date), # Convert ke string
+            "time": str(schedule.time),
+        },
+        "can_review": can_review,
+        "reviews": reviews_data
+    })
+
+@csrf_exempt
+def add_review_flutter(request, schedule_id):
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({"status": "error", "message": "Belum login"}, status=403)
+        
+        try:
+            # --- UBAH BAGIAN INI (Gunakan request.POST) ---
+            # data = json.loads(request.body) 
+            data = request.POST 
+            
+            schedule = get_object_or_404(Schedule, id=schedule_id)
+
+            if Review.objects.filter(schedule=schedule, reviewer=request.user).exists():
+                return JsonResponse({"status": "error", "message": "Anda sudah mereview event ini!"}, status=400)
+
+            if not Ticket.objects.filter(buyer=request.user, schedule=schedule).exists():
+                 return JsonResponse({"status": "error", "message": "Anda tidak memiliki tiket"}, status=403)
+
+            review = Review.objects.create(
+                schedule=schedule,
+                reviewer=request.user,
+                rating=int(data['rating']),
+                comment=data['comment']
+            )
+            return JsonResponse({"status": "success", "message": "Review berhasil ditambahkan!"}, status=200)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    return JsonResponse({"status": "error"}, status=405)
+
+@csrf_exempt
+def edit_review_flutter(request, review_id):
+    if request.method == 'POST':
+        try:
+            # --- UBAH BAGIAN INI JUGA ---
+            data = request.POST
+            
+            review = Review.objects.get(id=review_id)
+            if review.reviewer != request.user:
+                return JsonResponse({"status": "error", "message": "Unauthorized"}, status=403)
+            
+            review.rating = int(data['rating'])
+            review.comment = data['comment']
+            review.save()
+            return JsonResponse({"status": "success", "message": "Review berhasil diubah!"}, status=200)
+        except Review.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Review tidak ditemukan"}, status=404)
+    return JsonResponse({"status": "error"}, status=405)
+
+@csrf_exempt
+def delete_review_flutter(request, review_id):
+    if request.method == 'POST':
+        try:
+            review = Review.objects.get(id=review_id)
+            if review.reviewer != request.user:
+                return JsonResponse({"status": "error", "message": "Unauthorized"}, status=403)
+            review.delete()
+            return JsonResponse({"status": "success"}, status=200)
+        except Review.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Not found"}, status=404)
+    return JsonResponse({"status": "error"}, status=405)
