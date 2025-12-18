@@ -22,7 +22,10 @@
 
         <div class="h6" style="margin-top:20px; margin-bottom:12px;">QR Code</div>
         <div style="display: flex; margin-bottom: 20px;">
-            <img id='barcode' src="https://api.qrserver.com/v1/create-qr-code/?data={{ cart.id }}&amp;size=150x150" alt="QR Code for Order ID {{ cart.id }}" title="Order ID: {{ cart.id }}" width="150" height="150" style="border: 1px solid var(--neutral-300); padding: 8px; border-radius: 4px;"/>
+            <img id='barcode' src="https://api.qrserver.com/v1/create-qr-code/?data={{ cart.id }}&amp;size=150x150" alt="QR Code for Order ID {{ cart.id }}" title="Order ID: {{ cart.id }}" width="150" height="150" style="border: 1px solid var(--neutral-300); padding: 8px; border-radius: 4px;" onerror="document.getElementById('qr-fallback').style.display='block'; this.style.display='none';"/>
+        </div>
+        <div id="qr-fallback" style="display:none;">
+            <p>QR Code tidak dapat dimuat. Order ID: {{ cart.id }}</p>
         </div>
 
         <h2 class="h6" style="margin-top:8px; margin-bottom:8px;">Barang yang dipesan</h2>
