@@ -17,5 +17,5 @@ urlpatterns = [
     path('api/<int:id>/complete/', api_views.api_mark_completed, name='api_mark_completed'),
     path('api/<int:id>/make-reviewable/', api_views.api_make_reviewable, name='api_make_reviewable'),
 
-    path('proxy-image/', proxy_image, name='proxy_image'),
+    path('proxy-image/', views.proxy_image, name='proxy_image'),
 ]
