@@ -14,6 +14,8 @@ urlpatterns = [
     path('api/create/', api_views.api_create_schedule, name='api_create_schedule'),
     path('api/<int:id>/update/', api_views.api_update_schedule, name='api_update_schedule'),
     path('api/<int:id>/delete/', api_views.api_delete_schedule, name='api_delete_schedule'),
-    path('api/<int:id>/complete/', api_views.api_mark_completed, name='api_mark_completed'),  # ⬅️ ini
+    path('api/<int:id>/complete/', api_views.api_mark_completed, name='api_mark_completed'),
     path('api/<int:id>/make-reviewable/', api_views.api_make_reviewable, name='api_make_reviewable'),
+
+    path('proxy-image/', proxy_image, name='proxy_image'),
 ]
