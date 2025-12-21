@@ -8,7 +8,8 @@ def homepage(request):
     return render(request, 'main/homepage.html', {'schedules': schedules})
 
 def get_schedules_json(request):
-    schedules = Schedule.objects.all().values(
+    # Filter only upcoming schedules and sort by date/time (nearest first)
+    schedules = Schedule.objects.filter(status='upcoming').order_by('date', 'time')[:10].values(
         'team1', 'team2', 'category', 'date', 'time', 'location', 'image_url'
     )
     return JsonResponse(list(schedules), safe=False)

@@ -17,15 +17,17 @@
         <h1 class="h3 mb-6">Atur Harga Event</h1>
 
         <!-- Pesan Sukses (jika ada) -->
-        {% if messages %}
+        <div id="messages-container">
+          {% if messages %}
           <ul class="mb-4 space-y-2">
             {% for message in messages %}
-              <li class="p-4 rounded-lg bg-green-100 text-green-700 body">
-                {{ message }}
-              </li>
+            <li class="p-4 rounded-lg bg-green-100 text-green-700 body">
+              {{ message }}
+            </li>
             {% endfor %}
           </ul>
-        {% endif %}
+          {% endif %}
+        </div>
 
         <!-- Field: Schedule -->
         <div class="mb-5">
@@ -34,9 +36,9 @@
           </label>
           {{ form.schedule }}
           {% if form.schedule.errors %}
-            <p class="footnote text-red-600 mt-1">
-              {{ form.schedule.errors|striptags }}
-            </p>
+          <p class="footnote text-red-600 mt-1">
+            {{ form.schedule.errors|striptags }}
+          </p>
           {% endif %}
         </div>
 
@@ -47,9 +49,9 @@
           </label>
           {{ form.price }}
           {% if form.price.errors %}
-            <p class="footnote text-red-600 mt-1">
-              {{ form.price.errors|striptags }}
-            </p>
+          <p class="footnote text-red-600 mt-1">
+            {{ form.price.errors|striptags }}
+          </p>
           {% endif %}
         </div>
 
@@ -70,85 +72,180 @@
     <!-- ================================== -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
       <div class="p-6 md:p-8">
-        <h2 class="h4 mb-4">Daftar Harga Saat Ini</h2>
-        {% if prices %}
+        <div id="price-list-container">
+          <h2 class="h4 mb-4">Daftar Harga Saat Ini</h2>
+          {% if prices %}
           <ul class="divide-y divide-gray-200">
             {% for p in prices %}
-              <li class="py-3 flex justify-between items-center">
-                <div>
-                  <p class="body font-semibold">{{ p.schedule }}</p>
-                  <p class="footnote text-gray-600">{{ p.schedule.date }}</p>
-                </div>
-                <span class="body text-blue-600 font-semibold">
-                  Rp {{ p.price|floatformat:0 }}
-                </span>
-              </li>
+            <li class="py-3 flex justify-between items-center">
+              <div>
+                <p class="body font-semibold">{{ p.schedule }}</p>
+                <p class="footnote text-gray-600">{{ p.schedule.date }}</p>
+              </div>
+              <span class="body text-blue-600 font-semibold">
+                Rp {{ p.price|floatformat:0 }}
+              </span>
+            </li>
             {% endfor %}
           </ul>
-        {% else %}
+          {% else %}
           <p class="body text-gray-600">Belum ada harga yang diatur.</p>
-        {% endif %}
+          {% endif %}
+        </div>
       </div>
     </div>
 
   </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const scheduleSelect = document.getElementById("id_schedule");
-  const priceInput = document.getElementById("id_price");
-  const saveBtn = document.getElementById("save-btn");
-  const editBtn = document.getElementById("edit-btn");
+  document.addEventListener('DOMContentLoaded', function () {
+    const scheduleSelect = document.getElementById("id_schedule");
+    const priceInput = document.getElementById("id_price");
+    const saveBtn = document.getElementById("save-btn");
+    const editBtn = document.getElementById("edit-btn");
+    const priceListContainer = document.getElementById("price-list-container");
 
-  // Cek apakah event sudah punya harga
-  scheduleSelect.addEventListener('change', function() {
-    const scheduleId = this.value;
-    if (!scheduleId) return;
-    fetch(`/ticketing/get-price/${scheduleId}/`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.price > 0) {
-          priceInput.value = data.price;
-          saveBtn.disabled = true;
-          editBtn.disabled = false;
-        } else {
-          priceInput.value = "";
-          saveBtn.disabled = false;
-          editBtn.disabled = true;
-        }
-      });
-  });
+    // Reset button states
+    function resetButtons() {
+      saveBtn.disabled = true;
+      editBtn.disabled = true;
+      saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      editBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
 
-  // Fungsi simpan harga baru atau edit harga
-  function submitPrice() {
-    const scheduleId = scheduleSelect.value;
-    const price = priceInput.value;
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    // Enable save button only
+    function enableSaveOnly() {
+      saveBtn.disabled = false;
+      editBtn.disabled = true;
+      saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      editBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
 
-    fetch("/ticketing/set-price-ajax/", {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": csrfToken,
-        "X-Requested-With": "XMLHttpRequest",
-      },
-      body: new URLSearchParams({
-        schedule_id: scheduleId,
-        price: price,
-      }),
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        document.querySelector(".bg-white.rounded-xl.shadow-lg.overflow-hidden:nth-child(2) .p-6").innerHTML = data.html;
-      } else {
-        alert(data.error);
+    // Enable edit button only
+    function enableEditOnly() {
+      saveBtn.disabled = true;
+      editBtn.disabled = false;
+      saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      editBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    // Initial state: both disabled until schedule selected
+    resetButtons();
+
+    // Cek apakah event sudah punya harga
+    scheduleSelect.addEventListener('change', function () {
+      const scheduleId = this.value;
+      if (!scheduleId) {
+        resetButtons();
+        priceInput.value = "";
+        return;
       }
-    });
-  }
 
-  saveBtn.addEventListener("click", submitPrice);
-  editBtn.addEventListener("click", submitPrice);
-});
+      fetch(`/ticketing/get-price/${scheduleId}/`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.price > 0) {
+            priceInput.value = data.price;
+            enableEditOnly();
+          } else {
+            priceInput.value = "";
+            enableSaveOnly();
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching price:', err);
+          priceInput.value = "";
+          enableSaveOnly();
+        });
+    });
+
+    // Fungsi simpan harga baru atau edit harga
+    function submitPrice() {
+      const scheduleId = scheduleSelect.value;
+      const price = priceInput.value;
+
+      if (!scheduleId) {
+        alert('Silakan pilih jadwal terlebih dahulu.');
+        return;
+      }
+
+      if (!price || isNaN(price) || parseFloat(price) <= 0) {
+        alert('Silakan masukkan harga yang valid.');
+        return;
+      }
+
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      // Disable buttons during submit
+      saveBtn.disabled = true;
+      editBtn.disabled = true;
+
+      fetch("/ticketing/set-price-ajax/", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: new URLSearchParams({
+          schedule_id: scheduleId,
+          price: price,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Update price list container
+            priceListContainer.innerHTML = data.html;
+
+            // Show success message
+            const messageText = data.created ? 'Harga berhasil disimpan!' : 'Harga berhasil diperbarui!';
+            showSuccessMessage(messageText);
+
+            // After save/edit, switch to edit mode for this schedule
+            enableEditOnly();
+          } else {
+            alert(data.error || 'Terjadi kesalahan.');
+            // Re-enable appropriate button
+            if (priceInput.value) {
+              enableEditOnly();
+            } else {
+              enableSaveOnly();
+            }
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('Terjadi kesalahan saat menyimpan harga.');
+          // Re-enable appropriate button
+          if (priceInput.value) {
+            enableEditOnly();
+          } else {
+            enableSaveOnly();
+          }
+        });
+    }
+
+    // Show success message
+    function showSuccessMessage(message) {
+      const messagesContainer = document.getElementById('messages-container');
+      if (messagesContainer) {
+        messagesContainer.innerHTML = `
+        <ul class="mb-4 space-y-2">
+          <li class="p-4 rounded-lg bg-green-100 text-green-700 body">
+            ${message}
+          </li>
+        </ul>
+      `;
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+          messagesContainer.innerHTML = '';
+        }, 3000);
+      }
+    }
+
+    saveBtn.addEventListener("click", submitPrice);
+    editBtn.addEventListener("click", submitPrice);
+  });
 </script>
 
 {% endblock %}

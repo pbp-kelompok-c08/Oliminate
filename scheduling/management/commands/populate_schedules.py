@@ -13,21 +13,35 @@ from django.templatetags.static import static
 # [TAMBAHKAN INI]
 # Buat mapping antara nama Kategori di CSV (setelah di-normalisasi)
 # dengan nama file gambar di static/images/
-# Kuncinya adalah NAMA KATEGORI (UPPERCASE)
+# Kuncinya adalah NAMA KATEGORI (UPPERCASE) dan juga variants
 IMAGE_MAP = {
+    # Uppercase
     'FUTSAL': 'images/futsal.png',
     'BASKET': 'images/basket.png',
     'SEPAK BOLA': 'images/sepak_bola.png',
     'VALORANT': 'images/valorant.png',
-    'TENIS LAPANGAN': 'images/tenis_lapangan.png', # Asumsi nama file
-    'VOLI': 'images/voli.png',                   # Asumsi nama file
+    'TENIS LAPANGAN': 'images/tenis_lapangan.png',
+    'VOLI': 'images/voli.png',
     'VOLLY': 'images/voli.png',
-    'HOCKEY': 'images/hockey.png',                 # Asumsi nama file
-    'TENIS MEJA': 'images/tenis_meja.png',           # Asumsi nama file
-    'BADMINTON': 'images/badminton.png',             # Asumsi nama file
+    'HOCKEY': 'images/hockey.png',
+    'TENIS MEJA': 'images/tenis_meja.png',
+    'BADMINTON': 'images/badminton.png',
     'MLBB': 'images/mlbb.jpg',
-    # ... tambahkan kategori lain jika ada ...
-    'DEFAULT': 'images/default.png' # Gambar default jika tidak ada di map
+    # Title case / lowercase variants (for manually created schedules)
+    'Futsal': 'images/futsal.png',
+    'Basket': 'images/basket.png',
+    'Basketball': 'images/basket.png',
+    'Sepak Bola': 'images/sepak_bola.png',
+    'Valorant': 'images/valorant.png',
+    'Tenis Lapangan': 'images/tenis_lapangan.png',
+    'Voli': 'images/voli.png',
+    'Volly': 'images/voli.png',
+    'Hockey': 'images/hockey.png',
+    'Tenis Meja': 'images/tenis_meja.png',
+    'Badminton': 'images/badminton.png',
+    'Mlbb': 'images/mlbb.jpg',
+    # Default
+    'DEFAULT': 'images/default.png'
 }
 
 class Command(BaseCommand):

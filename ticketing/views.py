@@ -131,10 +131,50 @@ def set_event_price(request):
     else:
         form = EventPriceForm()
 
-    prices = EventPrice.objects.all().order_by('schedule__date')
+    # Handle corrupt decimal data - use raw SQL to bypass ORM conversion
+    from django.db import connection
+    from decimal import InvalidOperation, Decimal
+    
+    valid_prices = []
+    corrupt_ids = []
+    
+    # Simple class to hold price data for template rendering
+    class PriceDisplay:
+        def __init__(self, schedule, price):
+            self.schedule = schedule
+            self.price = price
+    
+    # Get all EventPrice data using raw SQL to bypass ORM decimal conversion
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, price, schedule_id FROM ticketing_eventprice ORDER BY id")
+        rows = cursor.fetchall()
+    
+    for row in rows:
+        ep_id, raw_price, schedule_id = row
+        try:
+            # Try to convert price to Decimal
+            if raw_price is not None and str(raw_price).strip() != '':
+                validated_price = Decimal(str(raw_price))
+            else:
+                # Empty or None price is considered corrupt
+                corrupt_ids.append(ep_id)
+                continue
+            # Get the schedule for display
+            try:
+                schedule = Schedule.objects.get(id=schedule_id)
+                valid_prices.append(PriceDisplay(schedule, validated_price))
+            except Schedule.DoesNotExist:
+                corrupt_ids.append(ep_id)  # Orphaned price, mark for deletion
+        except (InvalidOperation, ValueError, TypeError):
+            corrupt_ids.append(ep_id)
+    
+    # Delete corrupt entries
+    if corrupt_ids:
+        EventPrice.objects.filter(id__in=corrupt_ids).delete()
+    
     return render(request, 'set_price_form.html', {
         'form': form,
-        'prices': prices
+        'prices': valid_prices
     })
 
 @login_required(login_url='users:login') # Otomatis cek login
@@ -244,15 +284,42 @@ def set_event_price_ajax(request):
             return JsonResponse({'success': False, 'error': 'Data tidak lengkap.'})
 
         try:
+            from decimal import Decimal, InvalidOperation
+            from django.db import connection
+            
             schedule = Schedule.objects.get(id=schedule_id)
             obj, created = EventPrice.objects.update_or_create(
                 schedule=schedule,
                 defaults={'price': price}
             )
-            # render ulang partial daftar harga
-            prices = EventPrice.objects.all().order_by('schedule__date')
-            html = render_to_string('partials/event_price_list.html', {'prices': prices})
-            return JsonResponse({'success': True, 'html': html})
+            
+            # Simple class to hold price data for template rendering
+            class PriceDisplay:
+                def __init__(self, schedule, price):
+                    self.schedule = schedule
+                    self.price = price
+            
+            # Get all prices safely using raw SQL
+            valid_prices = []
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id, price, schedule_id FROM ticketing_eventprice ORDER BY id")
+                rows = cursor.fetchall()
+            
+            for row in rows:
+                ep_id, raw_price, sched_id = row
+                try:
+                    if raw_price is not None and str(raw_price).strip() != '':
+                        validated_price = Decimal(str(raw_price))
+                        try:
+                            sched = Schedule.objects.get(id=sched_id)
+                            valid_prices.append(PriceDisplay(sched, validated_price))
+                        except Schedule.DoesNotExist:
+                            pass
+                except (InvalidOperation, ValueError, TypeError):
+                    pass
+            
+            html = render_to_string('partials/event_price_list.html', {'prices': valid_prices})
+            return JsonResponse({'success': True, 'html': html, 'created': created})
         except Schedule.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Schedule tidak ditemukan.'})
     return JsonResponse({'success': False, 'error': 'Metode tidak valid.'})

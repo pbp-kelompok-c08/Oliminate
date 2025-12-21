@@ -19,7 +19,7 @@ class EventPrice(models.Model):
         on_delete=models.CASCADE, 
         related_name="price_info"
     )
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=15, decimal_places=2)
 
     def __str__(self):
         return f"Harga untuk {self.schedule}: Rp {self.price}"
@@ -39,13 +39,13 @@ class Ticket(models.Model):
         ('paid', 'Sudah Dibayar'),
     ]
 
-    id = models.AutoField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name='tickets')
     buyer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
     
     # Field 'price' ini sudah benar. JANGAN DIHAPUS.
     # Ini untuk 'struk' pembelian.
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=15, decimal_places=2)
     
     purchase_date = models.DateTimeField(default=timezone.now)
     qr_code = models.CharField(max_length=255, blank=True, null=True)
